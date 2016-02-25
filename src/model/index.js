@@ -1,8 +1,12 @@
 'use strict';
 
 import React from 'react';
-import sources from './sources.js';
 import relationships from './relationships.js';
+import Returns, {
+  RETURNS_ITEM,
+  RETURNS_LIST,
+  RETURNS_ALL_FIELDS
+} from '../sources/returns.js';
 
 export default function(fields) {
 
@@ -26,7 +30,6 @@ export default function(fields) {
     }
 
     static fields = () => Object.keys(fields)
-    static sources = () => sources(this, arguments)
     static relationships = () => relationships(this, arguments)
 
     /**
@@ -38,31 +41,11 @@ export default function(fields) {
   };
 
   // Return definitions
-  model.item = (fields = '*') => {
-    if (typeof fields === 'string') {
-      fields = [fields];
-    }
+  model.item = (fields = RETURNS_ALL_FIELDS) =>
+    new Returns(fields, model, RETURNS_ITEM)
 
-    if (!Array.isArray(fields)) {
-      throw new Error('Unknown field type ' + typeof fields);
-    }
-
-    const missing = fields.reduce((missing, field) => {
-      if (model.fields().indexOf(field) === -1) {
-        missing.push(field);
-      }
-      return missing;
-    }, []);
-
-    if (missing.length > 0) {
-      throw new Error(
-        `All return fields must be defined within your model. Missing: ` +
-        missing.join(', ')
-      );
-    }
-
-    return [fields, model];
-  }
+  model.list = (fields = RETURNS_ALL_FIELDS) =>
+    new Returns(fields, model, RETURNS_LIST)
 
   /**
    * instanceOf is shorthand for `PropTypes.instanceOf(Model)`.

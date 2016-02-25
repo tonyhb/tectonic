@@ -27,27 +27,6 @@ describe('Model', () => {
    * of that model) API endpoints return
    */ 
   describe('returns methods', () => {
-    it('throws an error if you pass anything but a string or array', () => {
-      assert.throws(
-        () => User.item(1),
-        `Unknown field type`
-      );
-
-      assert.throws(
-        () => User.item({}),
-        `Unknown field type`
-      );
-    });
-
-    // If you say that a source returns fields which aren't in the model we
-    // should throw an error
-    it('throws an error if we pass non-existent fields', () => {
-      assert.throws(
-        () => User.item('nonexistent'),
-        `All return fields must be defined within your model. ` +
-        `Missing: nonexistent`
-      );
-    });
 
   });
 
