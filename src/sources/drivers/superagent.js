@@ -1,6 +1,6 @@
 'use strict';
 
-export default fromSuperagent = (then, fail) => (params) => (source) => {
+const fromSuperagent = (then, fail) => (params) => (source) => {
   let call = source.meta.call();
 
   if (params) {
@@ -14,3 +14,5 @@ export default fromSuperagent = (then, fail) => (params) => (source) => {
     then(source.meta.transform(res));
   });
 };
+
+export default fromSuperagent;

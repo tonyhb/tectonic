@@ -2,23 +2,20 @@
 
 let definitions = new Map();
 
-const processDefinitions = (ctx, definitions) => {
-  if ( ! Array.isArray(definitions)) {
-    throw new Error('No source definitions provided');
+/**
+ * @param sources
+ * @param array  array of source definitions
+ */
+const processDefinitions = (ctx, toProcess) => {
+  if ( ! Array.isArray(toProcess)) {
+    throw new Error('Source definitions must be defined in an array');
   }
 
-  definitions.forEach(def => {
-    if ( ! validateDefinition(def)) {
-      throw new Error('Invalid source definition', def);
-    }
-
-    if (typeof def.returns === 'object') {
-      // TODO: This is a polymorphic data source which returns multiple models
-      throw new Error('Polymorphic data sources are not yet supported');
-    }
+  toProcess.forEach(def => {
+    validateDefinition(def);
 
     // Get the fields and modelType from the source definition's return value
-    let [fields, modelType] = def.returns();
+    let [fields, modelType] = def.returns;
 
     // Return all existing source definitions which return the given model
     // type, eg. all sources which return a single user (User.item)
@@ -50,15 +47,25 @@ const processDefinitions = (ctx, definitions) => {
 /**
  * These keys are required in every source definition
  */
-const requiredDefinitionKeys = ['params', 'returns', 'meta'];
+const requiredDefinitionKeys = ['returns', 'meta'];
 
 /**
  * Validate that a source definition is valid
- *
- * @return boolean
  */
 const validateDefinition = (def) => {
-  return requiredDefinitionKeys.every(i => def[i] !== undefined);
+  if (requiredDefinitionKeys.some(i => def[i] === undefined)) {
+    throw new Error(
+      'Source definitions must contain keys: ' +
+      requiredDefinitionKeys.join(', ')
+    );
+  }
+
+  if ( ! Array.isArray(def.returns) || def.length !== 2) {
+    throw new Error(
+      'You must pass a concrete return value or object to `returns` ' +
+      '(such as Model.item())'
+    );
+  }
 }
 
 /**
@@ -71,6 +78,9 @@ const validateDefinition = (def) => {
  */
 export default class Sources {
 
+  /**
+   * @param object Object containing keys to driver functions
+   */
   constructor(drivers) {
     this.drivers = drivers;
 

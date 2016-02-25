@@ -12,7 +12,7 @@ const Org = new Model({
 });
 
 Org.relationships({
-  members: arrayOf(User)
+  members: User.list
 });
 
 const Sources = new Sources({ fromSuperagent: superagent });

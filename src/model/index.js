@@ -37,6 +37,33 @@ export default function(fields) {
     }
   };
 
+  // Return definitions
+  model.item = (fields = '*') => {
+    if (typeof fields === 'string') {
+      fields = [fields];
+    }
+
+    if (!Array.isArray(fields)) {
+      throw new Error('Unknown field type ' + typeof fields);
+    }
+
+    const missing = fields.reduce((missing, field) => {
+      if (model.fields().indexOf(field) === -1) {
+        missing.push(field);
+      }
+      return missing;
+    }, []);
+
+    if (missing.length > 0) {
+      throw new Error(
+        `All return fields must be defined within your model. Missing: ` +
+        missing.join(', ')
+      );
+    }
+
+    return [fields, model];
+  }
+
   /**
    * instanceOf is shorthand for `PropTypes.instanceOf(Model)`.
    */
