@@ -4,8 +4,8 @@ import TestUtils from 'react-addons-test-utils';
 import React from 'react';
 import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
-import { Loader } from '../src/loader';
-import source from './source';
+import Loader from '../src/loader';
+import sources from './source';
 
 const store = createStore(combineReducers({
   data: (state = {}) => state
@@ -14,7 +14,7 @@ const store = createStore(combineReducers({
 export const wrap = (jsx) => {
   return (
     <Provider store={ store }>
-      <Loader source={ source }>
+      <Loader sources={ sources }>
         { jsx }
       </Loader>
     </Provider>
