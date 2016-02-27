@@ -2,15 +2,15 @@
 
 // Used to determine whether any source for an item or list returns all model
 // fields
-const RETURNS_ALL_FIELDS = '*';
+export const RETURNS_ALL_FIELDS = '*';
 
 // Used to determine whether a source returns a single item or a list of items
-const RETURNS_ITEM = 'item';
-const RETURNS_LIST = 'list';
+export const RETURNS_ITEM = 'item';
+export const RETURNS_LIST = 'list';
 
 export default class Returns {
 
-  constructor(fields, model, returnType) {
+  constructor(model, fields, returnType) {
     this.model = model;
     this.returnType = returnType;
 
@@ -30,32 +30,10 @@ export default class Returns {
       throw new Error('Unknown field type ' + typeof fields);
     }
 
-    this.assertFieldsExist(fields, model);
+    model.assertFieldsExist(fields);
 
     // Finally set the fields that this source returns
     this.fields = fields;
-  }
-
-  /**
-   * Ensures that all fields exist within the model
-   */
-  assertFieldsExist(fields, model) {
-    const modelFields = model.fields();
-
-    // Ensure that all fields are defined within our model
-    const missing = fields.reduce((missing, field) => {
-      if (modelFields.indexOf(field) === -1) {
-        missing.push(field);
-      }
-      return missing;
-    }, []);
-
-    if (missing.length > 0) {
-      throw new Error(
-        `All return fields must be defined within your model. Missing: ` +
-        missing.join(', ')
-      );
-    }
   }
 
 }

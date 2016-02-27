@@ -14,11 +14,11 @@ describe('returns', () => {
   describe('validation', () => {
     it('throws an error if you pass anything but a string or array', () => {
       assert.throws(
-        () => new Returns(1, User, RETURNS_ITEM)
+        () => new Returns(User, 1, RETURNS_ITEM)
         `Unknown field type`
       );
       assert.throws(
-        () => new Returns({}, User, RETURNS_ITEM)
+        () => new Returns(User, {}, RETURNS_ITEM)
         `Unknown field type`
       );
 
@@ -38,7 +38,7 @@ describe('returns', () => {
     it('throws an error if we pass non-existent fields', () => {
       assert.throws(
         () => User.item('nonexistent'),
-        `All return fields must be defined within your model. ` +
+        `All fields must be defined within your model. ` +
         `Missing: nonexistent`
       );
     });

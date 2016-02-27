@@ -20,10 +20,6 @@ export default function load(queries) {
     @connect((state) => ({ state }))
     class LoadComponent extends Component {
 
-      static contextTypes = {
-        sources: PropTypes.instanceOf(Sources)
-      }
-
       constructor(props) {
         super(...arguments);
 
@@ -35,6 +31,19 @@ export default function load(queries) {
           this.queries = queries(state, props);
         }
       }
+
+      static contextTypes = {
+        sources: PropTypes.instanceOf(Sources)
+      }
+
+      /**
+       * Each component stores its resolved queries from each render. This
+       * allows us to check whether queries have changed when the component
+       * receives new props; if they change we need to enqueue the new queries
+       * to load new data.
+       *
+       */
+      queries = {}
 
       componentWillMount() {
         // Resolve the queries and load the data.

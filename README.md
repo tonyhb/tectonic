@@ -1,3 +1,4 @@
+```js
 import load, { Model, sources, superagent } from 'adipose';
 
 const User = new Model({
@@ -34,6 +35,7 @@ Sources.fromSuperagent([
 
 @load((state, params) => ({
   org: Org.getItem(['name'], { id: 1 }),
+  dependsOnOrg: Repo.getList({ orgId: params.org.id }), // Wont be called until org is loaded
   list: Org.getList(['name'], { start: 0, limit: 20 })
 }))
 class OrgList extends Component {
@@ -42,3 +44,8 @@ class OrgList extends Component {
   }
 
 }
+```
+
+Each component remembers its queries. When it receives new props we recalculate
+queries within @load, compare against previous queries to see if items are
+different and only enqueue queries which have changed.

@@ -27,25 +27,59 @@ export default function(fields) {
   let model = class Model {
     constructor(data) {
       // @TODO: add data to this specific model
+      console.log('creating');
     }
 
-    static fields = () => Object.keys(fields)
-    static relationships = () => relationships(this, arguments)
+    static fields() { return Object.keys(fields); }
+    static relationships() { return relationships(this, arguments); }
+
 
     /**
-     * Loads a single resource via the list of sources available
+     * Ensures that all fields in the given array exist within the model
+     *
+     * @param array
      */
-    static getItem = () => {
-      // @TODO: Load a single item
+    static assertFieldsExist(fields = []) {
+      if (fields === RETURNS_ALL_FIELDS) {
+        return;
+      }
+
+      const modelFields = this.fields();
+
+      // Ensure that all fields are defined within our model
+      const missing = fields.reduce((missing, field) => {
+        if (modelFields.indexOf(field) === -1) {
+          missing.push(field);
+        }
+        return missing;
+      }, []);
+
+      if (missing.length > 0) {
+        throw new Error(
+          `All fields must be defined within your model. Missing: ` +
+          missing.join(', ')
+        );
+      }
     }
+
   };
 
   // Return definitions
   model.item = (fields = RETURNS_ALL_FIELDS) =>
-    new Returns(fields, model, RETURNS_ITEM)
+    new Returns(model, fields, RETURNS_ITEM)
 
   model.list = (fields = RETURNS_ALL_FIELDS) =>
-    new Returns(fields, model, RETURNS_LIST)
+    new Returns(model, fields, RETURNS_LIST)
+
+  model.getItem = (fields, params) => {
+    // In this case we're only passing in parameters to getItem:
+    // User.getItem({ id: 1 });
+    if (params === undefined) {
+      [params, fields] = [fields, RETURNS_ALL_FIELDS];
+    }
+
+  }
+
 
   /**
    * instanceOf is shorthand for `PropTypes.instanceOf(Model)`.
