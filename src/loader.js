@@ -2,6 +2,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import Sources from './sources';
+import Resolver from './resolver';
 
 /**
  * Loader is a top-level wrapper component which provides react context for

@@ -1,6 +1,7 @@
 'use strict';
 
 import Returns from './returns';
+import Resolver from '../resolver';
 
 /**
  * These keys are required in every source definition
@@ -43,6 +44,7 @@ export default class Sources {
    */
   constructor(drivers) {
     this.drivers = drivers;
+    this.resolver = new Resolver();
 
     // Make each driver callable via its key bound to our current context. This
     // allows us to add definitions for each driver by calling

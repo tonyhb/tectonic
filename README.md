@@ -16,7 +16,12 @@ Org.relationships({
   members: User.list
 });
 
-const Sources = new Sources({ fromSuperagent: superagent });
+const Sources = new Sources({
+  fromSuperagent: superagent,
+  fromSDK: sdk,
+  fromWebsocket: websocket
+});
+
 Sources.fromSuperagent([
   {
     meta: {
@@ -24,7 +29,7 @@ Sources.fromSuperagent([
       transform: (response) => response.data
     },
     // These are any parameters for the request (ie query params, post data)
-    params: [':id'],
+    params: ['id'],
     // returns should be Model.item, Model.list or an array of many
     returns: {
       org: Org.item(['id', 'name']),

@@ -47,6 +47,7 @@ export default function load(queries) {
 
       componentWillMount() {
         // Resolve the queries and load the data.
+        console.log(this.context.sources);
       }
 
       render() {

@@ -75,9 +75,18 @@ export default function(fields) {
     // In this case we're only passing in parameters to getItem:
     // User.getItem({ id: 1 });
     if (params === undefined) {
-      [params, fields] = [fields, RETURNS_ALL_FIELDS];
+      [fields, params] = [RETURNS_ALL_FIELDS, fields];
     }
+    return new Query(model, fields, RETURNS_ITEM, params);
+  }
 
+  model.getList = (fields, params) => {
+    // In this case we're only passing in parameters to getList:
+    // User.getList({ id: 1 });
+    if (params === undefined) {
+      [fields, params] = [RETURNS_ALL_FIELDS, fields];
+    }
+    return new Query(model, fields, RETURNS_LIST, params);
   }
 
 
