@@ -46,8 +46,13 @@ export default function load(queries) {
       queries = {}
 
       componentWillMount() {
+        const { sources } = this.context;
+        const { queries } = this;
+
         // Resolve the queries and load the data.
-        console.log(this.context.sources);
+        Object.keys(queries).forEach(q => {
+          sources.resolver.addQuery(queries[q]);
+        });
       }
 
       render() {

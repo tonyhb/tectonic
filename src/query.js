@@ -6,7 +6,7 @@ import {
   RETURNS_ALL_FIELDS
 } from './sources/returns.js';
 
-class Query {
+export default class Query {
 
   constructor(model, fields, returnType, params = {}) {
     model.assertFieldsExist(fields);
@@ -54,5 +54,3 @@ class Query {
   }
 
 }
-
-export default Query;
