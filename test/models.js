@@ -7,3 +7,8 @@ export const User = new Model({
   name: '',
   email: ''
 });
+
+export const Post = new Model({
+  id: 0,
+  title: ''
+});
