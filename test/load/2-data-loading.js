@@ -32,10 +32,11 @@ describe('@load: data loading', () => {
       }
 
       const WrappedBase = load({ user: User.getItem({ id: 1 }) })(Base);
-
       const item = renderAndFind(<WrappedBase />, Base);
+
       assert.isDefined(item);
       assert.isObject(item.props.status);
+      assert.isObject(item.props.user);
     });
 
   });

@@ -36,7 +36,7 @@ export default class SourceDefinition {
   }
 
   isPolymorphic() {
-    return this.returns instanceof Returns;
+    return !(this.returns instanceof Returns);
   }
 
   validate() {
@@ -47,11 +47,19 @@ export default class SourceDefinition {
       );
     }
 
-    if ( ! Array.isArray(this.returns) || this.returns.length !== 2) {
-      throw new Error(
-        'You must pass a concrete return value or object to `returns` ' +
-        '(such as Model.item())'
-      );
+    const { returns } = this;
+
+    if (returns instanceof Returns) {
+      return;
     }
+
+    Object.keys(returns).forEach(item => {
+      if (!(returns[item] instanceof Returns)) {
+        throw new Error(
+          'You must pass a concrete return value or object to `returns` ' +
+          '(such as Model.item())'
+        );
+      }
+    });
   }
 }

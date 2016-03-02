@@ -27,11 +27,22 @@ export default class DumbResolver {
       // add all return items within the source definition
       Object.keys(sourceDef.returns).forEach(k => {
         const ret = sourceDef.returns[k];
-        this.definitionsByModel.set(ret.model, sourceDef.key);
+        this.addDef({ model: ret.model, id: sourceDef.id });
       });
-    } else {
-      this.definitionsByModel.set(sourceDef.returns.model, sourceDef.key);
+      return;
     }
+
+    this.addDef({
+      model: sourceDef.returns.model,
+      id: sourceDef.id
+    });
+  }
+
+  addDef({ model, id }) {
+    const { definitionsByModel: defs } = this;
+    let items = defs.get(id) || [];
+    items.push(id);
+    defs.set(model, items);
   }
 
   /**
@@ -61,7 +72,6 @@ export default class DumbResolver {
 
     this.unresolvedQueries.forEach(q => {
       let defs = definitionsByModel.get(q.model);
-      console.log(defs);
     });
   }
 

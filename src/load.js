@@ -75,10 +75,7 @@ export default function load(queries) {
             props[q] = queries[q].prop()
             props.status[q] = queries[q].status()
           });
-
         }
-
-        console.log(props);
 
         return <WrappedComponent { ...props } />
       }
