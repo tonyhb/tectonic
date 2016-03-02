@@ -1,6 +1,6 @@
 'use strict';
 
-const mock = (then, fail) => (params) => (source) => {
+const mock = (then, fail) => (query) => (source) => {
 }
 
 export default mock;

@@ -5,7 +5,7 @@ import React from 'react';
 import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 import Loader from '../src/loader';
-import sources from './source';
+import loadManager from './loadManager';
 
 const store = createStore(combineReducers({
   data: (state = {}) => state
@@ -14,7 +14,7 @@ const store = createStore(combineReducers({
 export const wrap = (jsx) => {
   return (
     <Provider store={ store }>
-      <Loader sources={ sources }>
+      <Loader loadManager={ loadManager }>
         { jsx }
       </Loader>
     </Provider>

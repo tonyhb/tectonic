@@ -13,20 +13,20 @@ const requiredDefinitionKeys = ['returns', 'meta'];
  *
  */
 
-class SourceDefinition {
-  key = undefined
+export default class SourceDefinition {
+  id = undefined
 
   // These are the 
   meta = undefined
   returns = undefined
   params = undefined
 
-  constructor({ key, returns, meta, params }) {
-    if (key === undefined) {
-      key = Math.floor(Math.random() * (1 << 30)).toString(16);
+  constructor({ id, returns, meta, params }) {
+    if (id === undefined) {
+      id = Math.floor(Math.random() * (1 << 30)).toString(16);
     }
 
-    this.key = key;
+    this.id = id;
     this.returns = returns;
     this.meta = meta;
     this.params = params;

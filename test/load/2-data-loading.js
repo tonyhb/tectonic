@@ -1,5 +1,6 @@
 'use strict';
 
+import { assert } from 'chai';
 import React, { Component, PropTypes } from 'react';
 import load from '../../src/load';
 import { renderAndFind } from '../utils';
@@ -13,27 +14,28 @@ describe('@load: data loading', () => {
 
     it('loads single models when opts is an object', () => {
 
-      @load({ user: User.getItem({ id: 1 }) })
       class Base extends Component {
         static propTypes = {
-          loading: PropTypes.object,
+          status: PropTypes.object,
           user: User.instanceOf
         }
 
         render() {
-          const { loading, user } = this.props;
+          const { status, user } = this.props;
           // We inject a `loading` prop which is an object containing loading
           // states for all props specified within @load
-          if (loading.user === true) {
+          if (status.user === "PENDING") {
             return <p>Loading...</p>;
           }
           return <p>{ this.props.user.name }</p>
         }
       }
 
-      const item = renderAndFind(<Base />);
-      assert.defined(item);
-      assert.isObject(item.props.loading);
+      const WrappedBase = load({ user: User.getItem({ id: 1 }) })(Base);
+
+      const item = renderAndFind(<WrappedBase />, Base);
+      assert.isDefined(item);
+      assert.isObject(item.props.status);
     });
 
   });

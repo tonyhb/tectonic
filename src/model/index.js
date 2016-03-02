@@ -7,6 +7,7 @@ import Returns, {
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
 } from '../sources/returns.js';
+import Query from '../query.js';
 
 export default function(fields) {
 

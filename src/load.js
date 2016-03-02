@@ -2,7 +2,7 @@
 
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import Sources from './sources';
+import LoadManager from './loadManager.js';
 
 /**
  * Load is our decorator which accepts an object of queries or a function which
@@ -33,7 +33,7 @@ export default function load(queries) {
       }
 
       static contextTypes = {
-        sources: PropTypes.instanceOf(Sources)
+        loadManager: PropTypes.instanceOf(LoadManager)
       }
 
       /**
@@ -46,17 +46,41 @@ export default function load(queries) {
       queries = {}
 
       componentWillMount() {
-        const { sources } = this.context;
+        const { loadManager } = this.context;
         const { queries } = this;
 
-        // Resolve the queries and load the data.
-        Object.keys(queries).forEach(q => {
-          sources.resolver.addQuery(queries[q]);
-        });
+        if (queries) {
+          // Resolve the queries and load the data.
+          Object.keys(queries).forEach(q => {
+            loadManager.addQuery(queries[q]);
+          });
+        }
       }
 
       render() {
-        return <WrappedComponent { ...this.props } />
+        const {
+          queries,
+          context: { loadManager }
+        } = this;
+
+        let props = {
+          ...this.props,
+          status: {}
+        };
+
+        if (queries) {
+          loadManager.resolve();
+
+          Object.keys(queries).forEach(q => {
+            props[q] = queries[q].prop()
+            props.status[q] = queries[q].status()
+          });
+
+        }
+
+        console.log(props);
+
+        return <WrappedComponent { ...props } />
       }
     }
 

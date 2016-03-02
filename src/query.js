@@ -53,4 +53,12 @@ export default class Query {
     return k1.every(param => p1[param] === p2[param]);
   }
 
+  prop() {
+    return new this.model()
+  }
+
+  status() {
+    return "PENDING";
+  }
+
 }

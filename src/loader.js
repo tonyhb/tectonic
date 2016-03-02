@@ -1,30 +1,28 @@
 'use strict';
 
 import React, { Component, PropTypes } from 'react';
-import Sources from './sources';
-import Resolver from './resolver';
+import LoadManager from './loadManager.js';
 
 /**
  * Loader is a top-level wrapper component which provides react context for
- * predefined model sources.
+ * the LoadManager.
  *
- * This allows our @load wrapper to connect to Sources and initiate requests for
- * data.
- *
+ * This allows our @load wrapper to issue queries to LoadManager which then
+ * resolves these queries via `resolvers`.
  */
 export default class Loader extends Component {
 
   static propTypes = {
-    sources: PropTypes.instanceOf(Sources)
+    loadManager: PropTypes.instanceOf(LoadManager)
   }
 
   static childContextTypes = {
-    sources: PropTypes.instanceOf(Sources)
+    loadManager: PropTypes.instanceOf(LoadManager)
   }
 
   getChildContext() {
     return {
-      sources: this.props.sources
+      loadManager: this.props.loadManager
     }
   }
 
