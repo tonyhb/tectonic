@@ -1,9 +1,11 @@
 'use strict';
 
 import { assert } from 'chai';
+import LoadManager from '../../src/loadManager.js';
 import DumbResolver from '../../src/resolver/dumbResolver.js';
 import Query from '../../src/query.js';
 import SourceDefinition from '../../src/sources/definition.js';
+import { sources } from '../loadManager.js';
 import Returns, {
   RETURNS_ITEM,
   RETURNS_ALL_FIELDS
@@ -26,10 +28,7 @@ describe('dumbResolver', () => {
       const { definitionsByModel: defs } = r;
 
       assert.isDefined(defs);
-      // ensure it has one entry - User
       assert.equal(defs.size, 1);
-      assert.isTrue(defs.has(User));
-
       const userDefs = defs.get(User);
       assert.equal(userDefs.length, 1);
       assert.equal(userDefs[0], def.id);
@@ -50,8 +49,6 @@ describe('dumbResolver', () => {
       const { definitionsByModel: defs } = r;
       // ensure it has one entry - User
       assert.equal(defs.size, 2);
-      assert.isTrue(defs.has(User));
-      assert.isTrue(defs.has(Post));
 
       const userDefs = defs.get(User);
       assert.equal(userDefs.length, 1);
@@ -68,6 +65,18 @@ describe('dumbResolver', () => {
     r.addQuery(query);
     assert.equal(r.unresolvedQueries.length, 1);
     assert.equal(r.unresolvedQueries[0], query);
+  });
+
+  describe('resolving', () => {
+    const resolver = new DumbResolver();
+    const loadManager = new LoadManager({ sources, resolver });
+    sources.fromMock([{
+      returns: User.item(),
+      meta: {}
+    }]);
+
+    resolver.addQuery(query);
+    loadManager.resolve();
   });
 
 });

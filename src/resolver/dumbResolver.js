@@ -72,6 +72,19 @@ export default class DumbResolver {
 
     this.unresolvedQueries.forEach(q => {
       let defs = definitionsByModel.get(q.model);
+
+      if (defs === undefined || defs.length === 0) {
+        return console.warn(
+          'There is no source definition which resolves the query',
+          q
+        );
+      }
+
+      defs.forEach(id => {
+        const def = sourceMap.get(id);
+        console.log(q, def);
+      });
+
     });
   }
 

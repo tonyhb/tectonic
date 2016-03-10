@@ -12,13 +12,15 @@ const requiredDefinitionKeys = ['returns', 'meta'];
  * which returns data for the app.
  *
  */
-
 export default class SourceDefinition {
   id = undefined
 
-  // These are the 
   meta = undefined
   returns = undefined
+
+  /**
+   * Array of parameters for the source
+   */
   params = undefined
 
   constructor({ id, returns, meta, params }) {

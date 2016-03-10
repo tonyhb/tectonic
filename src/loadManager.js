@@ -12,7 +12,7 @@ export default class LoadManager {
 
     // TODO: Allow use of many resolvers
     if (resolver && resolver.onAddDefinition) {
-      sources.onAddDefinition = resolver.onAddDefinition;
+      sources.onAddDefinition = resolver.onAddDefinition.bind(resolver);
     }
 
   }
