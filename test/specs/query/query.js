@@ -2,13 +2,13 @@
 
 import { assert } from 'chai';
 
-import Query from '../../src/query.js';
-import { User } from '../models.js';
+import Query from '/src/query';
+import { User } from '/test/models.js';
 import {
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '../../src/sources/returns.js';
+} from '/src/sources/returns.js';
 
 
 describe('query', () => {

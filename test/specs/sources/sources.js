@@ -1,41 +1,44 @@
 'use strict';
 
 import { assert } from 'chai';
-import { sources } from '../loadManager';
-import { User } from '../models';
+import Sources from '/src/sources';
+import { User } from '/test/models';
+import d from '/test/mockDriver';
 
-describe('source definitions', () => {
+describe('Sources', () => {
 
-  describe('validation errors', () => {
+  const sources = new Sources();
+
+  describe('processDefinitions validation', () => {
     it('throws an error when a driver accepts no parameters', () => {
       assert.throws(
-        () => sources.fromMock(),
+        () => sources.processDefinitions(d),
         'Source definitions must be defined in an array'
       );
     });
 
     it('throws an error if we provide a non-array', () => {
       assert.throws(
-        () => sources.fromMock({}),
+        () => sources.processDefinitions(d, {}),
         'Source definitions must be defined in an array'
       );
     });
 
     it('throws an error when objects miss required fields', () => {
       assert.throws(
-        () => sources.fromMock([{}]),
+        () => sources.processDefinitions(d, [{}]),
         'Source definitions must contain keys: returns, meta'
       );
 
       // No returns
       assert.throws(
-        () => sources.fromMock([{meta: {}}]),
+        () => sources.processDefinitions(d, [{meta: {}}]),
         'Source definitions must contain keys: returns, meta'
       );
 
       // No meta
       assert.throws(
-        () => sources.fromMock([{returns: {}}]),
+        () => sources.processDefinitions(d, [{returns: {}}]),
         'Source definitions must contain keys: returns, meta'
       );
     });
@@ -44,7 +47,7 @@ describe('source definitions', () => {
       // FYI, you should call User.item() which is shorthand for all user
       // attributes
       assert.throws(
-        () => sources.fromMock([{meta: {}, returns: User.item }]),
+        () => sources.processDefinitions(d, [{meta: {}, returns: User.item }]),
         'You must pass a concrete return value or object to `returns` ' +
         '(such as Model.item())'
       );

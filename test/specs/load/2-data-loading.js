@@ -1,12 +1,13 @@
 'use strict';
 
 import { assert } from 'chai';
-import React, { Component, PropTypes } from 'react';
-import load from '../../src/load';
-import { renderAndFind } from '../utils';
+import React, { Component } from 'react';
+import load from '/src/decorator';
+import TestUtils from 'react-addons-test-utils';
+import { renderAndFind } from '/test/utils';
 
 // Data
-import { User } from '../models';
+import { User } from '/test/models';
 
 describe('@load: data loading', () => {
 

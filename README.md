@@ -1,5 +1,7 @@
 ```js
-import load, { Model, sources, superagent } from 'adipose';
+import load, { Manager, Model, Loader } from 'tectonic';
+import { superagent } from 'tectonic/drivers';
+import { DumbResolver } from 'tectonic/resolvers';
 
 const User = new Model({
   id: 0,
@@ -16,13 +18,16 @@ Org.relationships({
   members: User.list
 });
 
-const Sources = new Sources({
-  fromSuperagent: superagent,
-  fromSDK: sdk,
-  fromWebsocket: websocket
+const manager = new Manager({
+  drivers: {
+    fromSuperagent: superagent,
+    fromSDK: sdk,
+    fromWebsocket: websocket
+  },
+  resolver: new DumbResolver()
 });
 
-Sources.fromSuperagent([
+manager.fromSuperagent([
   {
     meta: {
       call: SDK.func,
@@ -37,6 +42,13 @@ Sources.fromSuperagent([
     }
   }
 ]);
+
+// Wrap your root component like so:
+<Loader manager={ manager }>
+  ...
+</Loader>
+
+// And use the decorator to laod models:
 
 @load((state, params) => ({
   org: Org.getItem(['name'], { id: 1 }),

@@ -4,8 +4,8 @@ import TestUtils from 'react-addons-test-utils';
 import React from 'react';
 import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
-import Loader from '../src/loader';
-import loadManager from './loadManager';
+import Loader from '/src/component';
+import loadManager from '/src/manager';
 
 const store = createStore(combineReducers({
   data: (state = {}) => state

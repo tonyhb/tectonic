@@ -1,11 +1,11 @@
 'use strict';
 
 import { assert } from 'chai';
-import Model from '../../src/model/index.js';
-import { User } from '../models';
+import Model from '/src/model';
+import { User } from '/test/models';
 import React, { Component } from 'react';
 
-import { render } from '../utils';
+import { render } from '/test/utils';
 
 describe('Model', () => {
 

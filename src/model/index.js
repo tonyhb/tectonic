@@ -6,8 +6,8 @@ import Returns, {
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '../sources/returns.js';
-import Query from '../query.js';
+} from '/src/sources/returns.js';
+import Query from '/src/query';
 
 export default function(fields) {
 

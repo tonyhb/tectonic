@@ -51,8 +51,18 @@ export default class SourceDefinition {
 
     const { returns } = this;
 
+    // If this is a single Returns instance this is valid
     if (returns instanceof Returns) {
       return;
+    }
+
+    // Otherwise this should be an object in which all values are Returns
+    // instances
+    if (typeof returns !== 'object') {
+      throw new Error(
+        'You must pass a concrete return value or object to `returns` ' +
+        '(such as Model.item())'
+      );
     }
 
     Object.keys(returns).forEach(item => {

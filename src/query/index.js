@@ -4,7 +4,7 @@ import {
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from './sources/returns.js';
+} from '/src/sources/returns.js';
 
 export default class Query {
 

@@ -1,4 +1,8 @@
 'use strict';
 
-export Model from './model.js';
-export default from './load.js';
+export default from './decorator';
+export Model from './model';
+export Manager from './manager';
+export Sources from './sources';
+// Export the <Loader /> wrapper component
+export Loader from './component';

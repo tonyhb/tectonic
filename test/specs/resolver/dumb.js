@@ -1,16 +1,15 @@
 'use strict';
 
 import { assert } from 'chai';
-import LoadManager from '../../src/loadManager.js';
-import DumbResolver from '../../src/resolver/dumbResolver.js';
-import Query from '../../src/query.js';
-import SourceDefinition from '../../src/sources/definition.js';
-import { sources } from '../loadManager.js';
+import Manager from '/src/manager';
+import DumbResolver from '/src/resolver/dumbResolver.js';
+import Query from '/src/query';
+import SourceDefinition from '/src/sources/definition.js';
 import Returns, {
   RETURNS_ITEM,
   RETURNS_ALL_FIELDS
-} from '../../src/sources/returns.js';
-import { User, Post } from '../models.js';
+} from '/src/sources/returns.js';
+import { User, Post } from '/test/models.js';
 
 describe('dumbResolver', () => {
   const query = User.getItem({ id: 1 });
@@ -68,15 +67,6 @@ describe('dumbResolver', () => {
   });
 
   describe('resolving', () => {
-    const resolver = new DumbResolver();
-    const loadManager = new LoadManager({ sources, resolver });
-    sources.fromMock([{
-      returns: User.item(),
-      meta: {}
-    }]);
-
-    resolver.addQuery(query);
-    loadManager.resolve();
   });
 
 });

@@ -1,7 +1,5 @@
 'use strict';
 
-import Returns from './returns';
-import Resolver from '../resolver';
 import SourceDefinition from './definition.js';
 
 /**
@@ -27,37 +25,18 @@ export default class Sources {
   definitions = new Map()
 
   /**
-   * If defined this callback will be invoked with a SourceDefinition each
-   * time a new definition is added to the definitions map.
+   * Convert a list of source definitions into a SourceDefinition classes,
+   * storing them by their ID in this.definitions.
    *
-   * This allows custom resolvers to implement custom data structures for
-   * storing definitions, such as mapping models to their source definitions for
-   * faster lookup.
+   * This will call the resolver's `onAddDefinition` function passing the
+   * SourceDefinnition as an argument. The resolver can use this to optimize
+   * query resolution at their discretion.
+   *
+   * @param function driver function to invoke when the source is used
+   * @param array array of source definitions
+   * @param Resolver concrete instance of the resolver being used in the manager
    */
-  onAddDefinition = undefined
-
-  /**
-   * @param object Object containing keys to driver functions
-   */
-  constructor(drivers) {
-    this.drivers = drivers;
-
-    // Make each driver callable via its key bound to our current context. This
-    // allows us to add definitions for each driver by calling
-    // sources[driverName](), ie: sources.fromSDK([...]);
-    Object.keys(drivers).forEach(driver => {
-      const driverFunc = drivers[driver];
-      // When calling the driver name run processDefinitions to add the
-      // definitions to the Source class
-      this[driver] = (defs) => this.processDefinitions(driverFunc, defs)
-    });
-  }
-
-  /**
-   * @param sources
-   * @param array  array of source definitions
-   */
-  processDefinitions(driverFunc, defsToProcess) {
+  processDefinitions(driverFunc, defsToProcess, resolver) {
     if ( ! Array.isArray(defsToProcess)) {
       throw new Error('Source definitions must be defined in an array');
     }
@@ -68,8 +47,8 @@ export default class Sources {
       this.definitions.set(item.id, item);
 
       // TODO: Test that this is called
-      if (this.onAddDefinition) {
-        this.onAddDefinition(item);
+      if (resolver && typeof resolver.onAddDefinition === 'function') {
+        resolver.onAddDefinition(item);
       }
     });
   }

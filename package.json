@@ -4,7 +4,7 @@
   "description": "Declarative data loading for React",
   "main": "transpiled/index.js",
   "scripts": {
-    "test": "$(npm bin)/mocha  --compilers js:babel-core/register --recursive --require ./test/setup.js ./test/**/*.js"
+    "test": "$(npm bin)/mocha  --compilers js:babel-core/register --recursive --require ./test/_setup.js ./test/specs/**/*.js"
   },
   "repository": {
     "type": "git",
@@ -31,6 +31,7 @@
     "babel-preset-es2015": "^6.5.0",
     "babel-preset-react": "^6.5.0",
     "babel-preset-stage-0": "^6.5.0",
+    "babel-root-import": "^3.2.2",
     "chai": "^3.4.1",
     "jsdom": "^7.2.2",
     "mocha": "^2.3.4",
