@@ -1,5 +1,15 @@
 'use strict';
 
+import * as utils from './utils';
+
+// This query chain is a series of functions which need to return true in order
+// for a source to satisfy a query
+const satisfiabilityChain = [
+  utils.doesSourceSatisfyQueryParams,
+  utils.doesSourceSatisfyQueryModel,
+  utils.doesSourceSatisfyQueryFields
+];
+
 /**
  * DumbResolver uses the first source that satisfies a query. It does no
  * optimization or caching. Hey, it's called dumb for a reason!

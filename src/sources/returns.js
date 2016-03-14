@@ -27,6 +27,9 @@ export default class Returns {
   returnType = undefined
   fields = undefined
 
+  // Stores all field names as a key within an object.
+  fieldsAsObject = {}
+
   constructor(model, fields, returnType) {
     this.model = model;
     this.returnType = returnType;
@@ -48,6 +51,10 @@ export default class Returns {
     }
 
     model.assertFieldsExist(fields);
+
+    // Store each field as the key to an object for O(1) lookups when testing
+    // query field satisfiability
+    fields.forEach(f => this.fieldsAsObject[f] = true);
 
     // Finally set the fields that this source returns
     this.fields = fields;

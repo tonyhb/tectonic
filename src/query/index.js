@@ -8,6 +8,12 @@ import {
 
 export default class Query {
 
+  /**
+   * @param Model
+   * @param array|string   Array of fields or RETURNS_ALL_FIELDS
+   * @param RETURNS_ITEM|RETURNS_LIST   query for a single model or list
+   * @param object   Object of query parameters to values
+   */
   constructor(model, fields, returnType, params = {}) {
     model.assertFieldsExist(fields);
 

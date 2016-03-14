@@ -13,16 +13,16 @@ import Manager from '/src/manager';
 export default class Loader extends Component {
 
   static propTypes = {
-    loadManager: PropTypes.instanceOf(Manager)
+    manager: PropTypes.instanceOf(Manager)
   }
 
   static childContextTypes = {
-    loadManager: PropTypes.instanceOf(Manager)
+    manager: PropTypes.instanceOf(Manager)
   }
 
   getChildContext() {
     return {
-      loadManager: this.props.loadManager
+      manager: this.props.manager
     }
   }
 
