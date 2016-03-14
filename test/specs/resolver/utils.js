@@ -31,6 +31,55 @@ describe('resolver utils', () => {
       assert.isTrue(utils.doesSourceSatisfyQueryParams(s, q));
     });
 
+    it('returns true when the the source and query have the same params',  () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(),
+        meta: {},
+        params: ['id']
+      });
+      const q = new Query(
+        User,
+        RETURNS_ALL_FIELDS,
+        RETURNS_ITEM,
+        {
+          id: 1
+        }
+      );
+      assert.isTrue(utils.doesSourceSatisfyQueryParams(s, q));
+    });
+
+  });
+
+  describe('doesSourceSatisfyAllQueryFields', () => {
+    it('returns true when source returns all and query returns a subset',  () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(),
+        meta: {}
+      });
+      const q = new Query(
+        User,
+        ['name'],
+        RETURNS_ITEM
+      );
+      assert.isTrue(utils.doesSourceSatisfyAllQueryFields(s, q));
+    });
+
+    it('returns false when source returns subet and query needs all', () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(['name']),
+        meta: {}
+      });
+      const q = new Query(
+        User,
+        RETURNS_ALL_FIELDS,
+        RETURNS_ITEM
+      );
+      assert.isFalse(utils.doesSourceSatisfyAllQueryFields(s, q));
+    });
+
   });
 
 });

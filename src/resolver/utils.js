@@ -9,6 +9,8 @@ import Returns, { RETURNS_ALL_FIELDS } from '/src/sources/returns';
  * If a source doesn't accept all parameters for a query then the source can't
  * satisfy said query.
  *
+ * TODO: How do we mark params as optional?
+ *
  * @param SourceDefinition
  * @param Query
  * @return bool
@@ -21,7 +23,7 @@ export function doesSourceSatisfyQueryParams(source, query) {
   }
 
   // Iterate through all source keys to see if they're defined in the query.
-  return source.params.every(sp => query[sp] !== undefined);
+  return source.params.every(sp => query.params[sp] !== undefined);
 }
 
 export function doesSourceSatisfyQueryModel(source, query) {
