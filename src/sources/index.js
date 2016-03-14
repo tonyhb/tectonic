@@ -3,12 +3,6 @@
 import SourceDefinition from './definition.js';
 
 /**
- * Validate that a source definition is valid
- */
-const validateDefinition = (def) => {
-}
-
-/**
  * {
  *   meta: {},
  *   fields: [],

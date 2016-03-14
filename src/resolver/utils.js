@@ -16,7 +16,7 @@ import Returns, { RETURNS_ALL_FIELDS } from '/src/sources/returns';
 export function doesSourceSatisfyQueryParams(source, query) {
   const queryKeys = Object.keys(query.params)
 
-  if (sourceKeys.length === 0 && queryKeys.length === 0) {
+  if (source.params.length === 0 && queryKeys.length === 0) {
     return true;
   }
 

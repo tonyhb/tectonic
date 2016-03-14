@@ -1,3 +1,28 @@
+# Tectonic
+
+-----
+
+This is **not ready** and shouldn't be used until this notice is removed *and*
+it's on NPM.
+
+-----
+
+Tectonic is a smart data component which handles:
+
+- Querying data via your existing REST API with adaptable query drivers
+- Storing state and data within Redux' reducers
+- Cache management
+- Passing data into your components
+
+In short:
+
+1. you explain your REST API in terms of sources
+2. you write standard drivers to communicate with your API, or use built in drivers
+3. you declaratively state what data your components need
+4. tectonic resolves queries, caching and data management to pass data into your
+   components. As a bonus your component also gets the entire async lifecycle
+   injected as props to show loading views.
+
 ```js
 import load, { Manager, Model, Loader } from 'tectonic';
 import { superagent } from 'tectonic/drivers';

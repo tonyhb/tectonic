@@ -23,6 +23,12 @@ export default class SourceDefinition {
    */
   params = undefined
 
+  /**
+   * @param string   unique ID of source definition
+   * @param Returns  instance of Returns listing what this source returns
+   * @param object   object containing unique source driver functionality
+   * @param array    array of query parameters for the API call
+   */
   constructor({ id, returns, meta, params }) {
     if (id === undefined) {
       id = Math.floor(Math.random() * (1 << 30)).toString(16);
@@ -31,7 +37,7 @@ export default class SourceDefinition {
     this.id = id;
     this.returns = returns;
     this.meta = meta;
-    this.params = params;
+    this.params = params || [];
 
     // ensure that after setting properties the definition is valid
     this.validate();
