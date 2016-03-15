@@ -135,6 +135,33 @@ describe('resolver utils', () => {
       assert.isFalse(utils.doesSourceSatisfyAllQueryFields(s, q));
     });
 
+    it('returns true when source returns same subset to query', () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(['id']),
+        meta: {}
+      });
+      const q = new Query(
+        User,
+        ['id'],
+        RETURNS_ITEM
+      );
+      assert.isTrue(utils.doesSourceSatisfyAllQueryFields(s, q));
+    });
+
+    it('returns false when source returns different subset to query', () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(['name']),
+        meta: {}
+      });
+      const q = new Query(
+        User,
+        ['id'],
+        RETURNS_ITEM
+      );
+      assert.isFalse(utils.doesSourceSatisfyAllQueryFields(s, q));
+    });
   });
 
 });

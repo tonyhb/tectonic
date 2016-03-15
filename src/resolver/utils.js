@@ -9,7 +9,7 @@ import Returns, { RETURNS_ALL_FIELDS } from '/src/sources/returns';
  * If a source doesn't accept all parameters for a query then the source can't
  * satisfy said query.
  *
- * TODO: How do we mark params as optional?
+ * NOTE: This only tests satisfiability of required params.
  *
  * @param SourceDefinition
  * @param Query
@@ -63,9 +63,9 @@ export function doesSourceSatisfyAllQueryFields(source, query) {
   }
 
   // Return whether every field is within this source
-  return query.fields.every(f => source.fieldsAsObject[f] !== undefined);
+  return query.fields.every(f => source.returns.fieldsAsObject[f] !== undefined);
 }
 
 // TODO:
-// - doesSourceSatisfySomeQueryFields
+// - `doesSourceSatisfySomeQueryFields` for partial matching
 // - How will we handle relationships within a query?
