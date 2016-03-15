@@ -18,4 +18,4 @@ const manager = new Manager({
   resolver
 });
 
-export default Manager;
+export default manager;

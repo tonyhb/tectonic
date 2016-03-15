@@ -45,6 +45,10 @@ export default class Manager {
       throw new Error('You must supply at least one driver to instantiate a manager');
     }
 
+    if ( ! this.resolver) {
+      throw new Error('You must pass a resolver to instantiate a manager');
+    }
+
     // Make each driver callable via its key bound to our current context. This
     // allows us to add definitions for each driver by calling
     // sources[driverName](), ie: sources.fromSDK([...]);

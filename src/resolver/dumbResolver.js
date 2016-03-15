@@ -30,6 +30,8 @@ export default class DumbResolver {
   /**
    * This will be called by the manager each time a source definition is added
    * to the manager's list of sources.
+   *
+   * @param SourceDefinition
    */
   onAddDefinition(sourceDef) {
     if (sourceDef.isPolymorphic()) {
@@ -86,13 +88,12 @@ export default class DumbResolver {
       if (defs === undefined || defs.length === 0) {
         return console.warn(
           'There is no source definition which resolves the query',
-          q
+          q.toString()
         );
       }
 
       defs.forEach(id => {
         const def = sourceMap.get(id);
-        console.log(q, def);
       });
 
     });

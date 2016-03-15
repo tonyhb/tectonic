@@ -5,8 +5,11 @@ import {
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
 } from '/src/sources/returns.js';
+import * as status from '/src/status';
 
 export default class Query {
+
+  status = status.PENDING
 
   /**
    * @param Model
@@ -21,6 +24,12 @@ export default class Query {
     this.fields = Array.isArray(fields) ? fields.sort() : fields;
     this.params = params;
     this.returnType = returnType;
+  }
+
+  toString() {
+    return `Query(Fields: ${this.fields}, ` +
+      `Params: ${JSON.stringify(this.params)}, ` +
+      `ReturnType: ${this.returnType})`
   }
 
   /**
@@ -61,10 +70,6 @@ export default class Query {
 
   prop() {
     return new this.model()
-  }
-
-  status() {
-    return "PENDING";
   }
 
 }

@@ -73,7 +73,7 @@ export default function load(queries) {
 
           Object.keys(queries).forEach(q => {
             props[q] = queries[q].prop()
-            props.status[q] = queries[q].status()
+            props.status[q] = queries[q].status
           });
         }
 
