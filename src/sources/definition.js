@@ -19,9 +19,14 @@ export default class SourceDefinition {
   returns = undefined
 
   /**
-   * Array of parameters for the source
+   * Array of **required** parameters for the source
    */
   params = undefined
+
+  /**
+   * Array of optional parameters for the source
+   */
+  optionalParams = undefined
 
   /**
    * @param string   unique ID of source definition
@@ -29,7 +34,7 @@ export default class SourceDefinition {
    * @param object   object containing unique source driver functionality
    * @param array    array of query parameters for the API call
    */
-  constructor({ id, returns, meta, params }) {
+  constructor({ id, returns, meta, params, optionalParams }) {
     if (id === undefined) {
       id = Math.floor(Math.random() * (1 << 30)).toString(16);
     }
@@ -38,6 +43,8 @@ export default class SourceDefinition {
     this.returns = returns;
     this.meta = meta;
     this.params = params || [];
+    this.optionalParams = optionalParams || [];
+
 
     // ensure that after setting properties the definition is valid
     this.validate();

@@ -42,6 +42,23 @@ describe('resolver utils', () => {
         User,
         RETURNS_ALL_FIELDS,
         RETURNS_ITEM,
+        { id: 1 }
+      );
+      assert.isTrue(utils.doesSourceSatisfyQueryParams(s, q));
+    });
+
+    it('returns true when all required parameters are passed without optional params', () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(),
+        meta: {},
+        params: ['id'],
+        optionalParams: ['limit']
+      });
+      const q = new Query(
+        User,
+        RETURNS_ALL_FIELDS,
+        RETURNS_ITEM,
         {
           id: 1
         }
@@ -49,6 +66,44 @@ describe('resolver utils', () => {
       assert.isTrue(utils.doesSourceSatisfyQueryParams(s, q));
     });
 
+    it('returns true when all required parameters are passed with optional params', () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(),
+        meta: {},
+        params: ['id'],
+        optionalParams: ['limit']
+      });
+      const q = new Query(
+        User,
+        RETURNS_ALL_FIELDS,
+        RETURNS_ITEM,
+        {
+          id: 1,
+          limit: 10
+        }
+      );
+      assert.isTrue(utils.doesSourceSatisfyQueryParams(s, q));
+    });
+
+    it('returns false when only optional parameters are passed', () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(),
+        meta: {},
+        params: ['id'],
+        optionalParams: ['limit']
+      });
+      const q = new Query(
+        User,
+        RETURNS_ALL_FIELDS,
+        RETURNS_ITEM,
+        {
+          limit: 10
+        }
+      );
+      assert.isFalse(utils.doesSourceSatisfyQueryParams(s, q));
+    });
   });
 
   describe('doesSourceSatisfyAllQueryFields', () => {
