@@ -78,7 +78,7 @@ describe('dumbResolver', () => {
 
     const r = new DumbResolver();
     r.addQuery(query);
-    r.onAddDefinition(
+    //r.onAddDefinition(
   });
 
 });
