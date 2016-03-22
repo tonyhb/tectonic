@@ -96,6 +96,11 @@ export default class DumbResolver {
    * @return bool  
    */
   resolveItem(query, sourceMap) {
+
+    const {
+      definitionsByModel
+    } = this;
+
     // Get all source definitions that return the current model
     let defs = definitionsByModel.get(query.model);
 

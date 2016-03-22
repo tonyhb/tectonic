@@ -72,8 +72,8 @@ export default function load(queries) {
           manager.resolve();
 
           Object.keys(queries).forEach(q => {
-            props[q] = queries[q].prop()
-            props.status[q] = queries[q].status
+            props[q] = queries[q].props;
+            props.status[q] = queries[q].status;
           });
         }
 
