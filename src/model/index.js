@@ -9,9 +9,9 @@ import Returns, {
 } from '/src/sources/returns.js';
 import Query from '/src/query';
 
-export default function(fields) {
+export default function(name, fields) {
 
-  if (typeof fields != 'object') {
+  if (typeof fields !== 'object') {
     throw new Error('A model must contain fields');
   }
 
@@ -20,7 +20,7 @@ export default function(fields) {
    *
    * The class has static properties for model-specific data such as:
    * - declaring model relationships
-   * - accessing model data such as available fields/attirbutes
+   * - accessing model data such as available fields/attributes
    *
    * The class has instance methods for instance-specific data. This refers to
    * a concrete instance of a particular model, for example "user 1".
@@ -33,7 +33,6 @@ export default function(fields) {
 
     static fields() { return Object.keys(fields); }
     static relationships() { return relationships(this, arguments); }
-
 
     /**
      * Ensures that all fields in the given array exist within the model
@@ -79,7 +78,7 @@ export default function(fields) {
       [fields, params] = [RETURNS_ALL_FIELDS, fields];
     }
     return new Query(model, fields, RETURNS_ITEM, params);
-  }
+  };
 
   model.getList = (fields, params) => {
     // In this case we're only passing in parameters to getList:
@@ -88,7 +87,12 @@ export default function(fields) {
       [fields, params] = [RETURNS_ALL_FIELDS, fields];
     }
     return new Query(model, fields, RETURNS_LIST, params);
-  }
+  };
+
+  model.meta = {
+    name: name,
+    updated: Date.now()
+  };
 
 
   /**
