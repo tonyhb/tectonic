@@ -67,6 +67,18 @@ describe('dumbResolver', () => {
   });
 
   describe('resolving', () => {
+    const def = new SourceDefinition({
+      id: 'somedef',
+      returns: User.item(),
+      meta: {}
+    });
+
+    // Warns for unresolved queries
+    // it tests 
+
+    const r = new DumbResolver();
+    r.addQuery(query);
+    r.onAddDefinition(
   });
 
 });

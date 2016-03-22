@@ -19,8 +19,8 @@ const satisfiabilityChain = [
 export default class DumbResolver {
 
   /**
-   * This map is keyed by model classes to a list of SourceDefinition IDs which
-   * return those specific models
+   * This map is keyed by model classes to an array of SourceDefinition IDs 
+   * which return those specific models
    */
   definitionsByModel = new Map()
 
@@ -82,21 +82,62 @@ export default class DumbResolver {
       return;
     }
 
-    this.unresolvedQueries.forEach(q => {
-      let defs = definitionsByModel.get(q.model);
-
-      if (defs === undefined || defs.length === 0) {
-        return console.warn(
-          'There is no source definition which resolves the query',
-          q.toString()
-        );
-      }
-
-      defs.forEach(id => {
-        const def = sourceMap.get(id);
-      });
-
+    this.unresolvedQueries = this.unresolvedQueries.filter((q) => {
+      return (this.resolveItem(q, sourceMap) === false);
     });
+  }
+
+  /**
+   * Takes a query and sourcemap and attempts to resolve a query naively by
+   * using the first source that satisfies the query.
+   *
+   * @param Quer
+   * @param Map    Map of source IDs to Source instances
+   * @return bool  
+   */
+  resolveItem(query, sourceMap) {
+    // Get all source definitions that return the current model
+    let defs = definitionsByModel.get(query.model);
+
+    if (defs === undefined || defs.length === 0) {
+      // This query cannot be satisfied as none of the added sources return this
+      // model type
+      return this.unresolvable(query);
+    }
+
+    // Iterate through all definition IDs which return the query's model,
+    // passing the source definition and query through our satisfiability chain.
+    // This will stop at the definition ID of the source that first satisfies
+    // our query, making sourceDef the 
+    let sourceDef;
+    let id = defs.find(id => {
+      sourceDef = sourceMap.get(id);
+      return satisfiabilityChain.every(i => i(sourceDef, query) === true);
+    });
+
+    if (id === undefined) {
+      return this.unresolvable(query);
+    }
+
+    // TODO:
+    // - Push source to call with params
+    // - Push query to resolved
+    // - How do we link query to source call?
+
+  }
+
+  /**
+   * unresolvable is called when a query can't be resolved with the current
+   * sources list
+   *
+   * @param Query
+   */
+  unresolvable(query) {
+    console.warn(
+      'There is no source definition which resolves the query',
+      query.toString()
+    );
+    return false;
   }
 
 }

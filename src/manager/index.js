@@ -37,7 +37,8 @@ import Sources from '/src/sources';
 export default class Manager {
 
 
-  constructor({ drivers, resolver }) {
+  constructor({ store, drivers, resolver }) {
+    this.store = store;
     this.resolver = resolver;
     this.sources = new Sources();
 
