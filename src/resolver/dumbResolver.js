@@ -99,7 +99,7 @@ export default class DumbResolver {
 
     const {
       definitionsByModel
-      } = this;
+    } = this;
 
     // Get all source definitions that return the current model
     let defs = definitionsByModel.get(query.model);
