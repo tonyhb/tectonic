@@ -70,7 +70,7 @@ export default class DumbResolver {
   }
 
   /**
-   *
+   * @param Object  Object of source definition IDs to the SourceDefinition instance
    */
   resolve(sourceMap) {
     const { 
