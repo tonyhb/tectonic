@@ -13,8 +13,17 @@ describe('Model', () => {
     assert.throws(() => Model(), 'A model must contain fields');
   });
 
+  it('instance has a name', () => {
+    let name = 'TestModel';
+    let a = new Model(name, {
+      id: 0
+    });
+
+    assert.equal(name, a.modelName);
+  });
+
   it('stores field definitions from the constructor', () => {
-    let a = Model({
+    let a = new Model('StoresTest', {
       id: 0,
       name: ''
     });
