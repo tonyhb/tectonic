@@ -13,21 +13,13 @@ describe('Model', () => {
     assert.throws(() => Model(), 'A model must contain fields');
   });
 
-  it('has a meta property', () => {
-    let a = new Model('TestModel', {
-      id: 0
-    });
-
-    assert.property(a, 'meta');
-  });
-
   it('instance has a name', () => {
     let name = 'TestModel';
     let a = new Model(name, {
       id: 0
     });
 
-    assert.equal(name, a.meta.name);
+    assert.equal(name, a.modelName);
   });
 
   it('stores field definitions from the constructor', () => {

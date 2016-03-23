@@ -89,10 +89,7 @@ export default function(name, fields) {
     return new Query(model, fields, RETURNS_LIST, params);
   };
 
-  model.meta = {
-    name: name,
-    updated: Date.now()
-  };
+  model.modelName = name;
 
 
   /**
