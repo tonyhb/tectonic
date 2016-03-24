@@ -3,11 +3,11 @@
 import Returns, { RETURNS_ALL_FIELDS } from '/src/sources/returns';
 
 /**
- * Predicate which checks that a given source accepts all parameters for a given
- * query.
+ * Predicate which checks that a given query contains all required params
+ * for the source
  *
- * If a source doesn't accept all parameters for a query then the source can't
- * satisfy said query.
+ * If a query doesn't provide all required parameters for a source then the 
+ * source can't satisfy said query.
  *
  * NOTE: This only tests satisfiability of required params.
  *
