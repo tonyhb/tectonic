@@ -7,7 +7,8 @@ import * as utils from './utils';
 const satisfiabilityChain = [
   utils.doesSourceSatisfyQueryParams,
   utils.doesSourceSatisfyQueryModel,
-  utils.doesSourceSatisfyQueryFields
+  utils.doesSourceSatisfyQueryFields,
+  utils.doesSourceSatisfyQueryReturnType
 ];
 
 /**

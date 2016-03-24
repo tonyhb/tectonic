@@ -37,6 +37,9 @@ export default class Sources {
 
     // TODO: Test that this stores definitions
     defsToProcess.forEach(def => {
+      // Add the driver function to the source
+      def.driverFunc = driverFunc;
+
       const item = new SourceDefinition(def)
       this.definitions.set(item.id, item);
 
