@@ -1,6 +1,10 @@
 'use strict';
 
-import Returns, { RETURNS_ALL_FIELDS } from '/src/sources/returns';
+import Returns, {
+  RETURNS_ITEM,
+  RETURNS_LIST,
+  RETURNS_ALL_FIELDS
+} from '/src/sources/returns';
 
 /**
  * Predicate which checks that a given query contains all required params
@@ -64,6 +68,19 @@ export function doesSourceSatisfyAllQueryFields(source, query) {
 
   // Return whether every field is within this source
   return query.fields.every(f => source.returns.fieldsAsObject[f] !== undefined);
+}
+
+/**
+ * If the query requires an item but the source only returns a list this returns
+ * false.
+ *
+ */
+export function doesSourceSatisfyQueryReturnType(source, query) {
+  if (source.returns.returnType === RETURNS_ITEM
+    && query.returnType === RETURNS_LIST) {
+    return false;
+  }
+  return true;
 }
 
 // TODO:

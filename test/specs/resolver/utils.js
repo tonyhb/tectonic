@@ -164,4 +164,19 @@ describe('resolver utils', () => {
     });
   });
 
+  describe('doesSourceSatisfyQueryReturnType', () => {
+    it('returns false if the query returns a list and the source returns an item', () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(),
+        meta: {}
+      });
+      const q = new Query(
+        User,
+        ['id'],
+        RETURNS_LIST
+      );
+      assert.isFalse(utils.doesSourceSatisfyQueryReturnType(s, q));
+    });
+  });
 });

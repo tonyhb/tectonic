@@ -7,6 +7,14 @@ import {
 } from '/src/sources/returns.js';
 import * as status from '/src/status';
 
+/**
+ * Query represents an API query to be resolved by the resolver. It is generated
+ * directly from a model and contains thing such as fields required, parameters,
+ * and whether we're loading a single item or a list.
+ *
+ * Queries are added to the resolver via the @load component and manager. It is
+ * the resolver's responsibility to identify which sources satisfy the query.
+ */
 export default class Query {
 
   status = status.PENDING
