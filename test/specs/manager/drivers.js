@@ -6,10 +6,13 @@ import Manager from '/src/manager';
 describe('Defining source drivers', () => {
 
   it('adds methods to the manager class', () => {
+    console.log('yea');
     const m = new Manager({
       drivers: {
-        test: () => ({}),
-      }
+        test: () => ({})
+      },
+      // resolver must be defined
+      resolver: () => ({})
     });
     assert.isFunction(m.test);
   });
