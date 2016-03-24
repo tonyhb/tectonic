@@ -10,11 +10,27 @@ import { render } from '/test/utils';
 describe('Model', () => {
 
   it('throws an error if created without any fields', () => {
-    assert.throws(() => Model(), 'A model must contain fields');
+    assert.throws(() => Model('name'), 'A model must contain fields');
+  });
+
+  it('throws an error if created without a name', () => {
+    assert.throws(
+      () => new Model('', { id: 0 }),
+      'A model must be defined with a name'
+    );
+  });
+
+  it('instance has a name', () => {
+    let name = 'TestModel';
+    let a = new Model(name, {
+      id: 0
+    });
+
+    assert.equal(name, a.modelName);
   });
 
   it('stores field definitions from the constructor', () => {
-    let a = Model({
+    let a = new Model('StoresTest', {
       id: 0,
       name: ''
     });
