@@ -86,6 +86,28 @@ export default class DumbResolver {
     this.unresolvedQueries = this.unresolvedQueries.filter((q) => {
       return (this.resolveItem(q, sourceMap) === false);
     });
+
+    // Now we have unresolved and resolved queries we can update the status of
+    // each query in one update. This is opposed to updating the status of
+    // resolvable queries inside resolveItem individually, as that would cause
+    // N store updates from the event listener.
+    //
+    // TODO: Add fail status to unresolvable queries and pending to resolved
+    // queries.
+    //
+    // TODO: Should we check the cache here already?
+    //       YES: it'll prevent any loading state flickers in the UI and help
+    //       rendering.
+
+    // Invoke the driver with the source definition, query, and success/fail
+    // callbacks which are partially applied with query and sourceDef.
+    this.resolvedQueries.forEach(query => {
+      const { sourceDefinition: sd } = query;
+
+      const success = (data) => this.success(query, sd, data);
+      const fail = (data) => this.fail(query, sd, fail);
+      sd.driverFunc(sd, query, success, fail);
+    });
   }
 
   /**
@@ -97,7 +119,6 @@ export default class DumbResolver {
    * @return bool
    */
   resolveItem(query, sourceMap) {
-
     const {
       definitionsByModel
     } = this;
