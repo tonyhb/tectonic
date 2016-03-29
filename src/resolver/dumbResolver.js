@@ -7,7 +7,7 @@ import * as utils from './utils';
 const satisfiabilityChain = [
   utils.doesSourceSatisfyQueryParams,
   utils.doesSourceSatisfyQueryModel,
-  utils.doesSourceSatisfyQueryFields,
+  utils.doesSourceSatisfyAllQueryFields,
   utils.doesSourceSatisfyQueryReturnType
 ];
 
@@ -20,7 +20,7 @@ const satisfiabilityChain = [
 export default class DumbResolver {
 
   /**
-   * This map is keyed by model classes to an array of SourceDefinition IDs 
+   * This map is keyed by model classes to an array of SourceDefinition IDs
    * which return those specific models
    */
   definitionsByModel = new Map()
@@ -40,18 +40,18 @@ export default class DumbResolver {
       // add all return items within the source definition
       Object.keys(sourceDef.returns).forEach(k => {
         const ret = sourceDef.returns[k];
-        this.addDef({ model: ret.model, id: sourceDef.id });
+        this._addDef({ model: ret.model, id: sourceDef.id });
       });
       return;
     }
 
-    this.addDef({
+    this._addDef({
       model: sourceDef.returns.model,
       id: sourceDef.id
     });
   }
 
-  addDef({ model, id }) {
+  _addDef({ model, id }) {
     const { definitionsByModel: defs } = this;
     let items = defs.get(id) || [];
     items.push(id);
@@ -74,7 +74,7 @@ export default class DumbResolver {
    * @param Object  Object of source definition IDs to the SourceDefinition instance
    */
   resolve(sourceMap) {
-    const { 
+    const {
       unresolvedQueries,
       definitionsByModel
     } = this;
@@ -94,7 +94,7 @@ export default class DumbResolver {
    *
    * @param Quer
    * @param Map    Map of source IDs to Source instances
-   * @return bool  
+   * @return bool
    */
   resolveItem(query, sourceMap) {
 
@@ -113,8 +113,7 @@ export default class DumbResolver {
 
     // Iterate through all definition IDs which return the query's model,
     // passing the source definition and query through our satisfiability chain.
-    // This will stop at the definition ID of the source that first satisfies
-    // our query, making sourceDef the 
+    // This will stop at the definition ID of the source that first satisfies.
     let sourceDef;
     let id = defs.find(id => {
       sourceDef = sourceMap.get(id);
@@ -125,11 +124,11 @@ export default class DumbResolver {
       return this.unresolvable(query);
     }
 
-    // TODO:
-    // - Push source to call with params
-    // - Push query to resolved
-    // - How do we link query to source call?
-
+    // Bookkeeping. This isn't used for anything other than debugging.
+    // TODO: Should we take this out, as this stores references === memory leak?
+    // (tonyhb)
+    query.sourceDefinition = sourceDef;
+    this.resolvedQueries.push(query);
   }
 
   /**
@@ -144,6 +143,16 @@ export default class DumbResolver {
       query.toString()
     );
     return false;
+  }
+
+  /**
+   * success is a function which is passed to a driver via partial application:
+   * the driver calls success() with data from the API, which in turn calls
+   * this function with query and sourceDef built in.
+   *
+   */
+  success(query, sourceDef, data) {
+    alert("TODO");
   }
 
 }

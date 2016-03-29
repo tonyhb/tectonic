@@ -17,7 +17,10 @@ import * as status from '/src/status';
  */
 export default class Query {
 
-  status = status.PENDING
+  /**
+   * When resolved we set the query's sourceDefinition property for tracking.
+   */
+  sourceDefinition = undefined
 
   /**
    * @param Model
@@ -35,13 +38,20 @@ export default class Query {
   }
 
   toString() {
-    return `Query(Fields: ${this.fields}, ` +
+    if (this._toString !== undefined) {
+      return this._toString;
+    }
+
+    this._toString = `Query(Model: ${this.model.modelName}, ` +
+      `Fields: ${this.fields}, ` +
       `Params: ${JSON.stringify(this.params)}, ` +
-      `ReturnType: ${this.returnType})`
+      `ReturnType: ${this.returnType})`;
+
+    return this._toString;
   }
 
   /**
-   * Returns whether the current query instance is the same 
+   * Returns whether the current query instance is the same
    */
   is(item) {
     const { model: m1, fields: f1, params: p1, returnType: rt1 } = this;
@@ -75,5 +85,25 @@ export default class Query {
     // Ensure the parameters are the same
     return k1.every(param => p1[param] === p2[param]);
   }
+
+  /**
+   * hash returns a hashed value of toString() that can be used to uniquely
+   * identify this query.
+   *
+   * This is memoized for speed.
+   */
+  hashQuery() {
+    if (this._hashQuery !== undefined) {
+      return this._hashQuery;
+    }
+
+    this._hashQuery = this.toString().split('').reduce((sum, n) => {
+      sum = ((sum << 5) - sum) + n.charCodeAt(0);
+      return sum & sum;
+    });
+
+    return this._hashQuery;
+  }
+
 
 }

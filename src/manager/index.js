@@ -81,4 +81,19 @@ export default class Manager {
     this.resolver.resolve(this.sources.definitions);
   }
 
+  /**
+   * props returns the query data and loading data for a given set of queries.
+   *
+   */
+  props() {
+    let props = {
+      status: {},
+    };
+
+    // TODO: Add loading status for each query (PENDING, SUCCESS, FAILURE)
+    // TODO: Check cache for query's data
+
+    return props;
+  }
+
 }

@@ -27,7 +27,7 @@ describe('@load: status props', () => {
         if (this.props.status.user === status.PENDING) {
           return <p>Loading...</p>;
         }
-        return <p>{ this.props.user.name }</p>
+        return <p>{ this.props.user }</p>
       }
     }
 

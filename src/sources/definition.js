@@ -19,7 +19,8 @@ export default class SourceDefinition {
   returns = undefined
 
   /**
-   * Array of **required** parameters for the source
+   * Array of **required** parameters for the source.
+   * These can be query parameters, postdata or parameters for URL replacement.
    */
   params = undefined
 
@@ -27,6 +28,8 @@ export default class SourceDefinition {
    * Array of optional parameters for the source
    */
   optionalParams = undefined
+
+  driverFunc = undefined
 
   /**
    * @param string   unique ID of source definition

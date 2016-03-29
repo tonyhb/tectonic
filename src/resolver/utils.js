@@ -6,6 +6,23 @@ import Returns, {
   RETURNS_ALL_FIELDS
 } from '/src/sources/returns';
 
+// TODO:
+// - `doesSourceSatisfySomeQueryFields` for partial matching
+// - How will we handle relationships within a query?
+
+/**
+ * A quick hashing function which produces a unique hash from a string
+ *
+ * @param string
+ * @return int
+ */
+export function hash(str) {
+  return str.toString().split('').reduce((sum, n) => {
+    sum = ((sum << 5) - sum) + n.charCodeAt(0);
+    return sum & sum;
+  });
+}
+
 /**
  * Predicate which checks that a given query contains all required params
  * for the source
@@ -82,7 +99,3 @@ export function doesSourceSatisfyQueryReturnType(source, query) {
   }
   return true;
 }
-
-// TODO:
-// - `doesSourceSatisfySomeQueryFields` for partial matching
-// - How will we handle relationships within a query?

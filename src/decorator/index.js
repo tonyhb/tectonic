@@ -63,19 +63,14 @@ export default function load(queries) {
           context: { manager }
         } = this;
 
-        let props = {
-          ...this.props,
-          status: {}
-        };
-
         if (queries) {
           manager.resolve();
-
-          Object.keys(queries).forEach(q => {
-            props[q] = queries[q].props;
-            props.status[q] = queries[q].status;
-          });
         }
+
+        let props = {
+          ...this.props,
+          ...manager.props(queries)
+        };
 
         return <WrappedComponent { ...props } />
       }
