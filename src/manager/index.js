@@ -38,17 +38,19 @@ export default class Manager {
 
 
   constructor({ store, drivers, resolver }) {
-    this.store = store;
-    this.resolver = resolver;
-    this.sources = new Sources();
-
     if (typeof drivers !== 'object') {
       throw new Error('You must supply at least one driver to instantiate a manager');
     }
 
-    if ( ! this.resolver) {
+    if ( ! resolver) {
       throw new Error('You must pass a resolver to instantiate a manager');
     }
+
+    this.store = store;
+    this.resolver = resolver;
+    this.sources = new Sources();
+    // Add the store to the resolver for dispatching actions
+    this.resolver.store = store;
 
     // Make each driver callable via its key bound to our current context. This
     // allows us to add definitions for each driver by calling
@@ -84,14 +86,26 @@ export default class Manager {
   /**
    * props returns the query data and loading data for a given set of queries.
    *
+   * @param object Object of prop names => queries
    */
-  props() {
+  props(queries) {
     let props = {
       status: {},
     };
 
+    if ( ! queries) {
+      return props;
+    }
+
+    const state =  this.store.getState();
+
+    Object.keys(queries).forEach(prop => {
+      props.status[prop] = state.tectonic.getIn(['status', queries[prop].toString()]);
+    });
     // TODO: Add loading status for each query (PENDING, SUCCESS, FAILURE)
     // TODO: Check cache for query's data
+
+    console.log(props, state);
 
     return props;
   }

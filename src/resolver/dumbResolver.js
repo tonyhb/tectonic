@@ -1,6 +1,8 @@
 'use strict';
 
 import * as utils from './utils';
+import { UPDATE_QUERY_STATUSES } from '/src/reducer';
+import { PENDING, SUCCESS, ERROR } from '/src/status';
 
 // This query chain is a series of functions which need to return true in order
 // for a source to satisfy a query
@@ -98,6 +100,13 @@ export default class DumbResolver {
     // TODO: Should we check the cache here already?
     //       YES: it'll prevent any loading state flickers in the UI and help
     //       rendering.
+    this.store.dispatch({
+      type: UPDATE_QUERY_STATUSES,
+      payload: {
+        ...this.unresolvedQueries.reduce((sum, n) => { sum[n] = ERROR; return sum }, {}),
+        ...this.resolvedQueries.reduce((sum, n) => { sum[n] = PENDING; return sum }, {})
+      }
+    });
 
     // Invoke the driver with the source definition, query, and success/fail
     // callbacks which are partially applied with query and sourceDef.
@@ -173,7 +182,11 @@ export default class DumbResolver {
    *
    */
   success(query, sourceDef, data) {
-    alert("TODO");
+    console.log("TODO");
+  }
+
+  fail(query, sourceDef, data) {
+    console.log('TODO');
   }
 
 }

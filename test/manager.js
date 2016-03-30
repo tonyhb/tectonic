@@ -3,6 +3,7 @@
 import Manager from '/src/manager';
 import DumbResolver from '/src/resolver/dumbResolver.js';
 import superagent from '/src/drivers/superagent';
+import reducer from '/src/reducer';
 
 // Import a custom mocking driver for our tests
 import mock from './mockDriver';
@@ -13,7 +14,7 @@ import { createStore, combineReducers } from 'redux';
 // DumbResolver by default
 export const createNewManager = (resolver = new DumbResolver()) => {
   const store = createStore(combineReducers({
-    data: (state = {}) => state
+    tectonic: reducer
   }));
 
   const manager = new Manager({

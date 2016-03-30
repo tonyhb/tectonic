@@ -38,7 +38,9 @@ describe('@load: status props', () => {
 
     assert.isDefined(item);
     assert.isObject(item.props.status);
-    assert.equal(item.props.status.user, status.PENDING);
+    // Right now we've not defined a sourcedefinition, so this should error
+    assert.isDefined(item.props.status.user);
+    assert.equal(item.props.status.user, status.ERROR);
   });
 
 });

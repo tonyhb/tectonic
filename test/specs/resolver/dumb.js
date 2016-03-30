@@ -111,7 +111,13 @@ describe('dumbResolver', () => {
         manager.fromMock([
           {
             id: 'somedef',
-            meta: {},
+            meta: {
+              returns: {
+                id: 1,
+                name: 'foo',
+                email: 'foo@bar.com'
+              }
+            },
             returns: User.item()
           }
         ]);
@@ -145,13 +151,13 @@ describe('dumbResolver', () => {
         const [manager, query] = setupManager();
         const sourceDef = manager.sources.definitions.get('somedef');
 
-        // Stub the driver function withou our source definition
-        const stub = sinon.stub(sourceDef, 'driverFunc');
+        // spy on the driver function withou our source definition
+        const spy = sinon.spy(sourceDef, 'driverFunc');
         manager.resolve();
-        assert.isTrue(stub.called);
+        assert.isTrue(spy.called);
       });
 
-      xit(`stores data`, () => {
+      it(`stores data`, () => {
       });
     });
 
