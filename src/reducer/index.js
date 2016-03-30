@@ -1,6 +1,7 @@
 'use strict';
 
 import { Map } from 'immutable';
+import { SUCCESS } from '/src/status';
 
 const defaultState = new Map({
   // Status stores a map of query hashes to statuses of said query
@@ -36,10 +37,15 @@ const reducer = (state = defaultState, action) => {
     return state.mergeIn(['status'], action.payload);
   }
 
+  // This is called when a query is successful, so we update data, queriesToIds
+  // and the status of the query
   if (action.type === UPDATE_DATA) {
+    const { query, data } = action.payload;
+
     return state.withMutations(s => {
-      s.mergeDeep({ data: action.payload.data });
-      s.setIn(['queriesToIds', action.payload.query.hashQuery()], action.payload.query.returnedIds);
+      s.mergeDeep({ data: data });
+      s.setIn(['queriesToIds', query.hashQuery()], query.returnedIds);
+      s.setIn(['status', query.toString()], SUCCESS);
       return s;
     });
   }

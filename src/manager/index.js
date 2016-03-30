@@ -2,6 +2,7 @@
 
 import Sources from '/src/sources';
 import Cache from '/src/cache';
+import { SUCCESS } from '/src/status';
 
 /**
  * The manager is the single interface for tectonic. It handles:
@@ -104,8 +105,15 @@ export default class Manager {
     const state =  this.store.getState().tectonic;
 
     Object.keys(queries).forEach(prop => {
-      props.status[prop] = state.getIn(['status', queries[prop].toString()]);
-      props[prop] = this.cache.getQueryData(queries[prop], state.tectonic);
+      const query = queries[prop];
+      const status = state.getIn(['status', query.toString()]);
+      props.status[prop] = status;
+      // If this query was a success load the data.
+      if (status === SUCCESS) {
+        props[prop] = this.cache.getQueryData(query, state.tectonic);
+      } else {
+        // TODO: Should we add an empty model?
+      }
     });
 
     return props;
