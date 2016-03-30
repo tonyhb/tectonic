@@ -2,7 +2,10 @@
   "presets": ["es2015", "react", "stage-0"],
   "plugins": [
     "transform-decorators-legacy",
-    ["babel-root-import", { "rootPathPrefix": "/" }]
+    ["babel-plugin-module-alias", [
+      { "src": "./src", "expose": "/src" },
+      { "src": "./test", "expose": "/test" },
+    ]]
   ],
   "sourceRoot": "."
 }
