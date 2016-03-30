@@ -1,6 +1,7 @@
 'use strict';
 
 import Sources from '/src/sources';
+import Cache from '/src/cache';
 
 /**
  * The manager is the single interface for tectonic. It handles:
@@ -46,11 +47,14 @@ export default class Manager {
       throw new Error('You must pass a resolver to instantiate a manager');
     }
 
+    this.cache = new Cache(store)
     this.store = store;
     this.resolver = resolver;
     this.sources = new Sources();
     // Add the store to the resolver for dispatching actions
     this.resolver.store = store;
+    // And add the cache to the resolver for querying and adding data
+    this.resolver.cache = this.cache;
 
     // Make each driver callable via its key bound to our current context. This
     // allows us to add definitions for each driver by calling
@@ -97,11 +101,11 @@ export default class Manager {
       return props;
     }
 
-    const state =  this.store.getState();
+    const state =  this.store.getState().tectonic;
 
     Object.keys(queries).forEach(prop => {
-      props.status[prop] = state.tectonic.getIn(['status', queries[prop].toString()]);
-      // TODO: Check cache for query's data
+      props.status[prop] = state.getIn(['status', queries[prop].toString()]);
+      props[prop] = this.cache.getQueryData(queries[prop], state.tectonic);
     });
 
     return props;

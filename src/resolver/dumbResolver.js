@@ -21,6 +21,8 @@ const satisfiabilityChain = [
  */
 export default class DumbResolver {
 
+  cache = undefined
+
   /**
    * This map is keyed by model classes to an array of SourceDefinition IDs
    * which return those specific models
@@ -29,6 +31,10 @@ export default class DumbResolver {
 
   unresolvedQueries = []
   resolvedQueries = []
+
+  constructor(cache) {
+    this.cache = cache;
+  }
 
   /**
    * This will be called by the manager each time a source definition is added
@@ -181,13 +187,13 @@ export default class DumbResolver {
    * this function with query and sourceDef built in.
    */
   success(query, sourceDef, data, meta) {
-    let toStore = {};
-
-    // TODO: Move into cache
+    // TODO: meta should contain things like headers for cache invalidation
+    // which can be used for single resources only
+    this.cache.storeApiData(query, sourceDef, data);
   }
 
   fail(query, sourceDef, data) {
-    console.log('TODO');
+    console.warn(`Query failed on ${query} using sourceDefinition ${sourceDef}: ${data}`);
   }
 
 }

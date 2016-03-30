@@ -8,12 +8,18 @@ import reducer from '/src/reducer';
 // Import a custom mocking driver for our tests
 import mock from './mockDriver';
 import { User } from './models';
-import { createStore, combineReducers } from 'redux';
+import { createStore as reduxCreateStore, combineReducers } from 'redux';
+
+export const createStore = () => {
+  return reduxCreateStore(combineReducers({
+    tectonic: reducer
+  }));
+}
 
 // createNewManager creates a completely fresh instance of a manager using the
 // DumbResolver by default
 export const createNewManager = (resolver = new DumbResolver()) => {
-  const store = createStore(combineReducers({
+  const store = reduxCreateStore(combineReducers({
     tectonic: reducer
   }));
 

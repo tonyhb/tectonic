@@ -11,9 +11,10 @@ import Returns, {
 } from '/src/sources/returns';
 // test stuff
 import { User, Post } from '/test/models';
+import { createStore } from '/test/manager';
 
 describe('parsing cache data', () => {
-  const cache = new Cache();
+  const cache = new Cache(createStore());
 
   describe('_parseReturnsData', () => {
 
@@ -36,7 +37,7 @@ describe('parsing cache data', () => {
         }
       };
       assert.deepEqual(
-        cache._parseReturnsData(sd.returns, User, apiResponse, time),
+        cache._parseReturnsData(User.getItem(), sd.returns, User, apiResponse, time),
         expected
       );
     });
@@ -71,7 +72,7 @@ describe('parsing cache data', () => {
         }
       };
       assert.deepEqual(
-        cache._parseReturnsData(sd.returns, User, apiResponse, time),
+        cache._parseReturnsData(User.getList(), sd.returns, User, apiResponse, time),
         expected
       );
     });
@@ -89,7 +90,7 @@ describe('parsing cache data', () => {
       }];
 
       assert.throws(
-        () => cache._parseReturnsData(sd.returns, User, apiResponse),
+        () => cache._parseReturnsData(User.getItem(), sd.returns, User, apiResponse),
         `Data for returning an item must be an object`
       );
     })
@@ -107,7 +108,7 @@ describe('parsing cache data', () => {
       };
 
       assert.throws(
-        () => cache._parseReturnsData(sd.returns, User, apiResponse),
+        () => cache._parseReturnsData(User.getList(), sd.returns, User, apiResponse),
         'Data for returning a list must be an array'
       );
     })
@@ -161,9 +162,65 @@ describe('parsing cache data', () => {
         }
       };
       assert.deepEqual(
-        cache.parseApiData(sd, apiResponse, time),
+        cache.parseApiData(Post.getList(), sd, apiResponse, time),
         expected
       );
+    });
+  });
+
+  describe('sets Query.returnedIds', () => {
+    it('with a single non-polymorphic query and return', () => {
+      const sd = new SourceDefinition({
+        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+        meta: {}
+      });
+      const apiResponse = {
+        id: 1,
+        name: 'foo',
+        email: 'foo@bar.com'
+      };
+      let query = User.getItem()
+      assert.deepEqual([], query.returnedIds);
+      cache.parseApiData(query, sd, apiResponse);
+      assert.deepEqual([1], query.returnedIds);
+    });
+
+    it('with a polymorphic query and return', () => {
+      const sd = new SourceDefinition({
+        returns: {
+          user: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+          posts: new Returns(Post, RETURNS_ALL_FIELDS, RETURNS_LIST),
+        },
+        meta: {}
+      });
+      const apiResponse = {
+        user: {
+            id: 1,
+            name: 'foo',
+            email: 'foo@bar.com'
+          },
+        posts: [
+          {
+            id: 1,
+            title: 'some post'
+          },
+          {
+            id: 2,
+            title: 'On the mechanics of economic development'
+          },
+        ]
+      };
+
+      // With a query for the user
+      let query = User.getItem()
+      assert.deepEqual([], query.returnedIds);
+      cache.parseApiData(query, sd, apiResponse);
+      assert.deepEqual([1], query.returnedIds);
+
+      query = Post.getList()
+      assert.deepEqual([], query.returnedIds);
+      cache.parseApiData(query, sd, apiResponse);
+      assert.deepEqual([1, 2], query.returnedIds);
     });
   });
 

@@ -5,6 +5,7 @@ import sinon from 'sinon';
 // src
 import DumbResolver from '/src/resolver/dumbResolver.js';
 import Query from '/src/query';
+import Cache from '/src/cache';
 import SourceDefinition from '/src/sources/definition.js';
 import Returns, {
   RETURNS_ITEM,
@@ -13,13 +14,15 @@ import Returns, {
 
 // test
 import { User, Post } from '/test/models.js';
-import { createNewManager } from '/test/manager.js';
+import { createNewManager, createStore } from '/test/manager.js';
+
+const cache = new Cache(createStore());
 
 describe('dumbResolver', () => {
 
   describe('definitionsByModel', () => {
     it('adds a single sourceDefinition return to definitionsByModel', () => {
-      const r = new DumbResolver();
+      const r = new DumbResolver(cache);
       const def = new SourceDefinition({
         id: 'somedef',
         returns: User.item(),
@@ -37,7 +40,7 @@ describe('dumbResolver', () => {
     });
 
     it('adds multiple sourceDefinitions to definitionsByModel', () => {
-      const r = new DumbResolver();
+      const r = new DumbResolver(cache);
       const def = new SourceDefinition({
         id: 'somedef',
         returns: {
@@ -64,7 +67,7 @@ describe('dumbResolver', () => {
 
   it('adds queries to unresolvedQueries', () => {
     const query = User.getItem({ id: 1 });
-    const r = new DumbResolver();
+    const r = new DumbResolver(cache);
 
     r.addQuery(query);
     assert.equal(r.unresolvedQueries.length, 1);
@@ -106,8 +109,8 @@ describe('dumbResolver', () => {
     describe('resolvable queries', () => {
 
       const setupManager = () => {
-        const resolver = new DumbResolver();
-        const manager = createNewManager(resolver);
+        const resolver = new DumbResolver(cache);
+        const manager = createNewManager();
         manager.fromMock([
           {
             id: 'somedef',

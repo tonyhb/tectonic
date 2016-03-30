@@ -35,6 +35,18 @@ export default class Query {
     this.fields = Array.isArray(fields) ? fields.sort() : fields;
     this.params = params;
     this.returnType = returnType;
+
+    // When the query is resolved and data is found this stores all of the IDs
+    // returned by the API for the given model. This is then stored in a map of
+    // query => IDs so that when we load props for a component we look up this
+    // hash then look up our data.
+    //
+    // This means that we can query on arbitrary things such as ranges and
+    // emails without knowing the IDs to look up, as the API tells us (plus we
+    // store all data by ID).
+    //
+    // By default this is an empty array so we can push to it.
+    this.returnedIds = [];
   }
 
   toString() {

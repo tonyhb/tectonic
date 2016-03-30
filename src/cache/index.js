@@ -12,6 +12,7 @@ import Returns, {
  *
  * TODO: Reading data
  * TODO: Per-model cache rules
+ * TODO: custom cache rules and predicates
  */
 export default class Cache {
 
@@ -20,11 +21,22 @@ export default class Cache {
    */
   store = undefined;
 
-  storeApiData(sourceDef, apiResponse) {
-    const payload = this.parseApiData(sourceDef, apiResponse);
+  constructor(store) {
+    if (store === undefined || store.dispatch === undefined || store.getState === undefined) {
+      throw new Error('Cache must be defined with a redux store');
+    }
+    this.store = store;
+  }
+
+  storeApiData(query, sourceDef, apiResponse) {
+    const data = this.parseApiData(query, sourceDef, apiResponse);
+
     this.store.dispatch({
       type: UPDATE_DATA,
-      payload
+      payload: {
+        data,
+        query
+      }
     });
   }
 
@@ -44,13 +56,14 @@ export default class Cache {
    *   ...
    * }
    *
+   * @param Query
    * @param SourceDefinition
    * @param object
    * @param Date  timestamp to add within cache, defaults to now. Used in
    * testing
    * @return object
    */
-  parseApiData(sourceDef, apiResponse, time = new Date()) {
+  parseApiData(query, sourceDef, apiResponse, time = new Date()) {
     let toStore = {};
 
     if (sourceDef.isPolymorphic()) {
@@ -62,13 +75,13 @@ export default class Cache {
       Object.keys(sourceDef.returns).forEach(key => {
         const returns = sourceDef.returns[key];
         // Get the return data for this particular key in the
-        const returnData = this._parseReturnsData(returns, returns.model, apiResponse[key], time);
+        const returnData = this._parseReturnsData(query, returns, returns.model, apiResponse[key], time);
         toStore[returns.model.modelName] = returnData;
       });
     } else {
       // this returns just one model (whether that's an individual model or
       // a list of the same models)
-      const returnData = this._parseReturnsData(sourceDef.returns, sourceDef.returns.model, apiResponse, time);
+      const returnData = this._parseReturnsData(query, sourceDef.returns, sourceDef.returns.model, apiResponse, time);
       toStore[sourceDef.returns.model.modelName] = returnData;
     }
 
@@ -87,6 +100,17 @@ export default class Cache {
    *   }
    * }
    *
+   * If the model of the data we're passing matches the queried for model, this
+   * also adds the model IDs to the query (each query can specify a SINGLE
+   * model). This allows us to cache the model IDs returned for a given query,
+   * which aids in lookups.
+   *
+   * For example, if the query was for a list of Posts and the endpoint returned
+   * the User AND the posts, this would add all returned post IDs to the query
+   * only.
+   *
+   * @param Query   Query so we can add the IDs of returned data to the query
+   * for caching
    * @param Returns
    * @param Model
    * @param object API data
@@ -94,7 +118,7 @@ export default class Cache {
    * testing
    * @return object
    */
-  _parseReturnsData(returns, model, apiResponse, time = new Date()) {
+  _parseReturnsData(query, returns, model, apiResponse, time = new Date()) {
     if (returns.returnType === RETURNS_LIST && !Array.isArray(apiResponse)) {
       throw new Error(`Data for returning a list must be an array`, apiResponse);
     }
@@ -123,11 +147,16 @@ export default class Cache {
       }
 
       const idAttr = model.idAttribute;
-      if (item[idAttr] === undefined) {
+      const id = item[idAttr];
+
+      if (id === undefined) {
         throw new Error(`Unable to process data from API; data is missing the ID attribute`, item);
       }
 
-      const id = item[idAttr];
+      // Each query needs to store the IDs of the model it queried for.
+      if (query.model === model) {
+        query.returnedIds.push(id);
+      }
 
       toStore[id] = {
         data: item,
@@ -138,6 +167,32 @@ export default class Cache {
 
       return toStore;
     }, {});
+  }
+
+  /**
+   * getQueryData inspects the given state for the current model for the
+   * necessary data and returns it if so.
+   *
+   * @param Query  Query, which must have a filled .returnedIds
+   * @param Map    Tectonic's reducer state (store.getState().tectonic)
+   */
+  getQueryData(query, state) {
+    if (query.returnedIds.length === 0) {
+      throw new Error(`Unable to pull data for query which has no returnedIds: ${query}`);
+    }
+
+    if (query.returnType === RETURNS_ITEM && query.returnedIds.length !== 1) {
+      throw new Error(`Invalid returnedIds length for a single item call: ${query.returnedIds}`);
+    }
+
+    const { modelName } = query.model;
+
+    if (query.returnType === RETURNS_ITEM) {
+      // TODO: cache invalidation
+      return state.getIn(['data', modelName, query.returnedIds[0]], 'data');
+    }
+
+    return query.returnedIds.map(id => state.getIn(['data', modelName, id, 'data']));
   }
 
 }

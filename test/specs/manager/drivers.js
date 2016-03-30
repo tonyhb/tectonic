@@ -2,6 +2,7 @@
 
 import { assert } from 'chai';
 import Manager from '/src/manager';
+import { createStore } from '/test/manager.js';
 
 describe('Defining source drivers', () => {
 
@@ -12,7 +13,8 @@ describe('Defining source drivers', () => {
         test: () => ({})
       },
       // resolver must be defined
-      resolver: () => ({})
+      resolver: () => ({}),
+      store: createStore()
     });
     assert.isFunction(m.test);
   });
