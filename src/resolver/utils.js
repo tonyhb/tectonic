@@ -71,8 +71,23 @@ export function doesSourceSatisfyQueryModel(source, query) {
  * @return bool
  */
 export function doesSourceSatisfyAllQueryFields(source, query) {
+  let returns = source.returns;
+
+  if (source.isPolymorphic()) {
+    // If this is polymorphic we need to find the Return item which is for the
+    // particular query's model
+    const key = Object.keys(returns)
+      .find(k => returns[k].model === query.model);
+    // There is no model for this particular query therefore it can never
+    // provide the fields for the model
+    if (key === undefined) {
+      return false;
+    }
+    returns = returns[key];
+  }
+
   // If the source returns all fields this will always satisfy the query
-  if (source.returns.fields === RETURNS_ALL_FIELDS) {
+  if (returns.fields === RETURNS_ALL_FIELDS) {
     return true;
   }
 
@@ -84,7 +99,7 @@ export function doesSourceSatisfyAllQueryFields(source, query) {
   }
 
   // Return whether every field is within this source
-  return query.fields.every(f => source.returns.fieldsAsObject[f] !== undefined);
+  return query.fields.every(f => returns.fieldsAsObject[f] !== undefined);
 }
 
 /**

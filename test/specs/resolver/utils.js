@@ -11,7 +11,7 @@ import Returns, {
   RETURNS_ALL_FIELDS
 } from '/src/sources/returns.js';
 
-import { User } from '/test/models';
+import { User, Post } from '/test/models';
 
 describe('resolver utils', () => {
 
@@ -161,6 +161,20 @@ describe('resolver utils', () => {
         RETURNS_ITEM
       );
       assert.isFalse(utils.doesSourceSatisfyAllQueryFields(s, q));
+    });
+
+    it('works with polymorphic queries', () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: {
+          user: User.item(),
+          posts: Post.list()
+        },
+        params: ['start', 'end'],
+        meta: {}
+      });
+      const q = Post.getList({ start: 1, end: 2 });
+      assert.isTrue(utils.doesSourceSatisfyAllQueryFields(s, q));
     });
   });
 

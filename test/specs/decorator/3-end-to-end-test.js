@@ -69,7 +69,68 @@ describe('@load: e2e end-to-end test', () => {
 
     assert.equal(item.props.status.user, status.SUCCESS);
     assert.deepEqual(item.props.user, data);
-
   });
 
+
+  it('queries a single model on a polymorphic source', () => {
+    // This is the data returned from the API and should be within the
+    // components props.
+    const data = {
+      user: {
+        id: 1,
+        name: 'works',
+        email: 'some@example.com'
+      },
+      posts: [
+        {
+          id: 1,
+          title: 'some post'
+        },
+        {
+          id: 2,
+          title: 'On the mechanics of economic development'
+        },
+      ]
+    };
+
+    const manager = createNewManager();
+    // Define sources for loading data.
+    manager.fromMock([
+      {
+        meta: {
+          // The mock driver is set up to return whatever is in meta.returns
+          // (after checking query params)
+          returns: data
+        },
+        params: ['start', 'end'],
+        returns: {
+          user: User.item(),
+          posts: Post.list()
+        }
+      }
+    ]);
+
+    class Base extends Component {
+      static propTypes = {
+        status: PropTypes.object,
+        posts: PropTypes.array
+      }
+
+      render() {
+        return <p>stuff</p>;
+      }
+    }
+
+    // This lets us ascertain whether the returnedIds was filled correctly,
+    // plus inspect the store based on the query.
+    let query = Post.getList({ start: 1, end: 2 });
+
+    const WrappedBase = load({
+      posts: query
+    })(Base);
+    const item = renderAndFind(<WrappedBase />, Base, manager);
+
+    assert.equal(item.props.status.posts, status.SUCCESS);
+    assert.deepEqual(item.props.posts, data.posts);
+  });
 });
