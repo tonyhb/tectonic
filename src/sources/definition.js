@@ -33,7 +33,7 @@ export default class SourceDefinition {
 
   /**
    * @param string   unique ID of source definition
-   * @param Returns  instance of Returns listing what this source returns
+   * @param Returns  obect of or instance of Returns
    * @param object   object containing unique source driver functionality
    * @param array    array of query parameters for the API call
    * @param function driver function to call to invoke the source
@@ -44,6 +44,8 @@ export default class SourceDefinition {
     }
 
     this.id = id;
+    // TODO: Standardize returns to use one class vs an object.
+    // See dumbresolver success for more info
     this.returns = returns;
     this.meta = meta;
     this.params = params || [];

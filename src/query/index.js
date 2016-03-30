@@ -105,5 +105,4 @@ export default class Query {
     return this._hashQuery;
   }
 
-
 }

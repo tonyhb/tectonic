@@ -101,11 +101,8 @@ export default class Manager {
 
     Object.keys(queries).forEach(prop => {
       props.status[prop] = state.tectonic.getIn(['status', queries[prop].toString()]);
+      // TODO: Check cache for query's data
     });
-    // TODO: Add loading status for each query (PENDING, SUCCESS, FAILURE)
-    // TODO: Check cache for query's data
-
-    console.log(props, state);
 
     return props;
   }

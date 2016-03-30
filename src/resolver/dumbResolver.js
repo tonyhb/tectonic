@@ -113,8 +113,8 @@ export default class DumbResolver {
     this.resolvedQueries.forEach(query => {
       const { sourceDefinition: sd } = query;
 
-      const success = (data) => this.success(query, sd, data);
-      const fail = (data) => this.fail(query, sd, fail);
+      const success = (data, meta) => this.success(query, sd, data, meta);
+      const fail = (data, meta) => this.fail(query, sd, data, meta);
       sd.driverFunc(sd, query, success, fail);
     });
   }
@@ -179,10 +179,11 @@ export default class DumbResolver {
    * success is a function which is passed to a driver via partial application:
    * the driver calls success() with data from the API, which in turn calls
    * this function with query and sourceDef built in.
-   *
    */
-  success(query, sourceDef, data) {
-    console.log("TODO");
+  success(query, sourceDef, data, meta) {
+    let toStore = {};
+
+    // TODO: Move into cache
   }
 
   fail(query, sourceDef, data) {

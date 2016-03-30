@@ -9,7 +9,7 @@ import Returns, {
 } from '/src/sources/returns.js';
 import Query from '/src/query';
 
-export default function(name, fields) {
+export default function(name, fields, opts = {}) {
 
   if (!name) {
     throw new Error('A model must be defined with a name');
@@ -32,8 +32,18 @@ export default function(name, fields) {
   let model = class Model {
     constructor(data) {
       // @TODO: add data to this specific model
-      console.log('creating');
+      console.log('TODO: Add data to model instance');
     }
+
+    // Define a getter for modelName so that it can't be changed after definition
+    static get modelName() { return name }
+
+    // Define a method on the class to get the ID attribute. This
+    // defaults to 'id' and is used for storing and looking up data in the
+    // store.
+    //
+    // Note: ALL queries must return the ID attribute.
+    static get idAttribute() { return opts.idAttribute || 'id'; }
 
     static fields() { return Object.keys(fields); }
     static relationships() { return relationships(this, arguments); }
@@ -92,9 +102,6 @@ export default function(name, fields) {
     }
     return new Query(model, fields, RETURNS_LIST, params);
   };
-
-  // Define a getter for modelName so that it can't be changed after definition
-  Object.defineProperty(model, 'modelName', { get() { return name } });
 
 
   /**

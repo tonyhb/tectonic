@@ -67,7 +67,7 @@ export default function load(queries) {
           manager.resolve();
         }
 
-        let props = {
+        const props = {
           ...this.props,
           ...manager.props(queries)
         };
