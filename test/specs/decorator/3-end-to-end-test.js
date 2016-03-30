@@ -133,4 +133,62 @@ describe('@load: e2e end-to-end test', () => {
     assert.equal(item.props.status.posts, status.SUCCESS);
     assert.deepEqual(item.props.posts, data.posts);
   });
+
+  it('queries with dependent data based off of a previous API call', () => {
+    // This is the data returned from the API and should be within the
+    // components props.
+    const data = {
+      user: {
+        id: 1,
+        name: 'works',
+        email: 'some@example.com'
+      },
+      posts: [
+        {
+          id: 1,
+          title: 'some post'
+        },
+        {
+          id: 2,
+          title: 'On the mechanics of economic development'
+        },
+      ]
+    };
+
+    const manager = createNewManager();
+    // Define sources for loading data.
+    manager.fromMock([
+      {
+        meta: {
+          returns: data.user
+        },
+        returns: User.item(),
+      },
+      {
+        meta: {
+          returns: data.posts
+        },
+        params: ['userID'],
+        returns: Post.list(),
+      }
+    ]);
+
+    class Base extends Component {
+      static propTypes = {
+        status: PropTypes.object,
+        posts: PropTypes.array
+      }
+
+      render() {
+        return <p>stuff</p>;
+      }
+    }
+    const WrappedBase = load((state, props) => ({
+      user: User.getItem(),
+      posts: Post.getList({ userID: props.user && props.user.id })
+    }))(Base);
+    const item = renderAndFind(<WrappedBase />, Base, manager);
+
+    assert.deepEqual(item.props.posts, data.posts);
+  });
 });

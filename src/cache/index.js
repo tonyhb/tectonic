@@ -188,8 +188,6 @@ export default class Cache {
 
     const { modelName } = query.model;
 
-    console.log(state.toJS());
-
     if (query.returnType === RETURNS_ITEM) {
       // TODO: cache invalidation
       return state.getIn(['data', modelName, query.returnedIds[0], 'data']).toJS();

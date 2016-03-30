@@ -1,14 +1,15 @@
 {
-  "name": "adipose",
+  "name": "tectonic-redux",
   "version": "0.0.0",
   "description": "Declarative data loading for React",
   "main": "transpiled/index.js",
   "scripts": {
-    "test": "$(npm bin)/mocha  --compilers js:babel-core/register --recursive --require ./test/_setup.js ./test/specs/**/*.js"
+    "test": "$(npm bin)/mocha  --compilers js:babel-core/register --recursive --require ./test/_setup.js ./test/specs/**/*.js",
+    "prepublish": "$(npm bin)/babel -d transpiled src"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/tonyhb/adipose.git"
+    "url": "git+ssh://git@github.com/tonyhb/tectonic.git"
   },
   "keywords": [
     "react",
@@ -21,11 +22,12 @@
   "author": "Tony Holdstock-Brown",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/tonyhb/adipose/issues"
+    "url": "https://github.com/tonyhb/tectonic/issues"
   },
-  "homepage": "https://github.com/tonyhb/adipose#readme",
+  "homepage": "https://github.com/tonyhb/tectonic#readme",
   "devDependencies": {
     "babel": "^6.5.2",
+    "babel-cli": "^6.6.5",
     "babel-core": "^6.5.2",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-preset-es2015": "^6.5.0",

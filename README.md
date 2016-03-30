@@ -49,7 +49,8 @@ const manager = new Manager({
     fromSDK: sdk,
     fromWebsocket: websocket
   },
-  resolver: new DumbResolver()
+  resolver: new DumbResolver(),
+  store: store // Redux store
 });
 
 manager.fromSuperagent([
@@ -75,9 +76,9 @@ manager.fromSuperagent([
 
 // And use the decorator to laod models:
 
-@load((state, params) => ({
+@load((state, props) => ({
   org: Org.getItem(['name'], { id: 1 }),
-  dependsOnOrg: Repo.getList({ orgId: params.org.id }), // Wont be called until org is loaded
+  dependsOnOrg: Repo.getList({ orgId: props.org.id }), // Wont be called until org is loaded
   list: Org.getList(['name'], { start: 0, limit: 20 })
 }))
 class OrgList extends Component {
