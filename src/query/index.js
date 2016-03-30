@@ -104,17 +104,17 @@ export default class Query {
    *
    * This is memoized for speed.
    */
-  hashQuery() {
-    if (this._hashQuery !== undefined) {
-      return this._hashQuery;
+  hash() {
+    if (this._hash !== undefined) {
+      return this._hash;
     }
 
-    this._hashQuery = this.toString().split('').reduce((sum, n) => {
+    this._hash = this.toString().split('').reduce((sum, n) => {
       sum = ((sum << 5) - sum) + n.charCodeAt(0);
       return sum & sum;
     });
 
-    return this._hashQuery;
+    return this._hash;
   }
 
 }

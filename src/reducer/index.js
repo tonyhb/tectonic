@@ -44,7 +44,7 @@ const reducer = (state = defaultState, action) => {
 
     return state.withMutations(s => {
       s.mergeDeep({ data: data });
-      s.setIn(['queriesToIds', query.hashQuery()], query.returnedIds);
+      s.setIn(['queriesToIds', query.hash()], query.returnedIds);
       s.setIn(['status', query.toString()], SUCCESS);
       return s;
     });

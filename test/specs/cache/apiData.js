@@ -182,7 +182,7 @@ describe('parsing cache data', () => {
       let query = User.getItem()
       assert.deepEqual([], query.returnedIds);
       cache.parseApiData(query, sd, apiResponse);
-      assert.deepEqual([1], query.returnedIds);
+      assert.deepEqual(['1'], query.returnedIds);
     });
 
     it('with a polymorphic query and return', () => {
@@ -215,13 +215,42 @@ describe('parsing cache data', () => {
       let query = User.getItem()
       assert.deepEqual([], query.returnedIds);
       cache.parseApiData(query, sd, apiResponse);
-      assert.deepEqual([1], query.returnedIds);
+      assert.deepEqual(['1'], query.returnedIds);
 
       query = Post.getList()
       assert.deepEqual([], query.returnedIds);
       cache.parseApiData(query, sd, apiResponse);
-      assert.deepEqual([1, 2], query.returnedIds);
+      assert.deepEqual(['1', '2'], query.returnedIds);
     });
+  });
+
+  it('getQueryData queries data correctly', () => {
+    const store = createStore();
+    const cache = new Cache(store);
+    const query = User.getItem({ id: 1 });
+    const sd = new SourceDefinition({
+      returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+      meta: {}
+    });
+    const apiResponse = {
+      id: 1,
+      name: 'foo',
+      email: 'foo@bar.com'
+    };
+    const time = new Date();
+
+    // Store data and set up state
+    cache.storeApiData(query, sd, apiResponse);
+
+    const state = store.getState().tectonic;
+
+    assert.deepEqual(state.getIn(['queriesToIds', query.hash()]), ['1']);
+
+    assert.deepEqual(
+      cache.getQueryData(query, state),
+      apiResponse
+    );
+
   });
 
 });

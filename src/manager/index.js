@@ -110,7 +110,7 @@ export default class Manager {
       props.status[prop] = status;
       // If this query was a success load the data.
       if (status === SUCCESS) {
-        props[prop] = this.cache.getQueryData(query, state.tectonic);
+        props[prop] = this.cache.getQueryData(query, state);
       } else {
         // TODO: Should we add an empty model?
       }

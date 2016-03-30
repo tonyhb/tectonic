@@ -155,7 +155,8 @@ export default class Cache {
 
       // Each query needs to store the IDs of the model it queried for.
       if (query.model === model) {
-        query.returnedIds.push(id);
+        // Make sure the ID is a string
+        query.returnedIds.push(id + '');
       }
 
       toStore[id] = {
@@ -187,12 +188,14 @@ export default class Cache {
 
     const { modelName } = query.model;
 
+    console.log(state.toJS());
+
     if (query.returnType === RETURNS_ITEM) {
       // TODO: cache invalidation
-      return state.getIn(['data', modelName, query.returnedIds[0]], 'data');
+      return state.getIn(['data', modelName, query.returnedIds[0], 'data']).toJS();
     }
 
-    return query.returnedIds.map(id => state.getIn(['data', modelName, id, 'data']));
+    return query.returnedIds.map(id => state.getIn(['data', modelName, id, 'data']).toJS());
   }
 
 }

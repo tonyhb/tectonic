@@ -9,7 +9,7 @@ import load from '/src/decorator';
 import * as status from '/src/status';
 
 // Data
-import { User } from '/test/models';
+import { User, Post } from '/test/models';
 
 describe('@load: status props', () => {
 
@@ -32,7 +32,8 @@ describe('@load: status props', () => {
     }
 
     const WrappedBase = load({
-      user: User.getItem({ id: 1 })
+      user: User.getItem({ id: 1 }),
+      post: Post.getItem({ id: 1 }),
     })(Base);
     const item = renderAndFind(<WrappedBase />, Base);
 
@@ -41,6 +42,7 @@ describe('@load: status props', () => {
     // Right now we've not defined a sourcedefinition, so this should error
     assert.isDefined(item.props.status.user);
     assert.equal(item.props.status.user, status.ERROR);
+    assert.equal(item.props.status.post, status.ERROR);
   });
 
 });
