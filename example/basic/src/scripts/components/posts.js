@@ -6,7 +6,7 @@ import load from 'tectonic-redux';
 import * as models from 'models';
 
 @load((props, state) => ({
-  user: models.User.getItem({ id: 1 }),
+  user: models.User.getItem({ id: 3 }),
   posts: models.Post.getList({ userId: props.user && props.user.id })
 }))
 export default class Posts extends Component {
@@ -20,6 +20,7 @@ export default class Posts extends Component {
     return (
       <div>
         <p>User status: { this.props.status.user }</p>
+        <p>User name: { this.props.user && this.props.user.name }</p>
         <p>Post status: { this.props.status.posts }</p>
         { posts.map(p => <Post post={ p } />) }
       </div>

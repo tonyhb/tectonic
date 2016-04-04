@@ -246,11 +246,9 @@ describe('parsing cache data', () => {
 
     assert.deepEqual(state.getIn(['queriesToIds', query.hash()]), ['1']);
 
-    assert.deepEqual(
-      cache.getQueryData(query, state),
-      apiResponse
-    );
-
+    const [data, ok] = cache.getQueryData(query, state);
+    assert.isTrue(ok);
+    assert.deepEqual(data, apiResponse);
   });
 
 });

@@ -1,4 +1,6 @@
-- Caching
+- Query cache before making new requests
+
+- Figure out how to tell if a query uses IDs and query cache pre-emptively
 
 - Relationships: define relationships between models such that queries and
   source definitions are defined with the model relationship (ie

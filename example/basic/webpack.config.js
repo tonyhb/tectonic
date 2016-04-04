@@ -8,7 +8,7 @@ var resolve = {
 };
 
 module.exports = {
-  devtool: 'inline-source-map',
+  devtool: 'eval',
   entry: [
     'webpack-dev-server/client?http://localhost:3000', // WebpackDevServer host and port
       './src/scripts/index'

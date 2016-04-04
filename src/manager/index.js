@@ -64,8 +64,6 @@ export default class Manager {
       const driverFunc = drivers[driver];
       // When calling the driver name run processDefinitions to add the
       // definitions to the Source class.
-      //
-      // This will call the resolver's onAddDefinition function with a 
       this[driver] = (defs) =>
         this.sources.processDefinitions(driverFunc, defs, this.resolver);
     });
@@ -81,11 +79,11 @@ export default class Manager {
   }
 
   /**
-   * resolve calls the Resolver's `resolve` function passing in the map of
+   * resolve calls the Resolver's `resolveAll` function passing in the map of
    * source definitions previously defined and processed.
    */
   resolve() {
-    this.resolver.resolve(this.sources.definitions);
+    this.resolver.resolveAll(this.sources.definitions);
   }
 
   /**
@@ -93,7 +91,7 @@ export default class Manager {
    *
    * @param object Object of prop names => queries
    */
-  props(queries) {
+  props(queries, state = undefined) {
     let props = {
       status: {},
     };
@@ -102,7 +100,9 @@ export default class Manager {
       return props;
     }
 
-    const state =  this.store.getState().tectonic;
+    if (state === undefined) {
+      state = this.store.getState().tectonic;
+    }
 
     Object.keys(queries).forEach(prop => {
       const query = queries[prop];
@@ -110,9 +110,11 @@ export default class Manager {
       props.status[prop] = status;
       // If this query was a success load the data.
       if (status === SUCCESS) {
-        props[prop] = this.cache.getQueryData(query, state);
+        let [data, _] = this.cache.getQueryData(query, state);
+        props[prop] = data;
       } else {
-        // TODO: Should we add an empty model?
+        // Add an empty model as the prop so that this.props.model.x works
+        props[prop] = query.model.blank();
       }
     });
 

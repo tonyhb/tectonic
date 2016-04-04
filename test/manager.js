@@ -1,7 +1,7 @@
 'use strict';
 
 import Manager from '/src/manager';
-import DumbResolver from '/src/resolver/dumbResolver.js';
+import BaseResolver from '/src/resolver/baseResolver.js';
 import superagent from '/src/drivers/superagent';
 import reducer from '/src/reducer';
 
@@ -17,8 +17,8 @@ export const createStore = () => {
 }
 
 // createNewManager creates a completely fresh instance of a manager using the
-// DumbResolver by default
-export const createNewManager = (resolver = new DumbResolver()) => {
+// BaseResolver by default
+export const createNewManager = (resolver = new BaseResolver()) => {
   const store = reduxCreateStore(combineReducers({
     tectonic: reducer
   }));

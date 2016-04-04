@@ -18,23 +18,7 @@ export default function load(queries) {
   return (WrappedComponent) =>
 
     @connect((state) => ({ state }))
-    class LoadComponent extends Component {
-
-      constructor(props) {
-        super(...arguments);
-
-        this.queries = queries;
-        // If the queries is a function we need to evaulate it with the current
-        // redux state and component props passed in to get our query object.
-        if (typeof queries === 'function') {
-          const { state, ...props } = props;
-          this.queries = queries(state, props);
-        }
-      }
-
-      static contextTypes = {
-        manager: PropTypes.instanceOf(Manager)
-      }
+    class TectonicComponent extends Component {
 
       /**
        * Each component stores its resolved queries from each render. This
@@ -45,16 +29,67 @@ export default function load(queries) {
        */
       queries = {}
 
-      componentWillMount() {
-        const { manager } = this.context;
-        const { queries } = this;
+      constructor(props, context) {
+        super(...arguments);
 
-        if (queries) {
-          // Resolve the queries and load the data.
-          Object.keys(queries).forEach(q => {
-            manager.addQuery(queries[q]);
-          });
+        this.queries = queries || {};
+        // If the queries is a function we need to evaulate it with the current
+        // redux state and component props passed in to get our query object.
+        if (typeof queries === 'function') {
+          // remove the tectonic state from props and pass it to the query
+          // function as state. all remaining props are just standard props :)
+          const { state, ...props } = props;
+          this.queries = queries(props, state);
         }
+      }
+
+      static contextTypes = {
+        manager: PropTypes.instanceOf(Manager)
+      }
+
+      /**
+       * componentWillReceiveProps is called after new props are passed down,
+       * typically from queries being resolved and data being available.
+       *
+       * This means that we need to potentially re-calculate the decorator query
+       * function with new props. To do this we use the previous decorator query
+       * evaluation to get new props from the state.
+       *
+       */
+      componentWillReceiveProps(next) {
+        if (typeof queries === 'function') {
+          // TODO: optimize. We don't need to re-calculate ths function when
+          // status states change.
+          const { state } = next;
+          // use the existing this.queries object from the previous invokation
+          // to get new params, then re-invoke queries
+          const props = this.context.manager.props(this.queries)
+          this.queries = queries(props, state);
+          this.addAndResolveQueries();
+        }
+      }
+
+      componentWillMount() {
+        this.addAndResolveQueries();
+      }
+
+      addAndResolveQueries() {
+        const {
+          queries,
+          context: { manager }
+        } = this;
+
+        const queryKeys = Object.keys(queries);
+
+        if (queryKeys.length === 0) {
+          return;
+        }
+        // Resolve the queries and load the data.
+        queryKeys.forEach(q => {
+          manager.addQuery(queries[q]);
+        });
+
+        setTimeout(() => manager.resolve(), 5);
       }
 
       render() {
@@ -62,10 +97,6 @@ export default function load(queries) {
           queries,
           context: { manager }
         } = this;
-
-        if (queries) {
-          manager.resolve();
-        }
 
         const props = {
           ...this.props,

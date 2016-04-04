@@ -27,7 +27,7 @@ describe('@load: status props', () => {
         if (this.props.status.user === status.PENDING) {
           return <p>Loading...</p>;
         }
-        return <p>{ this.props.user }</p>
+        return <p>{ this.props.user.name }</p>
       }
     }
 
@@ -39,10 +39,14 @@ describe('@load: status props', () => {
 
     assert.isDefined(item);
     assert.isObject(item.props.status);
-    // Right now we've not defined a sourcedefinition, so this should error
-    assert.isDefined(item.props.status.user);
-    assert.equal(item.props.status.user, status.ERROR);
-    assert.equal(item.props.status.post, status.ERROR);
+
+    // TODO: Remove timeout within decorator/index.addAndResolveQueries
+    window.setTimeout(() => {
+      // Right now we've not defined a sourcedefinition, so this should error
+      assert.isDefined(item.props.status.user);
+      assert.equal(item.props.status.user, status.ERROR);
+      assert.equal(item.props.status.post, status.ERROR);
+    }, 10);
   });
 
 });

@@ -39,7 +39,6 @@ describe('@load: e2e end-to-end test', () => {
     ]);
 
     assert.isDefined(manager.sources.definitions.get('userSource'));
-    assert.isDefined(manager.resolver.definitionsByModel.get(User));
 
     class Base extends Component {
       static propTypes = {
@@ -67,8 +66,11 @@ describe('@load: e2e end-to-end test', () => {
     })(Base);
     const item = renderAndFind(<WrappedBase />, Base, manager);
 
-    assert.equal(item.props.status.user, status.SUCCESS);
-    assert.deepEqual(item.props.user, data);
+    // The resolver doesn't start resolving until 5 ms in
+    window.setTimeout(() => {
+      assert.equal(item.props.status.user, status.SUCCESS);
+      assert.deepEqual(item.props.user, data);
+    }, 5);
   });
 
 
@@ -130,8 +132,10 @@ describe('@load: e2e end-to-end test', () => {
     })(Base);
     const item = renderAndFind(<WrappedBase />, Base, manager);
 
-    assert.equal(item.props.status.posts, status.SUCCESS);
-    assert.deepEqual(item.props.posts, data.posts);
+    window.setTimeout(() => {
+      assert.equal(item.props.status.posts, status.SUCCESS);
+      assert.deepEqual(item.props.posts, data.posts);
+    }, 10);
   });
 
   it('queries with dependent data based off of a previous API call', () => {
@@ -189,6 +193,8 @@ describe('@load: e2e end-to-end test', () => {
     }))(Base);
     const item = renderAndFind(<WrappedBase />, Base, manager);
 
-    assert.deepEqual(item.props.posts, data.posts);
+    window.setTimeout(() => {
+      assert.deepEqual(item.props.posts, data.posts);
+    }, 10);
   });
 });

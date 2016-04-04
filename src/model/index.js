@@ -45,6 +45,12 @@ export default function(name, fields, opts = {}) {
     // Note: ALL queries must return the ID attribute.
     static get idAttribute() { return opts.idAttribute || 'id'; }
 
+
+    /**
+     * Blank returns a copy of the fields as they are defined in the model.
+     */
+    static blank() { return { ...fields }; }
+
     static fields() { return Object.keys(fields); }
     static relationships() { return relationships(this, arguments); }
 

@@ -7,4 +7,5 @@ export Manager from './manager';
 export Loader from './component';
 export reducer from './reducer';
 // Resolvers
-export DumbResolver from './resolver/dumbResolver.js';
+export BaseResolver from './resolver/baseResolver.js';
+export fromSuperagent from './drivers/superagent.js';
