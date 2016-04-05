@@ -44,4 +44,24 @@ describe('SourceDefinition', () => {
     });
   });
 
+  describe('param normalization', () => {
+    it('turns a single param into an array', () => {
+      const def = new SourceDefinition({
+        params: 'id',
+        returns: User.item(),
+        meta: {}
+      });
+      assert.deepEqual(def.params, ['id']);
+    });
+
+    it('turns a single optionalParam into an array', () => {
+      const def = new SourceDefinition({
+        optionalParams: 'id',
+        returns: User.item(),
+        meta: {}
+      });
+      assert.deepEqual(def.optionalParams, ['id']);
+    });
+  });
+
 });

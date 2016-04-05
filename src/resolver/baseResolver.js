@@ -97,6 +97,7 @@ export default class BaseResolver {
 
     Object.keys(this.queries).forEach(hash => {
       const q = this.queries[hash];
+      console.log(this.cache.getQueryData(q, state), 'yea');
       const [data, ok] = this.cache.getQueryData(q, state);
 
       // We have data for this query; this query is resolved and is successful

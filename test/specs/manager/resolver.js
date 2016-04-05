@@ -14,6 +14,7 @@ describe('manager resolver functionality', () => {
     mock.expects('addQuery').once();
     m.addQuery(User.getItem());
     mock.verify();
+    mock.restore();
   });
 
   it('delegates resolve to resolveAll', () => {

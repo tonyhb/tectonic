@@ -52,6 +52,14 @@ export default class SourceDefinition {
     this.optionalParams = optionalParams || [];
     this.driverFunc = driverFunc;
 
+    if (typeof this.params === 'string') {
+      this.params = [this.params];
+    }
+    if (typeof this.optionalParams === 'string') {
+      this.optionalParams = [this.optionalParams];
+    }
+
+
     // ensure that after setting properties the definition is valid
     this.validate();
   }
