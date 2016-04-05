@@ -49,7 +49,12 @@ export default function(name, fields, opts = {}) {
     /**
      * Blank returns a copy of the fields as they are defined in the model.
      */
-    static blank() { return { ...fields }; }
+    static blank() {
+      return {
+        ...fields,
+        [this.idAttribute]: undefined
+      };
+    }
 
     static fields() { return Object.keys(fields); }
     static relationships() { return relationships(this, arguments); }
