@@ -99,16 +99,24 @@ export default class BaseResolver {
     // twice here.
     let resolvedQueries = [];
 
-    Object.keys(this.queries).forEach(hash => {
+    const queryKeys = Object.keys(this.queries);
+    if (queryKeys.length === 0) {
+      return;
+    }
+
+    queryKeys.forEach(hash => {
       const q = this.queries[hash];
       const [data, ok] = this.cache.getQueryData(q, state);
+
+      // We can remove this query from this.queries as it's processed. The
+      // only queries we need to process in the future are based off of
+      // dependent data loading, and these will be re-added by future renders of
+      // the decorator.
+      delete(this.queries[hash]);
 
       // We have data for this query; this query is resolved and is successful
       if (ok) {
         this.statusMap[hash] = SUCCESS;
-        // We can remove this resolved query from our query map; we won't need
-        // it any more.
-        delete(this.queries[hash]);
         return;
       }
 
@@ -116,7 +124,6 @@ export default class BaseResolver {
       if (this.cache.getQueryStatus(q, state) === PENDING) {
         console.debug('query already pending and in flight; skipping', q);
         // no need to update the query status as it's already pending
-        delete(this.queries[hash]);
         return;
       }
 
@@ -126,8 +133,6 @@ export default class BaseResolver {
         q.sourceDefinition = sd;
         resolvedQueries.push(q);
         this.statusMap[hash] = PENDING;
-        // Update status and delete from queries map
-        delete(this.queries[hash]);
       }
     });
 

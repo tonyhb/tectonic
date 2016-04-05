@@ -3,7 +3,8 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { createStore, combineReducers } from 'redux';
-import { Manager, Loader, reducer, BaseResolver, fromSuperagent } from 'tectonic-redux';
+import { Manager, Loader, reducer, BaseResolver } from 'tectonic-redux';
+import fromSuperagent from 'tectonic-superagent';
 
 // This is a mock driver which loads fake data for tectonic.
 // You should use our built in superagent drivers or your own driver here.
