@@ -16,15 +16,14 @@ import { RETURNS_ITEM } from '/src/sources/returns';
  *
  *   'use strict';
  *
- *   import { Manager } from 'tectonic';
- *   import { superagent } from 'tectonic/drivers;
- *   import { DumbResolver } from 'tectonic/resolvers;
+ *   import { Manager, BaseResolver } from 'tectonic';
+ *   import superagent from 'tectonic-superagent';
  *
  *   const manager = new Manager({
  *     drivers: {
  *       fromSuperagent: superagent
  *     },
- *     resolver: new DumbResolver()
+ *     resolver: new BaseResolver()
  *   });
  *
  *   manager.fromSuperagent([

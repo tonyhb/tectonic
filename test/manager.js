@@ -2,7 +2,6 @@
 
 import Manager from '/src/manager';
 import BaseResolver from '/src/resolver/baseResolver.js';
-import superagent from '/src/drivers/superagent';
 import reducer from '/src/reducer';
 
 // Import a custom mocking driver for our tests
@@ -25,8 +24,7 @@ export const createNewManager = (resolver = new BaseResolver()) => {
 
   const manager = new Manager({
     drivers: {
-      fromMock: mock,
-      fromSuperagent: superagent
+      fromMock: mock
     },
     store,
     resolver
