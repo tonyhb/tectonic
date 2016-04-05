@@ -2,7 +2,7 @@
 
 import * as utils from './utils';
 import { UPDATE_QUERY_STATUSES } from '/src/reducer';
-import { PENDING, SUCCESS, ERROR } from '/src/status';
+import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '/src/status';
 
 /**
  * BaseResolver is a simple resolver which batches new queries from the
@@ -36,6 +36,14 @@ export default class BaseResolver {
    * List of queries to resolve
    */
   queries = {}
+
+  /**
+   * statusMap holds a list of query hashes to their statuses during resolution.
+   * This allows us to manipulate the status of queries in resolveAll,
+   * resolveItem and unresolvable before dispatching.
+   *
+   */
+  statusMap = {}
 
   /**
    * This is called ecah time a sourceDefinition is added via the manager. It
@@ -85,10 +93,6 @@ export default class BaseResolver {
     // within this loop.
     const state = this.store.getState().tectonic;
 
-    // statuses is an object of queries to query statuses which we dispatch
-    // after resolving. The keys are created via query.toString()
-    let statuses = {};
-
     // All newly resolved queries will be pushed here so we call their source
     // definitions after resolution.
     // TODO: if two different queries use the same sourcedef this will be called
@@ -97,12 +101,11 @@ export default class BaseResolver {
 
     Object.keys(this.queries).forEach(hash => {
       const q = this.queries[hash];
-      console.log(this.cache.getQueryData(q, state), 'yea');
       const [data, ok] = this.cache.getQueryData(q, state);
 
       // We have data for this query; this query is resolved and is successful
       if (ok) {
-        statuses[hash] = SUCCESS;
+        this.statusMap[hash] = SUCCESS;
         // We can remove this resolved query from our query map; we won't need
         // it any more.
         delete(this.queries[hash]);
@@ -122,18 +125,19 @@ export default class BaseResolver {
       if (sd !== undefined) {
         q.sourceDefinition = sd;
         resolvedQueries.push(q);
+        this.statusMap[hash] = PENDING;
         // Update status and delete from queries map
-        statuses[hash] = PENDING;
         delete(this.queries[hash]);
-      } else {
-        statuses[hash] = ERROR;
       }
     });
 
     this.store.dispatch({
       type: UPDATE_QUERY_STATUSES,
-      payload: statuses
+      payload: this.statusMap
     });
+
+    // Now we reset the map
+    this.statusMap = {};
 
     resolvedQueries.forEach(query => {
       const { sourceDefinition: sd } = query;
@@ -194,11 +198,13 @@ export default class BaseResolver {
 
     if (params.some(v => v === undefined)) {
       // some query params are undefined; issue a debug and ignore.
-      console.debug('ignoring query as it has undefined parameters', query);
+      this.statusMap[query.hash()] = UNDEFINED_PARAMS;
+      console.debug && console.debug('ignoring query as it has undefined parameters', query);
       return;
     }
 
-    console.warn(
+    this.statusMap[query.hash()] = ERROR;
+    console.warn && console.warn(
       'There is no source definition which resolves the query',
       query.toString()
     );
