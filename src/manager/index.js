@@ -3,6 +3,7 @@
 import Sources from '/src/sources';
 import Cache from '/src/cache';
 import { SUCCESS } from '/src/status';
+import { RETURNS_ITEM } from '/src/sources/returns';
 
 /**
  * The manager is the single interface for tectonic. It handles:
@@ -114,7 +115,11 @@ export default class Manager {
         props[prop] = data;
       } else {
         // Add an empty model as the prop so that this.props.model.x works
-        props[prop] = query.model.blank();
+        if (query.returnType === RETURNS_ITEM) {
+          props[prop] = query.model.blank();
+        } else {
+          props[prop] = [];
+        }
       }
     });
 

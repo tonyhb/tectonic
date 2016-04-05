@@ -129,8 +129,6 @@ export default class BaseResolver {
       }
     });
 
-    console.log(statuses);
-
     this.store.dispatch({
       type: UPDATE_QUERY_STATUSES,
       payload: statuses

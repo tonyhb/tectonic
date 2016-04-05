@@ -7,7 +7,6 @@ import { createStore } from '/test/manager.js';
 describe('Defining source drivers', () => {
 
   it('adds methods to the manager class', () => {
-    console.log('yea');
     const m = new Manager({
       drivers: {
         test: () => ({})
