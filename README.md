@@ -76,7 +76,7 @@ manager.fromSuperagent([
 
 // And use the decorator to laod models:
 
-@load((state, props) => ({
+@load((props, state) => ({
   org: Org.getItem(['name'], { id: 1 }),
   dependsOnOrg: Repo.getList({ orgId: props.org.id }), // Wont be called until org is loaded
   list: Org.getList(['name'], { start: 0, limit: 20 })
