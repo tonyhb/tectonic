@@ -1,6 +1,6 @@
 {
   "name": "tectonic-redux",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Declarative data loading for React",
   "main": "transpiled/index.js",
   "scripts": {
