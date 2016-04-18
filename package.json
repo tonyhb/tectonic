@@ -1,5 +1,5 @@
 {
-  "name": "tectonic-redux",
+  "name": "tectonic",
   "version": "0.0.1",
   "description": "Declarative data loading for React",
   "main": "transpiled/index.js",
@@ -20,7 +20,7 @@
     "data"
   ],
   "author": "Tony Holdstock-Brown",
-  "license": "ISC",
+  "license": "GPL",
   "bugs": {
     "url": "https://github.com/tonyhb/tectonic/issues"
   },
