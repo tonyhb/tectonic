@@ -1,7 +1,10 @@
 'use strict';
 
 import Returns from './returns';
-import { GET, CREATE, UPDATE, DELETE } from '/src/consts';
+import {
+  GET, CREATE, UPDATE, DELETE,
+  RETURNS_NONE
+} from '/src/consts';
 
 /**
  * These keys are required in every source definition
@@ -33,20 +36,49 @@ export default class SourceDefinition {
   driverFunc = undefined
 
   /**
-   * @param string   unique ID of source definition
-   * @param Returns  obect of or instance of Returns
-   * @param object   object containing unique source driver functionality
-   * @param array    array of query parameters for the API call
-   * @param function driver function to call to invoke the source
+   * Create a new source definition to be used as a source for an API call.
+   *
+   * This is always called via the manager and should not be constructed
+   * manually. To create a source instantiate your manager with the necessary
+   * drivers and use the manager to make many sources:
+   *
+   * const m = new Manager({
+   *   drivers: { myDriver },
+   *   resolver: new BaseResolver(),
+   *   store: store
+   * });
+   * m.myDriver([
+   *   { ... } // the manager will construct a new source definition from this
+   *           // object, automatically adding driverFunc and constructing
+   *           // the returns parameter for you.
+   * ]);
+   *
+   * @param {string} o.id - unique ID of source definition; randomly generated if
+   * ommitted
+   * @param {(Returns|Object)} o.returns - instance of Returns or object of
+   * many Returns as values
+   * @param {Object} o.meta - object containing unique source driver functionality
+   * @param {Array} o.params - array of **required** parameters for the API call
+   * @param {Array} o.optionalParams - array of optional params for the API call
+   * @param {Function} o.driverFunc - driver function to call to invoke the source
+   * @param {string} o.queryType - the type of query (GET, UPDATE, CREATE, DELETE)
    */
   constructor({ id, returns, meta, params, optionalParams, driverFunc, queryType = GET }) {
     if (id === undefined) {
       id = Math.floor(Math.random() * (1 << 30)).toString(16);
     }
 
+    // If the queryType is UPDATE, CREATE or DELETE (ie. not GET) then the
+    // server *is* allowed to respond with 204 no content. This means that
+    // `returns` can be undefined for non-GET queries; we must automatically
+    // transform this into RETURNS_NONE.
+    if (queryType !== GET && returns === undefined) {
+      returns = RETURNS_NONE;
+    }
+
     this.id = id;
-    // TODO: Standardize returns to use one class vs an object.
-    // See dumbresolver success for more info
+    // XXX Potentially create a parent class for polymorphic returns so it's not
+    // a POJO
     this.returns = returns;
     this.meta = meta;
     this.params = params || [];
@@ -67,19 +99,38 @@ export default class SourceDefinition {
     this.validate();
   }
 
+  /**
+   * Returns true if this source definition fetches more than one model at
+   * a time
+   */
   isPolymorphic() {
     return !(this.returns instanceof Returns);
   }
 
   validate() {
+    const chain = [
+      ::this.validateRequiredKeys,
+      ::this.validateReturns,
+      ::this.validateQueryType
+    ];
+    chain.forEach(f => f());
+  }
+
+  validateRequiredKeys() {
     if (requiredDefinitionKeys.some(i => this[i] === undefined)) {
       throw new Error(
         'Source definitions must contain keys: ' +
         requiredDefinitionKeys.join(', ')
       );
     }
+  }
 
-    const { returns } = this;
+  validateReturns() {
+    const { returns, queryType } = this;
+
+    if (queryType !== GET && returns === RETURNS_NONE) {
+      return true;
+    }
 
     // If this is a single Returns instance this is valid
     if (returns instanceof Returns) {
@@ -103,5 +154,16 @@ export default class SourceDefinition {
         );
       }
     });
+  }
+
+  validateQueryType() {
+    const { queryType } = this;
+    if (queryType !== GET && queryType !== CREATE && 
+        queryType !== UPDATE && queryType !== DELETE) {
+        throw new Error(
+          'You must specify the type of query using one of GET, CREATE, ' +
+          'UPDATE or DELETE'
+        );
+    }
   }
 }

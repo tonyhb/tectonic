@@ -3,7 +3,7 @@
 import { assert } from 'chai';
 import SourceDefinition from '/src/sources/definition.js';
 import { User } from '/test/models';
-import { GET } from '/src/consts';
+import { GET, UPDATE, CREATE, DELETE, RETURNS_NONE } from '/src/consts';
 
 describe('SourceDefinition', () => {
 
@@ -14,6 +14,14 @@ describe('SourceDefinition', () => {
         returns: User.item()
       });
       assert.equal(sd.queryType, GET);
+    });
+
+    it('allows Returns to be undefined when the queryType is DELETE', () => {
+      const sd = new SourceDefinition({
+        meta: {},
+        queryType: DELETE
+      });
+      assert.equal(sd.returns, RETURNS_NONE);
     });
   });
 
@@ -35,7 +43,26 @@ describe('SourceDefinition', () => {
       );
     });
 
-    // TODO: Test that RETURNS_NONE is only applicable with non-GET sources
+    it('throws an error if returns is ommited for GET queryType', () => {
+      assert.throws(
+        () => new SourceDefinition({
+          meta: {},
+          queryType: GET
+        }),
+        'Source definitions must contain keys: returns, meta'
+      );
+    });
+
+    it('throws an error with an unknown query type', () => {
+      assert.throws(
+        () => new SourceDefinition({
+          meta: {},
+          queryType: 'fuck you'
+        }),
+        'You must specify the type of query using one of GET, CREATE, ' +
+        'UPDATE or DELETE'
+      );
+    });
   });
 
   describe('id generation', () => {
