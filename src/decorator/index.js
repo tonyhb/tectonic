@@ -194,7 +194,9 @@ export default function load(queries) {
         const props = {
           ...this.props,
           ...manager.props(queries),
-          createModel: ::this.createModel
+          createModel: ::this.createModel,
+          updateModel: ::this.updateModel,
+          deleteModel: ::this.deleteModel,
         };
 
         return <WrappedComponent { ...props } />
