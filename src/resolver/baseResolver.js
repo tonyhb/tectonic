@@ -28,7 +28,8 @@ export default class BaseResolver {
     utils.doesSourceSatisfyQueryParams,
     utils.doesSourceSatisfyQueryModel,
     utils.doesSourceSatisfyAllQueryFields,
-    utils.doesSourceSatisfyQueryReturnType
+    utils.doesSourceSatisfyQueryReturnType,
+    utils.doesSourceSatisfyQueryType
   ];
 
 
