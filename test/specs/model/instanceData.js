@@ -45,6 +45,18 @@ describe('Model instance data', () => {
     assert.equal(second.id, 2);
   });
 
+  it('allows us to get all values as an object', () => {
+    const u = new User({ id: 1, name: 'foo' });
+    assert.deepEqual(
+      u.values(),
+      {
+        id: 1,
+        name: 'foo',
+        email: ''
+      }
+    );
+  });
+
   it('User.blank() always returns a new instance with an undefined idAttribute', () => {
     let user = User.blank();
     assert.equal(user.id, undefined);

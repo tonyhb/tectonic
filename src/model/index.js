@@ -35,7 +35,9 @@ export const recordMethods = [
   'updateIn',
   'withMutations',
   'asMutable',
-  'asImmutable'
+  'asImmutable',
+  'toJS',
+  'toObject'
 ];
 
 export default function(name, fields, opts = {}) {
@@ -103,6 +105,10 @@ export default function(name, fields, opts = {}) {
           return new this.constructor(record);
         }.bind(this);
       });
+    }
+
+    values() {
+      return this.record.toObject()
     }
 
     // Define a getter for modelName so that it can't be changed after definition
