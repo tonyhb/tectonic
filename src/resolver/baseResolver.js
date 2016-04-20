@@ -126,9 +126,16 @@ export default class BaseResolver {
       }
 
       // check if the query status was previously set to pending
-      if (this.cache.getQueryStatus(q, state) === PENDING) {
+      const status = this.cache.getQueryStatus(q, state);
+      if (status === PENDING) {
         console.debug('query already pending and in flight; skipping', q);
         // no need to update the query status as it's already pending
+        return;
+      }
+
+      // If the query previously failed we should skil it
+      if (status === ERROR) {
+        console.debug('query previously failed; skipping', q);
         return;
       }
 
