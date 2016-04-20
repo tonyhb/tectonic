@@ -4,12 +4,12 @@ import { assert } from 'chai';
 import Model from '/src/model';
 import { User } from '/test/models';
 import React, { Component } from 'react';
-import { GET } from '/src/consts';
 import {
+  GET,
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/sources/returns';
+} from '/src/consts';
 
 import { render } from '/test/utils';
 

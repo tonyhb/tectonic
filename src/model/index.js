@@ -2,13 +2,14 @@
 
 import React from 'react';
 import relationships from './relationships.js';
-import Returns, {
+import Returns from '/src/sources/returns.js';
+import Query from '/src/query';
+import {
+  GET,
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/sources/returns.js';
-import Query from '/src/query';
-import { GET } from '/src/consts';
+} from '/src/consts';
 
 export default function(name, fields, opts = {}) {
 

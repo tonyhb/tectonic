@@ -4,11 +4,12 @@ import { assert } from 'chai';
 
 import Cache from '/src/cache';
 import SourceDefinition from '/src/sources/definition';
-import Returns, {
-  RETURNS_LIST,
+import Returns from '/src/sources/returns';
+import {
   RETURNS_ITEM,
+  RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/sources/returns';
+} from '/src/consts';
 // test stuff
 import { User, Post } from '/test/models';
 import { createStore } from '/test/manager';

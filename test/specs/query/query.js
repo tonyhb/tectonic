@@ -3,13 +3,13 @@
 import { assert } from 'chai';
 
 import Query from '/src/query';
-import { GET, CREATE, UPDATE, DELETE } from '/src/consts';
-import { User } from '/test/models.js';
 import {
+  GET, CREATE, UPDATE, DELETE,
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/sources/returns.js';
+} from '/src/consts';
+import { User } from '/test/models.js';
 
 
 describe('query', () => {

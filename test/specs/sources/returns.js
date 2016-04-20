@@ -3,11 +3,12 @@
 import { assert } from 'chai';
 
 import { User } from '/test/models.js';
-import Returns, {
+import Returns from '/src/sources/returns.js';
+import {
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/sources/returns.js';
+} from '/src/consts';
 
 describe('returns', () => {
 

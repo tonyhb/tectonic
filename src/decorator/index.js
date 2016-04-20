@@ -92,6 +92,10 @@ export default function load(queries) {
         setTimeout(() => manager.resolve(), 5);
       }
 
+      createModel(model, callback) {
+        // Add a query to the resolver which
+      }
+
       render() {
         const {
           queries,

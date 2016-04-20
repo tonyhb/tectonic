@@ -1,13 +1,15 @@
 'use strict';
 
+import * as status from '/src/status';
 import {
+  GET,
+  CREATE,
+  UPDATE,
+  DELETE,
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/sources/returns.js';
-import * as status from '/src/status';
-
-import { GET, CREATE, UPDATE, DELETE } from '/src/consts';
+} from '/src/consts';
 
 /**
  * Query represents an API query to be resolved by the resolver. It is generated

@@ -1,10 +1,11 @@
 'use strict';
 
 import { UPDATE_DATA } from '/src/reducer';
-import Returns, {
-  RETURNS_LIST,
-  RETURNS_ITEM
-} from '/src/sources/returns';
+import Returns from '/src/sources/returns';
+import {
+  RETURNS_ITEM,
+  RETURNS_LIST
+} from '/src/consts';
 import { Map } from 'immutable';
 
 /**

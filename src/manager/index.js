@@ -3,7 +3,7 @@
 import Sources from '/src/sources';
 import Cache from '/src/cache';
 import { SUCCESS } from '/src/status';
-import { RETURNS_ITEM } from '/src/sources/returns';
+import { RETURNS_ITEM } from '/src/consts';
 
 /**
  * The manager is the single interface for tectonic. It handles:

@@ -1,10 +1,11 @@
 'use strict';
 
-import Returns, {
+import Returns from '/src/sources/returns';
+import {
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/sources/returns';
+} from '/src/consts';
 
 // TODO:
 // - `doesSourceSatisfySomeQueryFields` for partial matching
