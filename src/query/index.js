@@ -38,7 +38,7 @@ export default class Query {
    * @param object Object of query parameters to values
    * @param object Body to be sent in request, used for POST, PUT etc.
    */
-  constructor({ model, fields, queryType = GET, returnType, params = {}, body }) {
+  constructor({ model, fields, queryType = GET, returnType, params = {}, body, callback }) {
     model.assertFieldsExist(fields);
 
     this.model = model;

@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import Manager from '/src/manager';
 import Query from '/src/query';
 import {
+  GET,
   CREATE,
   UPDATE,
   DELETE
@@ -143,6 +144,20 @@ export default function load(queries) {
        * @param function async-style callback with params (err, response)
        */
       createModel(opts, callback) {
+        this._createQuery(CREATE, opts, callback);
+      }
+
+      updateModel(opts, callback) {
+        this._createQuery(UPDATE, opts, callback);
+      }
+
+      // TODO: the delete API is pretty fucking messy. It shouldn't need an
+      // instance?
+      deleteModel(opts, callback) {
+        this._createQuery(DELETE, opts, callback);
+      }
+
+      _createQuery(type, opts, callback) {
         // TODO: this is a somewhat hacky way of checking if we were passed
         // a model instance. Fix me?
         if (opts.constructor.instanceOf !== undefined) {
@@ -151,15 +166,15 @@ export default function load(queries) {
 
         const { model, params } = opts;
 
-        // Add a query to the resolver which creates an instance of the model.
-        //
+        // Create a new query for the given type (CREATE, UPDATE etc)
         // Resolver utils only check that the returnType matches when querying
         // for a list; this needs no returnType field.
         const query = new Query({
           params,
+          callback,
           model: model.constructor,
-          queryType: CREATE,
-          body: model.values()
+          queryType: type,
+          body: model.values(),
         });
 
         const {
