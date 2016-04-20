@@ -18,3 +18,15 @@ TODO FOR CRUD:
   data
 
 - Smarter resolver: bucket sources by their query types.
+
+Examples by crud:
+
+...We need params and body to go in the POST call.
+POST /api/v0/users/:id -.
+  {
+    params: { id: 1 },
+	body: {
+	  attrs...
+	}
+  }
+

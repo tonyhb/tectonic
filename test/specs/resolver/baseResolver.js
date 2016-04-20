@@ -208,7 +208,6 @@ describe('BaseResolver', () => {
             }
           },
         },
-
       ]);
       const q = new Query({
         model: User,
@@ -227,6 +226,66 @@ describe('BaseResolver', () => {
       assert.equal(q.sourceDefinition.id, 'ok');
     });
 
+  });
+
+  describe('callbacks', () => {
+    const m = createNewManager();
+    m.fromMock([
+      {
+        returns: User.item(),
+        params: 'id',
+        meta: {
+          returns: {
+            id: '1'
+          }
+        }
+      },
+      {
+        returns: User.list(),
+        meta: {} // This will fail as a driver error as we provide no returns
+      },
+      {
+        queryType: UPDATE,
+        params: 'foo', // incorrect param
+        returns: User.item(),
+        meta: {
+          returns: {
+            id: '1'
+          }
+        },
+      }
+    ]);
+
+    it('calls callbacks on success', () => {
+      let q = User.getItem({ id: 1 });
+      q.callback = () => {};
+      const spy = sinon.spy(q, 'callback');
+      m.addQuery(q);
+      m.resolve();
+      assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), SUCCESS);
+      assert(spy.withArgs(null, { id: '1' }).calledOnce);
+    });
+
+
+    it('calls callbacks on unresolvable error', () => {
+      let q = Post.getItem({ id: 1 });
+      q.callback = () => {};
+      const spy = sinon.spy(q, 'callback');
+      m.addQuery(q);
+      m.resolve();
+      assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), ERROR);
+      assert(spy.withArgs('There is no source definition which resolves the query', null).calledOnce);
+    });
+
+    it('calls callbacks on driver error', () => {
+      let q = User.getList();
+      q.callback = () => {};
+      const spy = sinon.spy(q, 'callback');
+      m.addQuery(q);
+      m.resolve();
+      assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), ERROR);
+      assert(spy.withArgs('either pass success/fail state in query params or provide meta.returns', null).calledOnce);
+    });
   });
 
 });

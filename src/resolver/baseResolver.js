@@ -209,6 +209,12 @@ export default class BaseResolver {
       return;
     }
 
+    // Call the callback if it exists with an error
+    if (typeof query.callback === 'function') {
+      // TODO improve error
+      query.callback('There is no source definition which resolves the query', null);
+    }
+
     this.statusMap[query.hash()] = ERROR;
     console.warn && console.warn(
       'There is no source definition which resolves the query',
@@ -221,6 +227,10 @@ export default class BaseResolver {
     // which can be used for single resources only
     // TODO: Also update all dependencies of this query as failed
     this.cache.storeApiData(query, sourceDef, data);
+
+    if (typeof query.callback === 'function') {
+      query.callback(null, data);
+    }
   }
 
   fail(query, sourceDef, data) {
@@ -232,6 +242,10 @@ export default class BaseResolver {
         [query.hash()]: ERROR
       }
     });
+
+    if (typeof query.callback === 'function') {
+      query.callback(data, null);
+    }
   }
 
 }
