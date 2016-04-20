@@ -139,6 +139,22 @@ describe('query', () => {
       assert.isTrue(q1.is(q2));
     });
 
+    it('matches body', () => {
+      let q1, q2;
+      const common = {
+        model: User,
+        queryType: CREATE,
+      };
+
+      q1 = new Query({ ...common, body: { foo: 'bar' } });
+      q2 = new Query({ ...common, body: { wha: 'the' } });
+      assert.isFalse(q1.is(q2));
+
+      q1 = new Query({ ...common, body: { foo: 'bar' } });
+      q2 = new Query({ ...common, body: { foo: 'bar' } });
+      assert.isTrue(q1.is(q2));
+    });
+
   });
 
 });

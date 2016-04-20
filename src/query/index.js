@@ -10,6 +10,7 @@ import {
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
 } from '/src/consts';
+import deepEqual from 'deep-equal';
 
 /**
  * Query represents an API query to be resolved by the resolver. It is generated
@@ -34,9 +35,10 @@ export default class Query {
    *               sources list. Defaults to GET
    * @param string RETURNS_ITEM, RETURNS_LIST, or RETURNS NONE. Specifies
    *               whether the GET query is for a single model or list of models
-   * @param object   Object of query parameters to values
+   * @param object Object of query parameters to values
+   * @param object Body to be sent in request, used for POST, PUT etc.
    */
-  constructor({ model, fields, queryType = GET, returnType, params = {} }) {
+  constructor({ model, fields, queryType = GET, returnType, params = {}, body }) {
     model.assertFieldsExist(fields);
 
     this.model = model;
@@ -44,6 +46,7 @@ export default class Query {
     this.params = params;
     this.returnType = returnType;
     this.queryType = queryType;
+    this.body = body;
 
     // When the query is resolved and data is found this stores all of the IDs
     // returned by the API for the given model. This is then stored in a map of
@@ -66,6 +69,7 @@ export default class Query {
     this._toString = `Query(Model: ${this.model.modelName}, ` +
       `Fields: ${this.fields}, ` +
       `Params: ${JSON.stringify(this.params)}, ` +
+      `Body: ${JSON.stringify(this.body)}, ` +
       `QueryType: ${this.queryType}), ` +
       `ReturnType: ${this.returnType})`;
 
@@ -76,36 +80,18 @@ export default class Query {
    * Returns whether the current query instance is the same
    */
   is(item) {
-    const { model: m1, fields: f1, params: p1, returnType: rt1, queryType: qt1 } = this;
-    const { model: m2, fields: f2, params: p2, returnType: rt2, queryType: qt2 } = item;
-    const k1 = Object.keys(p1), k2 = Object.keys(p2);
+    const comparisons = [
+      'model',
+      'fields',
+      'params',
+      'returnType',
+      'queryType',
+      'body'
+    ];
 
-    // Ensure the models and return types are the same.
-    if (m1 !== m2 || rt1 !== rt2 || qt1 !== qt2) {
-      return false;
-    }
-
-    // If both queries ask for a subset of fields ensure they're the same.
-    if (Array.isArray(f1) && Array.isArray(f2)) {
-      // If the fields are different sizes then we have a new query
-      if (f1.length !== f2.length) {
-        return false;
-      }
-
-      // Ensure that the query is asking for the same fields
-      if ( ! f1.every((field, idx) => f2[idx] === field)) {
-        return false;
-      }
-    } else if (f1 !== RETURNS_ALL_FIELDS || f2 !== RETURNS_ALL_FIELDS) {
-      return false;
-    }
-
-    if (k1.length !== k2.length) {
-      return false;
-    }
-
-    // Ensure the parameters are the same
-    return k1.every(param => p1[param] === p2[param]);
+    return comparisons.every(field => {
+      return deepEqual(this[field], item[field]) === true;
+    });
   }
 
   /**
