@@ -195,12 +195,38 @@ describe('resolver utils', () => {
     // TODO: Test that model.getItem/getList adds GET query type
     it('returns true if queryType matches', () => {
       const s = new SourceDefinition({
-        returns: User.item(),
         queryType: GET,
+        returns: User.item(),
         meta: {}
       });
       const q = User.getItem(1);
       assert.isTrue(utils.doesSourceSatisfyQueryType(s, q));
+    });
+
+    it ('returns false with a queryType mismatch', () => {
+      let s, q;
+      // Get vs Update
+      s = new SourceDefinition({
+        queryType: UPDATE,
+        returns: User.item(),
+        meta: {}
+      });
+      q = User.getItem(1);
+      assert.isFalse(utils.doesSourceSatisfyQueryType(s, q));
+
+      // Get vs Create
+      s = new SourceDefinition({
+        queryType: CREATE,
+        returns: User.item(),
+        meta: {}
+      });
+      q = new Query({
+        model: User,
+        fields: ['id'],
+        returnType: RETURNS_ITEM,
+        queryType: GET
+      });
+      assert.isFalse(utils.doesSourceSatisfyQueryType(s, q));
     });
 
   });

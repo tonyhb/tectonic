@@ -114,3 +114,7 @@ export function doesSourceSatisfyQueryReturnType(source, query) {
   }
   return true;
 }
+
+export function doesSourceSatisfyQueryType(source, query) {
+  return (source.queryType === query.queryType);
+}

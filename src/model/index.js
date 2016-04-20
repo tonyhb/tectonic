@@ -7,7 +7,8 @@ import Returns, {
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
 } from '/src/sources/returns.js';
-import Query, { GET } from '/src/query';
+import Query from '/src/query';
+import { GET } from '/src/consts';
 
 export default function(name, fields, opts = {}) {
 
