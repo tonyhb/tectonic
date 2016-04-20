@@ -56,20 +56,22 @@ describe('BaseResolver', () => {
       return m;
     }
 
-    it('checks the cache to see if data exists for a query', () => {
-      const m = resolveAllManager();
-      m.addQuery(User.getItem({ id: 1 }));
-      const spy = sinon.spy(m.resolver.cache, 'getQueryData');
-      m.resolve();
-      assert(spy.called);
-    });
+    describe('caching', () => {
+      it('checks the cache to see if data exists for a query', () => {
+        const m = resolveAllManager();
+        m.addQuery(User.getItem({ id: 1 }));
+        const spy = sinon.spy(m.resolver.cache, 'getQueryData');
+        m.resolve();
+        assert(spy.called);
+      });
 
-    it('checks the cache to see if a request is in-flight for a current query', () => {
-      const m = resolveAllManager();
-      m.addQuery(User.getItem({ id: 1 }));
-      const spy = sinon.spy(m.resolver.cache, 'getQueryStatus');
-      m.resolve();
-      assert(spy.called);
+      it('checks the cache to see if a request is in-flight for a current query', () => {
+        const m = resolveAllManager();
+        m.addQuery(User.getItem({ id: 1 }));
+        const spy = sinon.spy(m.resolver.cache, 'getQueryStatus');
+        m.resolve();
+        assert(spy.called);
+      });
     });
 
     xit('calls driver functions for newly resolved sources', () => {

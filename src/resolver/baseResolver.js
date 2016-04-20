@@ -107,13 +107,17 @@ export default class BaseResolver {
 
     queryKeys.forEach(hash => {
       const q = this.queries[hash];
-      const [data, ok] = this.cache.getQueryData(q, state);
-
       // We can remove this query from this.queries as it's processed. The
       // only queries we need to process in the future are based off of
       // dependent data loading, and these will be re-added by future renders of
       // the decorator.
       delete(this.queries[hash]);
+
+      // Check if the query is in the cache. getQueryData returns a tuple; if
+      // the second parameter of the tuple is true we already have data for this
+      // query and can skip it. However, if this returns FALSE we MUST
+      // process the query again unless it's in-flight.
+      const [data, ok] = this.cache.getQueryData(q, state);
 
       // We have data for this query; this query is resolved and is successful
       if (ok) {
@@ -226,7 +230,9 @@ export default class BaseResolver {
     // TODO: meta should contain things like headers for cache invalidation
     // which can be used for single resources only
     // TODO: Also update all dependencies of this query as failed
-    this.cache.storeApiData(query, sourceDef, data);
+    if (data) {
+      this.cache.storeApiData(query, sourceDef, data);
+    }
 
     if (typeof query.callback === 'function') {
       query.callback(null, data);
