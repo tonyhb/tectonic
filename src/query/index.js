@@ -7,6 +7,13 @@ import {
 } from '/src/sources/returns.js';
 import * as status from '/src/status';
 
+// These consts are used within queries to state whether the query lists,
+// creates, updates or deletes a model
+export const GET = 'get';
+export const CREATE = 'create';
+export const UPDATE = 'update';
+export const DELETE = 'delete';
+
 /**
  * Query represents an API query to be resolved by the resolver. It is generated
  * directly from a model and contains thing such as fields required, parameters,
@@ -25,16 +32,21 @@ export default class Query {
   /**
    * @param Model
    * @param array|string   Array of fields or RETURNS_ALL_FIELDS
-   * @param RETURNS_ITEM|RETURNS_LIST   query for a single model or list
+   * @param string GET, CREATE, UPDATE, or DELETE from consts above. Specifies
+   *               the type of query to be sent across and match for in the
+   *               sources list. Defaults to GET
+   * @param string RETURNS_ITEM, RETURNS_LIST, or RETURNS NONE. Specifies
+   *               whether the GET query is for a single model or list of models
    * @param object   Object of query parameters to values
    */
-  constructor(model, fields, returnType, params = {}) {
+  constructor({ model, fields, queryType = GET, returnType, params = {} }) {
     model.assertFieldsExist(fields);
 
     this.model = model;
     this.fields = Array.isArray(fields) ? fields.sort() : fields;
     this.params = params;
     this.returnType = returnType;
+    this.queryType = queryType;
 
     // When the query is resolved and data is found this stores all of the IDs
     // returned by the API for the given model. This is then stored in a map of
@@ -57,6 +69,7 @@ export default class Query {
     this._toString = `Query(Model: ${this.model.modelName}, ` +
       `Fields: ${this.fields}, ` +
       `Params: ${JSON.stringify(this.params)}, ` +
+      `QueryType: ${this.queryType}), ` +
       `ReturnType: ${this.returnType})`;
 
     return this._toString;
@@ -66,12 +79,12 @@ export default class Query {
    * Returns whether the current query instance is the same
    */
   is(item) {
-    const { model: m1, fields: f1, params: p1, returnType: rt1 } = this;
-    const { model: m2, fields: f2, params: p2, returnType: rt2 } = item;
+    const { model: m1, fields: f1, params: p1, returnType: rt1, queryType: qt1 } = this;
+    const { model: m2, fields: f2, params: p2, returnType: rt2, queryType: qt2 } = item;
     const k1 = Object.keys(p1), k2 = Object.keys(p2);
 
     // Ensure the models and return types are the same.
-    if (m1 !== m2 || rt1 !== rt2) {
+    if (m1 !== m2 || rt1 !== rt2 || qt1 !== qt2) {
       return false;
     }
 

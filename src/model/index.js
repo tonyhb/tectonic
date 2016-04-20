@@ -7,7 +7,7 @@ import Returns, {
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
 } from '/src/sources/returns.js';
-import Query from '/src/query';
+import Query, { GET } from '/src/query';
 
 export default function(name, fields, opts = {}) {
 
@@ -102,7 +102,13 @@ export default function(name, fields, opts = {}) {
     if (params === undefined) {
       [fields, params] = [RETURNS_ALL_FIELDS, fields];
     }
-    return new Query(model, fields, RETURNS_ITEM, params);
+    return new Query({
+      model,
+      fields,
+      params,
+      queryType: GET,
+      returnType: RETURNS_ITEM
+    });
   };
 
   model.getList = (fields, params) => {
@@ -111,7 +117,13 @@ export default function(name, fields, opts = {}) {
     if (params === undefined) {
       [fields, params] = [RETURNS_ALL_FIELDS, fields];
     }
-    return new Query(model, fields, RETURNS_LIST, params);
+    return new Query({
+      model,
+      fields,
+      params,
+      queryType: GET,
+      returnType: RETURNS_LIST
+    });
   };
 
 

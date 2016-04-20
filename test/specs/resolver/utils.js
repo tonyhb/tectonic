@@ -23,11 +23,11 @@ describe('resolver utils', () => {
         returns: User.item(),
         meta: {}
       });
-      const q = new Query(
-        User,
-        RETURNS_ALL_FIELDS,
-        RETURNS_ITEM
-      );
+      const q = new Query({
+        model: User,
+        fields: RETURNS_ALL_FIELDS,
+        returnType: RETURNS_ITEM
+      });
       assert.isTrue(utils.doesSourceSatisfyQueryParams(s, q));
     });
 
@@ -38,12 +38,12 @@ describe('resolver utils', () => {
         meta: {},
         params: ['id']
       });
-      const q = new Query(
-        User,
-        RETURNS_ALL_FIELDS,
-        RETURNS_ITEM,
-        { id: 1 }
-      );
+      const q = new Query({
+        model: User,
+        fields: RETURNS_ALL_FIELDS,
+        returnType: RETURNS_ITEM,
+        params: { id: 1 },
+      });
       assert.isTrue(utils.doesSourceSatisfyQueryParams(s, q));
     });
 
@@ -55,14 +55,12 @@ describe('resolver utils', () => {
         params: ['id'],
         optionalParams: ['limit']
       });
-      const q = new Query(
-        User,
-        RETURNS_ALL_FIELDS,
-        RETURNS_ITEM,
-        {
-          id: 1
-        }
-      );
+      const q = new Query({
+        model: User,
+        fields: RETURNS_ALL_FIELDS,
+        returnType: RETURNS_ITEM,
+        params: { id: 1 },
+      });
       assert.isTrue(utils.doesSourceSatisfyQueryParams(s, q));
     });
 
@@ -74,15 +72,15 @@ describe('resolver utils', () => {
         params: ['id'],
         optionalParams: ['limit']
       });
-      const q = new Query(
-        User,
-        RETURNS_ALL_FIELDS,
-        RETURNS_ITEM,
-        {
+      const q = new Query({
+        model: User,
+        fields: RETURNS_ALL_FIELDS,
+        returnType: RETURNS_ITEM,
+        params: {
           id: 1,
           limit: 10
-        }
-      );
+        },
+      });
       assert.isTrue(utils.doesSourceSatisfyQueryParams(s, q));
     });
 
@@ -94,14 +92,12 @@ describe('resolver utils', () => {
         params: ['id'],
         optionalParams: ['limit']
       });
-      const q = new Query(
-        User,
-        RETURNS_ALL_FIELDS,
-        RETURNS_ITEM,
-        {
-          limit: 10
-        }
-      );
+      const q = new Query({
+        model: User,
+        fields: RETURNS_ALL_FIELDS,
+        returnType: RETURNS_ITEM,
+        params: { limit: 10 }
+      });
       assert.isFalse(utils.doesSourceSatisfyQueryParams(s, q));
     });
   });
@@ -113,39 +109,39 @@ describe('resolver utils', () => {
         returns: User.item(),
         meta: {}
       });
-      const q = new Query(
-        User,
-        ['name'],
-        RETURNS_ITEM
-      );
+      const q = new Query({
+        model: User,
+        fields: ['name'],
+        returnType: RETURNS_ITEM
+      });
       assert.isTrue(utils.doesSourceSatisfyAllQueryFields(s, q));
     });
 
-    it('returns false when source returns subet and query needs all', () => {
+    it('returns false when source returns subet of fields and query needs all', () => {
       const s = new SourceDefinition({
         id: 1,
         returns: User.item(['name']),
         meta: {}
       });
-      const q = new Query(
-        User,
-        RETURNS_ALL_FIELDS,
-        RETURNS_ITEM
-      );
+      const q = new Query({
+        model: User,
+        fields: RETURNS_ALL_FIELDS,
+        returnType: RETURNS_ITEM
+      });
       assert.isFalse(utils.doesSourceSatisfyAllQueryFields(s, q));
     });
 
-    it('returns true when source returns same subset to query', () => {
+    it('returns true when source returns same subset as query', () => {
       const s = new SourceDefinition({
         id: 1,
         returns: User.item(['id']),
         meta: {}
       });
-      const q = new Query(
-        User,
-        ['id'],
-        RETURNS_ITEM
-      );
+      const q = new Query({
+        model: User,
+        fields: ['id'],
+        returnType: RETURNS_ITEM
+      });
       assert.isTrue(utils.doesSourceSatisfyAllQueryFields(s, q));
     });
 
@@ -155,11 +151,11 @@ describe('resolver utils', () => {
         returns: User.item(['name']),
         meta: {}
       });
-      const q = new Query(
-        User,
-        ['id'],
-        RETURNS_ITEM
-      );
+      const q = new Query({
+        model: User,
+        fields: ['id'],
+        returnType: RETURNS_ITEM
+      });
       assert.isFalse(utils.doesSourceSatisfyAllQueryFields(s, q));
     });
 
@@ -185,12 +181,18 @@ describe('resolver utils', () => {
         returns: User.item(),
         meta: {}
       });
-      const q = new Query(
-        User,
-        ['id'],
-        RETURNS_LIST
-      );
+      const q = new Query({
+        model: User,
+        fields: ['id'],
+        returnType: RETURNS_LIST
+      });
       assert.isFalse(utils.doesSourceSatisfyQueryReturnType(s, q));
     });
   });
+
+  // Which aspect of crud the query represents
+  describe('doesSourceSatisfyQueryType', () => {
+    // it('returns true
+  });
+
 });
