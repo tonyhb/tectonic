@@ -3,6 +3,12 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import Manager from '/src/manager';
+import Query from '/src/query';
+import {
+  CREATE,
+  UPDATE,
+  DELETE
+} from '/src/consts';
 
 /**
  * Load is our decorator which accepts an object of queries or a function which
@@ -92,8 +98,23 @@ export default function load(queries) {
         setTimeout(() => manager.resolve(), 5);
       }
 
+      /**
+       * createModel is a function passed to the wrapped component. This
+       * function takes an instance of a model and an optional callback, creates
+       * a CREATEA query and adds it to the resolver.
+       *
+       * @param Model instantiated model with data added
+       * @param function async-style callback with params (err, response)
+       */
       createModel(model, callback) {
         // Add a query to the resolver which
+        // TODO: finish
+        const q = new Query({
+          model: model.constructor,
+          queryType: CREATE,
+          body: model.values()
+        });
+
       }
 
       render() {

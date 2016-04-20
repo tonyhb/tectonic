@@ -15,6 +15,11 @@ import { render } from '/test/utils';
 
 describe('Model', () => {
 
+  it('provides the model class from the constructor', () => {
+    let a = new User();
+    assert.equal(a.constructor, User);
+  })
+
   it('throws an error if created without any fields', () => {
     assert.throws(() => Model('name'), 'A model must contain fields');
   });
