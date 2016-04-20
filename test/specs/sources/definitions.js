@@ -3,8 +3,19 @@
 import { assert } from 'chai';
 import SourceDefinition from '/src/sources/definition.js';
 import { User } from '/test/models';
+import { GET } from '/src/consts';
 
 describe('SourceDefinition', () => {
+
+  describe('constructor', () => {
+    it('automatically assigns queryType of GET if it doesnt exist', () => {
+      const sd = new SourceDefinition({
+        meta: {},
+        returns: User.item()
+      });
+      assert.equal(sd.queryType, GET);
+    });
+  });
 
   describe('validation', () => {
     it('throws an error when objects miss required fields', () => {
@@ -23,6 +34,8 @@ describe('SourceDefinition', () => {
         'Source definitions must contain keys: returns, meta'
       );
     });
+
+    // TODO: Test that RETURNS_NONE is only applicable with non-GET sources
   });
 
   describe('id generation', () => {

@@ -10,7 +10,7 @@ import Returns, {
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
 } from '/src/sources/returns.js';
-
+import { GET, UPDATE, CREATE, DELETE } from '/src/consts';
 import { User, Post } from '/test/models';
 
 describe('resolver utils', () => {
@@ -192,7 +192,17 @@ describe('resolver utils', () => {
 
   // Which aspect of crud the query represents
   describe('doesSourceSatisfyQueryType', () => {
-    // it('returns true
+    // TODO: Test that model.getItem/getList adds GET query type
+    it('returns true if queryType matches', () => {
+      const s = new SourceDefinition({
+        returns: User.item(),
+        queryType: GET,
+        meta: {}
+      });
+      const q = User.getItem(1);
+      assert.isTrue(utils.doesSourceSatisfyQueryType(s, q));
+    });
+
   });
 
 });

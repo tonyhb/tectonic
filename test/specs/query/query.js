@@ -2,7 +2,8 @@
 
 import { assert } from 'chai';
 
-import Query, { GET, CREATE, UPDATE, DELETE } from '/src/query';
+import Query from '/src/query';
+import { GET, CREATE, UPDATE, DELETE } from '/src/consts';
 import { User } from '/test/models.js';
 import {
   RETURNS_ITEM,

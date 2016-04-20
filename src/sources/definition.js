@@ -1,6 +1,7 @@
 'use strict';
 
 import Returns from './returns';
+import { GET, CREATE, UPDATE, DELETE } from '/src/consts';
 
 /**
  * These keys are required in every source definition
@@ -38,7 +39,7 @@ export default class SourceDefinition {
    * @param array    array of query parameters for the API call
    * @param function driver function to call to invoke the source
    */
-  constructor({ id, returns, meta, params, optionalParams, driverFunc }) {
+  constructor({ id, returns, meta, params, optionalParams, driverFunc, queryType = GET }) {
     if (id === undefined) {
       id = Math.floor(Math.random() * (1 << 30)).toString(16);
     }
@@ -51,6 +52,8 @@ export default class SourceDefinition {
     this.params = params || [];
     this.optionalParams = optionalParams || [];
     this.driverFunc = driverFunc;
+    // Which CRUD action this refers to
+    this.queryType = queryType;
 
     if (typeof this.params === 'string') {
       this.params = [this.params];
