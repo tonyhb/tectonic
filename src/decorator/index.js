@@ -101,20 +101,73 @@ export default function load(queries) {
       /**
        * createModel is a function passed to the wrapped component. This
        * function takes an instance of a model and an optional callback, creates
-       * a CREATEA query and adds it to the resolver.
+       * a CREATE query and adds it to the resolver.
        *
-       * @param Model instantiated model with data added
+       * Examples:
+       *
+       *   No API params or callback:
+       *
+       *   onSubmit(data) {
+       *     this.props.createModel(new User(data));
+       *   }
+       *
+       *   No API params, with callback:
+       *
+       *   onSubmit(data) {
+       *     this.props.createModel(new User(data), (err, result) => {});
+       *   }
+       *
+       *   API params, no callback:
+       *
+       *   onSubmit(data) {
+       *     this.props.createModel({
+       *       model: new Post(data)
+       *       params: { userID: 1 }
+       *     });
+       *   }
+       *
+       *   API params and callback:
+       *
+       *   onSubmit(data) {
+       *     this.props.createModel(
+       *       {
+       *         model: new Post(data)
+       *         params: { userID: 1 }
+       *       },
+       *       (err, result) => {}
+       *     );
+       *   }
+       *
+       * @param Object containing model instance with data to save and any api
+       * params
        * @param function async-style callback with params (err, response)
        */
-      createModel(model, callback) {
-        // Add a query to the resolver which
-        // TODO: finish
-        const q = new Query({
+      createModel(opts, callback) {
+        // TODO: this is a somewhat hacky way of checking if we were passed
+        // a model instance. Fix me?
+        if (opts.constructor.instanceOf !== undefined) {
+          opts = { model: opts };
+        }
+
+        const { model, params } = opts;
+
+        // Add a query to the resolver which creates an instance of the model.
+        //
+        // Resolver utils only check that the returnType matches when querying
+        // for a list; this needs no returnType field.
+        const query = new Query({
+          params,
           model: model.constructor,
           queryType: CREATE,
           body: model.values()
         });
 
+        const {
+          context: { manager }
+        } = this;
+        // TODO: keep track of query in load component for future devtools?
+        manager.addQuery(query);
+        manager.resolve();
       }
 
       render() {
@@ -125,7 +178,8 @@ export default function load(queries) {
 
         const props = {
           ...this.props,
-          ...manager.props(queries)
+          ...manager.props(queries),
+          createModel: ::this.createModel
         };
 
         return <WrappedComponent { ...props } />

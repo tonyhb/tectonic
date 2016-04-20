@@ -5,7 +5,7 @@ import sinon from 'sinon';
 
 import React, { Component } from 'react';
 import load from '/src/decorator';
-import { CREATE } from '/src/query';
+import { CREATE } from '/src/consts';
 
 import { renderAndFind } from '/test/utils';
 import { createNewManager } from '/test/manager';
@@ -59,10 +59,11 @@ describe('creating a resource from within a component', () => {
 
     it('should pass a Query model with queryType of "CREATE" into the resolver', () => {
       const m = createNewManager();
-      const item = renderAndFind(<Wrapped />, Basic, m);
       const stub = sinon.stub(m, 'addQuery', (query) => {
         assert.equal(query.queryType, CREATE)
       });
+      const item = renderAndFind(<Wrapped />, Basic, m);
+      item.create(new User({ id: 1 }));
       assert.isTrue(stub.called);
     });
   });

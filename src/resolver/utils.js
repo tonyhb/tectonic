@@ -33,6 +33,9 @@ export function hash(str) {
  *
  * NOTE: This only tests satisfiability of required params.
  *
+ * TODO: Should we check that the source **also** allows for all params passed
+ * into the query?
+ *
  * @param SourceDefinition
  * @param Query
  * @return bool
