@@ -1,6 +1,6 @@
 'use strict';
 
-import { Model } from 'tectonic-redux';
+import { Model } from 'tectonic';
 
 export const User = new Model('user', {
   id: 0,
