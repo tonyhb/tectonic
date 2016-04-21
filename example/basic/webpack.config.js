@@ -23,10 +23,9 @@ module.exports = {
   resolveLoader: resolve,
   module: {
     loaders: [
-      {
-        test: /tectonic/,
-        loaders: ['babel-loader']
-      },
+      // Foregoing postcss for now. Much love to the PostCSS project though!
+      // You should use it.
+      { test: /\.css$/, loader: "style-loader!css-loader?modules&importLoaders=1" },
       {
         test: /\.jsx?$/,
         loaders: ['babel-loader'],

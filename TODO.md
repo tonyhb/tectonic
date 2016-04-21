@@ -8,3 +8,25 @@
 - Data updating: figure out how to update and create new models from a component
   (idea: pass a function down via @load that accepts arbitrary model instances
   for creating/updating. how do we define sources for this?)
+
+
+TODO FOR CRUD:
+
+- Resolver should find correct queries
+- If a source/query RETURNS_NONE when deleting don't add to the cache
+- If a query contains a callback, we should call it on success/error with server
+  data
+
+- Smarter resolver: bucket sources by their query types.
+
+Examples by crud:
+
+...We need params and body to go in the POST call.
+POST /api/v0/users/:id -.
+  {
+    params: { id: 1 },
+	body: {
+	  attrs...
+	}
+  }
+

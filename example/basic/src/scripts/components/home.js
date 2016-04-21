@@ -2,14 +2,15 @@
 
 import React, { Component } from 'react';
 const { object } = React.PropTypes;
-import load from 'tectonic-redux';
+import load from 'tectonic';
 
 import * as models from 'models';
 
+// This demo expects that you're logged in as user 1
 @load({
   user: models.User.getItem({ id: 1 })
 })
-export default class User extends Component {
+export default class Home extends Component {
   static propTypes = {
     status: object,
     user: object

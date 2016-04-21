@@ -1,10 +1,11 @@
 'use strict';
 
-import Returns, {
+import Returns from '/src/sources/returns';
+import {
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/sources/returns';
+} from '/src/consts';
 
 // TODO:
 // - `doesSourceSatisfySomeQueryFields` for partial matching
@@ -32,6 +33,9 @@ export function hash(str) {
  *
  * NOTE: This only tests satisfiability of required params.
  *
+ * TODO: Should we check that the source **also** allows for all params passed
+ * into the query?
+ *
  * @param SourceDefinition
  * @param Query
  * @return bool
@@ -53,7 +57,6 @@ export function doesSourceSatisfyQueryModel(source, query) {
     // This only returns one model
     return returns.model === query.model;
   }
-
 
   // This source returns more than one model
   return Object.keys(returns).some(k => returns[k].model === query.model);
@@ -113,4 +116,8 @@ export function doesSourceSatisfyQueryReturnType(source, query) {
     return false;
   }
   return true;
+}
+
+export function doesSourceSatisfyQueryType(source, query) {
+  return (source.queryType === query.queryType);
 }

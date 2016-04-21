@@ -1,0 +1,25 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "title": "json-server",
+      "body": "q: how many times have you pood yourself in public? a: too many",
+      "author": "typicode",
+      "authorID": 1
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "body": "some comment",
+      "postId": 1
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "name": "typicode",
+      "email": "foo@example.com"
+    }
+  ]
+}

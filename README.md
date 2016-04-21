@@ -106,7 +106,7 @@ different and only enqueue queries which have changed.
 The cache is an abstraction over the redux store. When querying the cache, the
 cache pulls data from the store and checks whether it's valid (according to
 cache rules you define). If the data is valid it returns said data. If it's
-invalid it returns `undefined`, causing the resolver to query for data. 
+invalid it returns `undefined`, causing the resolver to query for data.
 
 When the resolver queries for and successfully receives data it stores it in the
 cache, which delegates actual storage to the redux store.

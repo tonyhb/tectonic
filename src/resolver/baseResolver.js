@@ -3,6 +3,7 @@
 import * as utils from './utils';
 import { UPDATE_QUERY_STATUSES } from '/src/reducer';
 import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '/src/status';
+import { GET } from '/src/consts';
 
 /**
  * BaseResolver is a simple resolver which batches new queries from the
@@ -28,7 +29,8 @@ export default class BaseResolver {
     utils.doesSourceSatisfyQueryParams,
     utils.doesSourceSatisfyQueryModel,
     utils.doesSourceSatisfyAllQueryFields,
-    utils.doesSourceSatisfyQueryReturnType
+    utils.doesSourceSatisfyQueryReturnType,
+    utils.doesSourceSatisfyQueryType
   ];
 
 
@@ -106,13 +108,17 @@ export default class BaseResolver {
 
     queryKeys.forEach(hash => {
       const q = this.queries[hash];
-      const [data, ok] = this.cache.getQueryData(q, state);
-
       // We can remove this query from this.queries as it's processed. The
       // only queries we need to process in the future are based off of
       // dependent data loading, and these will be re-added by future renders of
       // the decorator.
       delete(this.queries[hash]);
+
+      // Check if the query is in the cache. getQueryData returns a tuple; if
+      // the second parameter of the tuple is true we already have data for this
+      // query and can skip it. However, if this returns FALSE we MUST
+      // process the query again unless it's in-flight.
+      const [data, ok] = this.cache.getQueryData(q, state);
 
       // We have data for this query; this query is resolved and is successful
       if (ok) {
@@ -121,9 +127,18 @@ export default class BaseResolver {
       }
 
       // check if the query status was previously set to pending
-      if (this.cache.getQueryStatus(q, state) === PENDING) {
+      const status = this.cache.getQueryStatus(q, state);
+      if (status === PENDING) {
         console.debug('query already pending and in flight; skipping', q);
         // no need to update the query status as it's already pending
+        return;
+      }
+
+      // If the query previously failed we should skip it if this is a GET
+      // request.
+      // TODO: test this is only for get requests
+      if (status === ERROR && q.queryType === GET) {
+        console.debug('query previously failed; skipping', q);
         return;
       }
 
@@ -208,6 +223,12 @@ export default class BaseResolver {
       return;
     }
 
+    // Call the callback if it exists with an error
+    if (typeof query.callback === 'function') {
+      // TODO improve error
+      query.callback('There is no source definition which resolves the query', null);
+    }
+
     this.statusMap[query.hash()] = ERROR;
     console.warn && console.warn(
       'There is no source definition which resolves the query',
@@ -219,7 +240,18 @@ export default class BaseResolver {
     // TODO: meta should contain things like headers for cache invalidation
     // which can be used for single resources only
     // TODO: Also update all dependencies of this query as failed
-    this.cache.storeApiData(query, sourceDef, data);
+    if (data) {
+      // TODO: test errors thrown here trigger failure 
+      try {
+        this.cache.storeApiData(query, sourceDef, data);
+      } catch (e) {
+        return this.fail(query, sourceDef, e);
+      }
+    }
+
+    if (typeof query.callback === 'function') {
+      query.callback(null, data);
+    }
   }
 
   fail(query, sourceDef, data) {
@@ -231,6 +263,10 @@ export default class BaseResolver {
         [query.hash()]: ERROR
       }
     });
+
+    if (typeof query.callback === 'function') {
+      query.callback(data, null);
+    }
   }
 
 }

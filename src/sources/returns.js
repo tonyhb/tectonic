@@ -1,12 +1,10 @@
 'use strict';
 
-// Used to determine whether any source for an item or list returns all model
-// fields
-export const RETURNS_ALL_FIELDS = '*';
-
-// Used to determine whether a source returns a single item or a list of items
-export const RETURNS_ITEM = 'item';
-export const RETURNS_LIST = 'list';
+import {
+  RETURNS_ITEM,
+  RETURNS_LIST,
+  RETURNS_ALL_FIELDS
+} from '/src/consts';
 
 /**
  * Returns defines a single entity returned from an API response.

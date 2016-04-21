@@ -1,12 +1,12 @@
 'use strict';
 
 import React, { Component, PropTypes } from 'react';
-import load from 'tectonic-redux';
+import load from 'tectonic';
 
 import * as models from 'models';
 
 @load((props, state) => ({
-  user: models.User.getItem({ id: 3 }),
+  user: models.User.getItem({ id: 1 }),
   posts: models.Post.getList({ userId: props.user && props.user.id })
 }))
 export default class Posts extends Component {
