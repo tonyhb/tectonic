@@ -8,3 +8,5 @@ export Loader from './component';
 export reducer from './reducer';
 // Resolvers
 export BaseResolver from './resolver/baseResolver.js';
+
+export * from './consts'; 
