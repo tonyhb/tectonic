@@ -62,18 +62,12 @@ export default class Query {
   }
 
   toString() {
-    if (this._toString !== undefined) {
-      return this._toString;
-    }
-
-    this._toString = `Query(Model: ${this.model.modelName}, ` +
+    return `Query(Model: ${this.model.modelName}, ` +
       `Fields: ${this.fields}, ` +
       `Params: ${JSON.stringify(this.params)}, ` +
       `Body: ${JSON.stringify(this.body)}, ` +
       `QueryType: ${this.queryType}), ` +
       `ReturnType: ${this.returnType})`;
-
-    return this._toString;
   }
 
   /**

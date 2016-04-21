@@ -2,6 +2,8 @@
 
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import deepEqual from 'deep-equal';
+
 import Manager from '/src/manager';
 import Query from '/src/query';
 import {
@@ -46,7 +48,39 @@ export default function load(queries) {
           // remove the tectonic state from props and pass it to the query
           // function as state. all remaining props are just standard props :)
           const { state, ...props } = props;
-          this.queries = queries(props, state);
+
+          // !! Note: slightly complex issue. At this point we may be rendering
+          // a componet with dependent data queries to be loaded with props and
+          // state.
+          //
+          // IF we've already queried for the parent query we'll already pass
+          // the props into the component during render() (via
+          // manager.props(this.queries)).
+          //
+          // This means that resolving **won't change our props** for the
+          // component: the component has props for the parent query in the
+          // initial render, and resolving **doesnt change the props** therefore
+          // componentWillReceiveProps will never get called and we won't
+          // compute the query function to resolve the child queries. The child
+          // queries will stay in UNDEFINED_PARAMS state forever. 
+          //
+          // To work around this we compute queries using the props from manager
+          // up until this.queries doesn't change.
+          //
+          // TODO: Create a proper DAG or tree of dependencies for each qeury.
+          // This isn't so performant.
+
+          // Compute queries from props and state, then compute the next set of
+          // props from those queries.
+          let computedQueries = queries(props, state);
+          let computedProps = context.manager.props(computedQueries);
+
+          while(deepEqual(computedQueries, queries(computedProps, state)) === false) {
+            computedQueries = queries(computedProps, state);
+            computedProps = context.manager.props(computedQueries);
+          }
+
+          this.queries = computedQueries;
         }
       }
 
