@@ -3,6 +3,7 @@
 import * as utils from './utils';
 import { UPDATE_QUERY_STATUSES } from '/src/reducer';
 import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '/src/status';
+import { GET } from '/src/consts';
 
 /**
  * BaseResolver is a simple resolver which batches new queries from the
@@ -133,8 +134,10 @@ export default class BaseResolver {
         return;
       }
 
-      // If the query previously failed we should skil it
-      if (status === ERROR) {
+      // If the query previously failed we should skip it if this is a GET
+      // request.
+      // TODO: test this is only for get requests
+      if (status === ERROR && q.queryType === GET) {
         console.debug('query previously failed; skipping', q);
         return;
       }
@@ -238,7 +241,12 @@ export default class BaseResolver {
     // which can be used for single resources only
     // TODO: Also update all dependencies of this query as failed
     if (data) {
-      this.cache.storeApiData(query, sourceDef, data);
+      // TODO: test errors thrown here trigger failure 
+      try {
+        this.cache.storeApiData(query, sourceDef, data);
+      } catch (e) {
+        return this.fail(query, sourceDef, e);
+      }
     }
 
     if (typeof query.callback === 'function') {

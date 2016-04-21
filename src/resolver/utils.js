@@ -58,7 +58,6 @@ export function doesSourceSatisfyQueryModel(source, query) {
     return returns.model === query.model;
   }
 
-
   // This source returns more than one model
   return Object.keys(returns).some(k => returns[k].model === query.model);
 }
