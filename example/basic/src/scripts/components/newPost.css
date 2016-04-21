@@ -1,0 +1,13 @@
+.form label, .form span {
+	display: block;
+}
+.form input, .form textarea {
+	border: 0;
+	border-bottom: 1px solid #ddd;
+	padding: .5rem;
+	width: 100%;
+	margin: 0 0 1rem 0;
+}
+.form textarea {
+	height: 10rem;
+}

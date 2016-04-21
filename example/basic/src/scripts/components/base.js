@@ -1,4 +1,3 @@
-
 'use strict';
 
 import React, { Component } from 'react';
@@ -13,6 +12,7 @@ const Base = ({ children }) => (
       <ul styleName='menu'>
         <li><Link to='/'>Home</Link></li>
         <li><Link to='/posts'>Posts</Link></li>
+        <li><Link to='/new-post'>New Post</Link></li>
       </ul>
     </div>
     <div styleName='content'>

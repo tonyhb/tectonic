@@ -27,7 +27,7 @@ html, body {
 	padding: 0;
 }
 .menu li {
-	float: inline-block;
+	display: inline-block;
 	margin: 0;
 	padding: 0;
 }

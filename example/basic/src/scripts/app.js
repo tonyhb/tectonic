@@ -3,9 +3,11 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { createStore, combineReducers } from 'redux';
-import { Manager, Loader, reducer, BaseResolver } from 'tectonic';
+import { Manager, Loader, reducer, BaseResolver, CREATE } from 'tectonic';
 import fromSuperagent from 'tectonic-superagent';
 import { Router, Route, hashHistory } from 'react-router';
+
+import { reducer as formReducer } from 'redux-form';
 
 // This is a mock driver which loads fake data for tectonic.
 // You should use our built in superagent drivers or your own driver here.
@@ -18,9 +20,13 @@ import * as models from './models';
 import Base from './components/base';
 import Home from './components/home';
 import Posts from './components/posts';
+import NewPost from './components/newPost';
 
 // 1: Add the tectonic reducer to your redux store
-const store = createStore(combineReducers({ tectonic: reducer }));
+const store = createStore(combineReducers({
+  tectonic: reducer,
+  form: formReducer
+}));
 
 // 2. Instantiate a new manager with your drivers, a resolver, and the redux
 //    store
@@ -50,6 +56,14 @@ manager.fromSuperagent([
     meta: {
       url: 'http://localhost:3001/posts?userId=:userId'
     }
+  },
+  {
+    queryType: CREATE,
+    returns: models.Post.item(),
+    meta: {
+      url: 'http://localhost:3001/posts',
+      method: 'POST'
+    }
   }
 ]);
 
@@ -62,6 +76,7 @@ const data = (
         <Route component={ Base }>
           <Route path="/" component={ Home } />
           <Route path="/posts" component={ Posts } />
+          <Route path="/new-post" component={ NewPost } />
         </Route>
       </Router>
     </Loader>
