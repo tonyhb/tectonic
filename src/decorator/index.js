@@ -105,8 +105,16 @@ export default function load(queries) {
           // use the existing this.queries object from the previous invokation
           // to get new params, then re-invoke queries
           const props = this.context.manager.props(this.queries)
-          this.queries = queries(props, state);
-          this.addAndResolveQueries();
+
+          // TODO: TEST IN UNIT TESTS
+          // Now we need to compare whether queries have changed with new props;
+          // if they haven't we should NEVER add and resolve lest we find
+          // ourselves in an infinite loop.
+          const newQueries = this.queries = queries(props, state);
+          if (deepEqual(this.queries, newQueries) === false) {
+            this.queries = newQueries;
+            this.addAndResolveQueries();
+          }
         }
       }
 
