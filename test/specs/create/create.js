@@ -109,6 +109,7 @@ describe('creating a resource from within a component', () => {
       );
 
       // Resolving happens after 5ms
+      // TODO: Spy on callback
       window.setTimeout(() => {
         assert.isArray(calledWith);
         const [err, result] = calledWith;

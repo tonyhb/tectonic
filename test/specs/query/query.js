@@ -21,6 +21,12 @@ describe('query', () => {
         'All fields must be defined within your model. Missing: foo'
       );
     });
+
+    it('stores callbacks', () => {
+      const cb = () => ({});
+      const q = new Query({ model: User, callback: cb });
+      assert.deepEqual(q.callback, cb);
+    });
   });
 
   describe('.is', () => {

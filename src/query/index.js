@@ -47,6 +47,7 @@ export default class Query {
     this.returnType = returnType;
     this.queryType = queryType;
     this.body = body;
+    this.callback = callback;
 
     // When the query is resolved and data is found this stores all of the IDs
     // returned by the API for the given model. This is then stored in a map of
