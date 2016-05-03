@@ -4,7 +4,8 @@ import Returns from '/src/sources/returns';
 import {
   RETURNS_ITEM,
   RETURNS_LIST,
-  RETURNS_ALL_FIELDS
+  RETURNS_ALL_FIELDS,
+  GET
 } from '/src/consts';
 
 // TODO:
@@ -111,11 +112,16 @@ export function doesSourceSatisfyAllQueryFields(source, query) {
  *
  */
 export function doesSourceSatisfyQueryReturnType(source, query) {
-  if (source.returns.returnType === RETURNS_ITEM
-    && query.returnType === RETURNS_LIST) {
-    return false;
-  }
-  return true;
+  // TODO: Revert to allowing a RETURNS_LIST call for a RETURNS_ITEM query;
+  // overfetching is OK as the LIST query may already be in flight.
+  //
+  // In order to allow this we need to smarten passing props down into
+  // a component - if the query for ITEM returns a LIST we'll currently pass the
+  // entire list down into the component and not the ITEM. That's not correct;
+  // we need to figure out the ID to extract and pass that back.
+
+  // Note that query.returnType will be undefined if this is a non-GET query.
+  return (source.returns.returnType === query.returnType || query.queryType !== GET);
 }
 
 export function doesSourceSatisfyQueryType(source, query) {
