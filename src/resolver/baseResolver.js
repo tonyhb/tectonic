@@ -114,6 +114,12 @@ export default class BaseResolver {
       // the decorator.
       delete(this.queries[hash]);
 
+      // If the query status is SUCCESS we can short-circuit
+      if (q.status === SUCCESS) {
+        this.statusMap[hash] = SUCCESS;
+        return;
+      }
+
       // Check if the query is in the cache. getQueryData returns a tuple; if
       // the second parameter of the tuple is true we already have data for this
       // query and can skip it. However, if this returns FALSE we MUST
