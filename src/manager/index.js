@@ -2,7 +2,7 @@
 
 import Sources from '/src/sources';
 import Cache from '/src/cache';
-import { SUCCESS } from '/src/status';
+import { PENDING, SUCCESS } from '/src/status';
 import { RETURNS_ITEM } from '/src/consts';
 
 /**
@@ -90,8 +90,16 @@ export default class Manager {
    * props returns the query data and loading data for a given set of queries.
    *
    * @param object Object of prop names => queries
+   * @param Immutable.Map tectonic state
+   * @param bool   whether to ignore cache when loading data. this should be
+   *               true when fetching props for rendering a component only
+   *               - this will always happen after a cache has become invalid.
+   *               however, when using query props inside a decorator this
+   *               should be false so that stale props are never passed into
+   *               a Query constructor.
    */
   props(queries, state = undefined) {
+    const { cache } = this;
     let props = {
       status: {},
     };
@@ -106,11 +114,27 @@ export default class Manager {
 
     Object.keys(queries).forEach(prop => {
       const query = queries[prop];
-      const status = state.getIn(['status', query.toString()]);
+      let status;
+
+      // ignoreCache will be 
+      const ignoreCache = query.status === SUCCESS;
+
+      // If this has expired and we're respecting the cache set the status to
+      // pending. It doesn't matter what we have stored; the state is not
+      // updated when a query expires.
+      if (this.cache.hasQueryExpired(query, state) && !ignoreCache) {
+        status = PENDING;
+      } else {
+        // We inject statuses for each query into this.props; get the status
+        // for the query.
+        status = cache.getQueryStatus(query, state);
+      }
+
       props.status[prop] = status;
+
       // If this query was a success load the data.
       if (status === SUCCESS) {
-        let [data, _] = this.cache.getQueryData(query, state);
+        let [data, _] = cache.getQueryData(query, state);
         props[prop] = data;
       } else {
         // Add an empty model as the prop so that this.props.model.x works

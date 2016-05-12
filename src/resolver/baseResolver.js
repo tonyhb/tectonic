@@ -114,22 +114,28 @@ export default class BaseResolver {
       // the decorator.
       delete(this.queries[hash]);
 
-      // If the query status is SUCCESS we can short-circuit
+      // If the query status is SUCCESS internally we can short-circuit. This
+      // allows us to not re-request a query with zero expiry time from
+      // a component re-rendering with different props.
       if (q.status === SUCCESS) {
         this.statusMap[hash] = SUCCESS;
         return;
       }
 
-      // Check if the query is in the cache. getQueryData returns a tuple; if
-      // the second parameter of the tuple is true we already have data for this
-      // query and can skip it. However, if this returns FALSE we MUST
-      // process the query again unless it's in-flight.
-      const [data, ok] = this.cache.getQueryData(q, state);
+      // Only check query data if the query has data that is NOT stale; ie we
+      // have cached data
+      if ( ! this.cache.hasQueryExpired(q, state)) {
+        // Check if the query is in the cache. getQueryData returns a tuple; if
+        // the second parameter of the tuple is true we already have data for this
+        // query and can skip it. However, if this returns FALSE we MUST
+        // process the query again unless it's in-flight.
+        const [data, ok] = this.cache.getQueryData(q, state);
 
-      // We have data for this query; this query is resolved and is successful
-      if (ok) {
-        this.statusMap[hash] = SUCCESS;
-        return;
+        // We have data for this query; this query is resolved and is successful
+        if (ok) {
+          this.statusMap[hash] = SUCCESS;
+          return;
+        }
       }
 
       // check if the query status was previously set to pending
@@ -242,15 +248,25 @@ export default class BaseResolver {
     );
   }
 
-  success(query, sourceDef, data, meta) {
-    // TODO: meta should contain things like headers for cache invalidation
-    // which can be used for single resources only
-    // TODO: Also update all dependencies of this query as failed
+  success(query, sourceDef, data, meta = {}) {
+    // TODO: Also update all dependencies of this query as success and
+    // re-resolve
+
+    // meta should contain things like headers for cache invalidation. we parse
+    // the `expires` and `cache-control` headers from meta.headers to determine
+    // the expiry date.
+    //
+    // by default this will return now, meaning this query will never be cached
+    const expires = this.parseCacheHeaders(meta.headers);
+
     if (data) {
       // TODO: test errors thrown here trigger failure 
       try {
-        this.cache.storeApiData(query, sourceDef, data);
+        query.status = SUCCESS;
+        this.cache.storeApiData(query, sourceDef, data, expires);
       } catch (e) {
+        console.warn(e);
+        query.status = ERROR;
         return this.fail(query, sourceDef, e);
       }
     }
@@ -261,6 +277,7 @@ export default class BaseResolver {
   }
 
   fail(query, sourceDef, data) {
+    // TODO: Also update all dependencies of this query as failed
     console.warn(`Query failed on ${query} using sourceDefinition ${sourceDef}: ${data}`);
 
     this.store.dispatch({
@@ -273,6 +290,26 @@ export default class BaseResolver {
     if (typeof query.callback === 'function') {
       query.callback(data, null);
     }
+  }
+
+  /**
+   * parseCacheHeaders allows us to determine when a successful query should be
+   * cached until
+   *
+   * @param object object of response headers
+   * @return Date  date to cache until. if no cache information can be
+   * determined this will return now
+   */
+  parseCacheHeaders(headers = {}) {
+    const cc = headers['cache-control'];
+    if (cc) {
+      return utils.parseCacheControlHeaders(cc);
+    }
+    const expires = new Date(headers.expires);
+    if (expires > new Date()) {
+      return expires;
+    }
+    return new Date();
   }
 
 }

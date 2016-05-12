@@ -127,3 +127,18 @@ export function doesSourceSatisfyQueryReturnType(source, query) {
 export function doesSourceSatisfyQueryType(source, query) {
   return (source.queryType === query.queryType);
 }
+
+// CACHING UTILS
+// =============
+
+export function parseCacheControlHeaders(cc) {
+  // Take the max-age header, if it exists
+  const match = cc.match(/max-age=(\d+)/);
+  if (match === undefined) {
+    return new Date();
+  }
+
+  const seconds = match[1];
+  let now = new Date();
+  return new Date(now.setSeconds(now.getSeconds() + seconds));
+}

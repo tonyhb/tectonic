@@ -90,9 +90,9 @@ export default class PropInspector {
            *   // TODO: Now that we're using a proxy we can:
            *   // - assert that the model actually has this prop
            *   // - assert that we're loading and specifying that model's fields
-           *   const parentQuery = queryMap[queryProp];
-           *   parentQuery.children = this;
-           *   this.parent = parentQuery;
+           *   return function() {
+           *     this.parent = queryProp;
+           *   };
            *   // TODO:
            *   // Return props defined by the parent for this or an empty object so
            *   // that accessing child attributes returns undefined.

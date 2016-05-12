@@ -42,7 +42,10 @@ export default function load(queries) {
       constructor(props, context) {
         super(...arguments);
 
+        // TODO: Test that adding .success to this.queries doesn't affect the
+        // constructor queries
         this.queries = queries || {};
+
         // If the queries is a function we need to evaulate it with the current
         // redux state and component props passed in to get our query object.
         if (typeof queries === 'function') {
@@ -52,6 +55,17 @@ export default function load(queries) {
 
           this.inspector = new PropInspector({ queryFunc: queries });
           this.queries = this.inspector.computeDependencies(props, state, context.manager);
+        } else {
+          // These are static queries, but the component may have already been
+          // rendered in a prior app path. This means that we're going to need
+          // to iterate through all queries and reset .status to undefined, so
+          // that we guarantee we don't skip the cache and respect cache control
+          Object.keys(this.queries).forEach(q => {
+            // TODO: Potential clone() method inside query which allows us to
+            // clone a query based on constructor args - instead of this reset
+            this.queries[q].status = undefined;
+            this.queries[q].returnedIds = new Set();
+          });
         }
       }
 
@@ -97,6 +111,10 @@ export default function load(queries) {
 
       componentWillMount() {
         this.addAndResolveQueries();
+      }
+
+      componnetWillUnmount() {
+        this.queries = {};
       }
 
       addAndResolveQueries() {
@@ -212,7 +230,7 @@ export default function load(queries) {
 
         const props = {
           ...this.props,
-          ...manager.props(queries),
+          ...manager.props(queries, undefined, true),
           createModel: ::this.createModel,
           updateModel: ::this.updateModel,
           deleteModel: ::this.deleteModel,

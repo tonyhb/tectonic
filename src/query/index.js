@@ -27,7 +27,24 @@ export default class Query {
    */
   sourceDefinition = undefined
 
-  status = status.PENDING
+  /**
+   * Represents the query status for an individual query.
+   *
+   * This is **extremely important** due to nuances: if this is SUCCESS, the
+   * manager will **always** load data for this query from the store regardless
+   * of cache validation.
+   *
+   * Background:
+   *
+   * - If a query response has a max-age of 0 we should discard the data on
+   *   another page load OR component mount, but ignore caching when loading
+   *   props for rendering or dependent data.
+   *
+   * - We only set the query status directly after resolving a query. This means
+   *   that we can guarantee that a query instance with status of SUCCESS is
+   *   fresh and can ignore the cache
+   */
+  status = undefined
 
   /**
    * @param Model
@@ -75,7 +92,7 @@ export default class Query {
     // store all data by ID).
     //
     // By default this is an empty array so we can push to it.
-    this.returnedIds = [];
+    this.returnedIds = new Set();
   }
 
   toString() {
