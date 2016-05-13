@@ -140,5 +140,5 @@ export function parseCacheControlHeaders(cc) {
 
   const seconds = match[1];
   let now = new Date();
-  return new Date(now.setSeconds(now.getSeconds() + seconds));
+  return new Date(now.getTime() + (seconds * 1000));
 }

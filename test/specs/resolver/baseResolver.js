@@ -37,7 +37,10 @@ describe('BaseResolver', () => {
           meta: {
             returns: (success) => {
               window.setTimeout(() => {
-                success({ id: 1, name: 'foo', email: 'foo@bar.com' });
+                success(
+                  { id: 1, name: 'foo', email: 'foo@bar.com' },
+                  { headers: { 'cache-control': 'max-age=3600' } }
+                );
               }, 1000);
             }
           }
@@ -57,12 +60,23 @@ describe('BaseResolver', () => {
     }
 
     describe('caching', () => {
-      it('checks the cache to see if data exists for a query', () => {
+
+      it('checks the cache to see if the query has expired', () => {
         const m = resolveAllManager();
         m.addQuery(User.getItem({ id: 1 }));
-        const spy = sinon.spy(m.resolver.cache, 'getQueryData');
+        const spy = sinon.spy(m.resolver.cache, 'hasQueryExpired');
         m.resolve();
-        assert(spy.called);
+        assert.isTrue(spy.called);
+      });
+
+      it('if the query has expired doesnt get query data', () => {
+        const m = resolveAllManager();
+        const q = User.getItem({ id: 1 })
+        assert.isTrue(m.resolver.cache.hasQueryExpired(q, m.store.getState().tectonic));
+        const spy = sinon.spy(m.resolver.cache, 'getQueryData');
+        m.addQuery(q);
+        m.resolve();
+        assert.isFalse(spy.called);
       });
 
       it('checks the cache to see if a request is in-flight for a current query', () => {
@@ -72,6 +86,59 @@ describe('BaseResolver', () => {
         m.resolve();
         assert(spy.called);
       });
+
+      describe('parseCacheHeaders', () => {
+
+        it('cache-control', () => {
+          const r = new BaseResolver();
+          const date = r.parseCacheHeaders({ 'cache-control': 'max-age=60' });
+          const now = new Date();
+          // Assert that the cache-control date is within 200ms of what we
+          // expect
+          assert.approximately(
+            date.getTime(),
+            new Date(now.getTime() + (60 * 1000)).getTime(),
+            200
+          );
+        });
+
+      });
+
+      it('stores cache information for a query', (done) => {
+        const m = resolveAllManager();
+        const q = User.getItem({ id: 1 })
+        m.addQuery(q);
+        m.resolve();
+
+        window.setTimeout(() => {
+          const expires = m.store.getState().tectonic.getIn(['queriesToExpiry', q.toString()])
+          assert.isDefined(expires);
+          assert.isTrue(expires > new Date());
+          done();
+        }, 1500);
+      });
+
+      it('uses cached query data where possible', (done) => {
+        const m = resolveAllManager();
+        let q = User.getItem({ id: 1 })
+
+        m.addQuery(q);
+        m.resolve();
+
+        window.setTimeout(() => {
+          let q = User.getItem({ id: 1 })
+
+          const expirySpy = sinon.spy(m.resolver.cache, 'hasQueryExpired');
+          const queryDataSpy = sinon.spy(m.resolver.cache, 'getQueryData');
+          m.addQuery(q);
+          m.resolve();
+          assert.isTrue(expirySpy.called);
+          assert.isTrue(queryDataSpy.called);
+
+          done();
+        }, 1500);
+      });
+
     });
 
     xit('calls driver functions for newly resolved sources', () => {
