@@ -29,16 +29,16 @@ describe('parsing cache data', () => {
         name: 'foo',
         email: 'foo@bar.com'
       };
-      const time = new Date();
+      const expires = new Date();
 
       const expected = {
         1: {
           data: apiResponse,
-          cache: { time }
+          cache: { expires }
         }
       };
       assert.deepEqual(
-        cache._parseReturnsData(User.getItem(), sd.returns, User, apiResponse, time),
+        cache._parseReturnsData(User.getItem(), sd.returns, User, apiResponse, expires),
         expected
       );
     });
@@ -60,20 +60,20 @@ describe('parsing cache data', () => {
           email: 'baz@bar.com'
         },
       ];
-      const time = new Date();
+      const expires = new Date();
 
       const expected = {
         1: {
           data: apiResponse[0],
-          cache: { time }
+          cache: { expires }
         },
         2: {
           data: apiResponse[1],
-          cache: { time }
+          cache: { expires }
         }
       };
       assert.deepEqual(
-        cache._parseReturnsData(User.getList(), sd.returns, User, apiResponse, time),
+        cache._parseReturnsData(User.getList(), sd.returns, User, apiResponse, expires),
         expected
       );
     });
@@ -142,28 +142,28 @@ describe('parsing cache data', () => {
           },
         ]
       };
-      const time = new Date();
+      const expires = new Date();
 
       const expected = {
         User: {
           1: {
             data: apiResponse.user,
-            cache: { time }
+            cache: { expires }
           }
         },
         Post: {
           1: {
             data: apiResponse.posts[0],
-            cache: { time }
+            cache: { expires }
           },
           2: {
             data: apiResponse.posts[1],
-            cache: { time }
+            cache: { expires }
           },
         }
       };
       assert.deepEqual(
-        cache.parseApiData(Post.getList(), sd, apiResponse, time),
+        cache.parseApiData(Post.getList(), sd, apiResponse, expires),
         expected
       );
     });
@@ -181,9 +181,9 @@ describe('parsing cache data', () => {
         email: 'foo@bar.com'
       };
       let query = User.getItem()
-      assert.deepEqual([], query.returnedIds);
+      assert.deepEqual(new Set(), query.returnedIds);
       cache.parseApiData(query, sd, apiResponse);
-      assert.deepEqual(['1'], query.returnedIds);
+      assert.deepEqual(new Set(['1']), query.returnedIds);
     });
 
     it('with a polymorphic query and return', () => {
@@ -214,14 +214,14 @@ describe('parsing cache data', () => {
 
       // With a query for the user
       let query = User.getItem()
-      assert.deepEqual([], query.returnedIds);
+      assert.deepEqual(new Set(), query.returnedIds);
       cache.parseApiData(query, sd, apiResponse);
-      assert.deepEqual(['1'], query.returnedIds);
+      assert.deepEqual(new Set(['1']), query.returnedIds);
 
       query = Post.getList()
-      assert.deepEqual([], query.returnedIds);
+      assert.deepEqual(new Set(), query.returnedIds);
       cache.parseApiData(query, sd, apiResponse);
-      assert.deepEqual(['1', '2'], query.returnedIds);
+      assert.deepEqual(new Set(['1', '2']), query.returnedIds);
     });
   });
 
@@ -238,14 +238,13 @@ describe('parsing cache data', () => {
       name: 'foo',
       email: 'foo@bar.com'
     };
-    const time = new Date();
 
     // Store data and set up state
     cache.storeApiData(query, sd, apiResponse);
 
     const state = store.getState().tectonic;
 
-    assert.deepEqual(state.getIn(['queriesToIds', query.hash()]), ['1']);
+    assert.deepEqual(state.getIn(['queriesToIds', query.hash()]), new Set(['1']));
 
     const [data, ok] = cache.getQueryData(query, state);
     assert.isTrue(ok);

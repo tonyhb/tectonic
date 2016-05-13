@@ -92,6 +92,9 @@ export default class Query {
     // store all data by ID).
     //
     // By default this is an empty array so we can push to it.
+    //
+    // Also, by making this an ES6 set we guarantee uniqueness so as to not
+    // check the 
     this.returnedIds = new Set();
   }
 
