@@ -187,7 +187,7 @@ describe('@load: e2e end-to-end test', () => {
         return <p>stuff</p>;
       }
     }
-    const WrappedBase = load((state, props) => ({
+    const WrappedBase = load(props => ({
       user: User.getItem(),
       posts: Post.getList({ userID: props.user && props.user.id })
     }))(Base);

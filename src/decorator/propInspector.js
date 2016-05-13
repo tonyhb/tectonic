@@ -6,7 +6,7 @@ import deepEqual from 'deep-equal';
  *
  * Given this decorator:
  *
- * @load((props, state) => ({
+ * @load((props) => ({
  *   user: User.getItem({ id: props.id }),
  *   posts: Posts.getList({ userName: user.name })
  * })
@@ -23,12 +23,12 @@ export default class PropInspector {
     this.queryFunc = queryFunc;
   }
 
-  computeDependencies(props, state, manager) {
+  computeDependencies(props, manager) {
     const { queryFunc } = this;
     // This gives us a map of prop names to queries.
     // We can use this to determine if queries generate props which other
     // queries depend on.
-    let queryMap = queryFunc(props, state);
+    let queryMap = queryFunc(props);
 
     // !! Note: slightly complex issue. At this point we may be rendering
     // a componet with dependent data queries to be loaded with props and
@@ -50,8 +50,8 @@ export default class PropInspector {
     if (manager) {
       let computedProps = manager.props(queryMap);
 
-      while(deepEqual(queryMap, queryFunc(computedProps, state)) === false) {
-        queryMap = queryFunc(computedProps, state);
+      while(deepEqual(queryMap, queryFunc(computedProps)) === false) {
+        queryMap = queryFunc(computedProps);
         computedProps = manager.props(queryMap);
       }
     }
@@ -125,7 +125,7 @@ export default class PropInspector {
     // Call the decorator's query function again using the accessor.
     // This will return an object of prop names to queries with correct
     // parent relationships.
-    const tree = this.queryFunc(this.accessor, state);
+    const tree = this.queryFunc(this.accessor);
 
     // Here we iterate through all items in the tree and reassign parents and
     // children of each query based on the queryMap modified by the proxy above

@@ -54,7 +54,7 @@ export default function load(queries) {
           const { state, ...props } = props;
 
           this.inspector = new PropInspector({ queryFunc: queries });
-          this.queries = this.inspector.computeDependencies(props, state, context.manager);
+          this.queries = this.inspector.computeDependencies(props, this.context.manager);
         } else {
           // These are static queries, but the component may have already been
           // rendered in a prior app path. This means that we're going to need
@@ -96,7 +96,7 @@ export default function load(queries) {
 
           // Generate new queries by computing dependencies with the new props
           // and state.
-          const newQueries = this.inspector.computeDependencies(props, state);
+          const newQueries = this.inspector.computeDependencies(props);
 
           // Assign the props newQueries to this.queries; this is gonna retain
           // query statuses for successful queries and not re-query them even if
