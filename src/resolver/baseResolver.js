@@ -141,7 +141,7 @@ export default class BaseResolver {
       // check if the query status was previously set to pending
       const status = this.cache.getQueryStatus(q, state);
       if (status === PENDING) {
-        console.debug('query already pending and in flight; skipping', q);
+        console.debug && console.debug('query already pending and in flight; skipping', q);
         // no need to update the query status as it's already pending
         return;
       }
@@ -150,7 +150,8 @@ export default class BaseResolver {
       // request.
       // TODO: test this is only for get requests
       if (status === ERROR && q.queryType === GET) {
-        console.debug('query previously failed; skipping', q);
+        q.status = ERROR;
+        console.debug && console.debug('query previously failed; skipping', q);
         return;
       }
 
@@ -165,7 +166,7 @@ export default class BaseResolver {
 
     this.store.dispatch({
       type: UPDATE_QUERY_STATUSES,
-      payload: this.statusMap
+      payload: { ...this.statusMap }
     });
 
     // Now we reset the map
@@ -242,6 +243,7 @@ export default class BaseResolver {
     }
 
     this.statusMap[query.hash()] = ERROR;
+    query.status = ERROR;
     console.warn && console.warn(
       'There is no source definition which resolves the query',
       query.toString()

@@ -41,7 +41,7 @@ describe('BaseResolver', () => {
                   { id: 1, name: 'foo', email: 'foo@bar.com' },
                   { headers: { 'cache-control': 'max-age=3600' } }
                 );
-              }, 1000);
+              }, 50);
             }
           }
         },
@@ -115,7 +115,7 @@ describe('BaseResolver', () => {
           assert.isDefined(expires);
           assert.isTrue(expires > new Date());
           done();
-        }, 1500);
+        }, 75);
       });
 
       it('uses cached query data where possible', (done) => {
@@ -136,7 +136,7 @@ describe('BaseResolver', () => {
           assert.isTrue(queryDataSpy.called);
 
           done();
-        }, 1500);
+        }, 75);
       });
 
     });

@@ -121,7 +121,15 @@ export function doesSourceSatisfyQueryReturnType(source, query) {
   // we need to figure out the ID to extract and pass that back.
 
   // Note that query.returnType will be undefined if this is a non-GET query.
-  return (source.returns.returnType === query.returnType || query.queryType !== GET);
+  let { returns } = source;
+
+  if (source.isPolymorphic()) {
+    const key = Object.keys(returns)
+      .find(k => returns[k].model === query.model);
+    returns = returns[key];
+  }
+
+  return (returns.returnType === query.returnType || query.queryType !== GET);
 }
 
 export function doesSourceSatisfyQueryType(source, query) {

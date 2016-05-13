@@ -2,7 +2,7 @@
 
 import Sources from '/src/sources';
 import Cache from '/src/cache';
-import { PENDING, SUCCESS } from '/src/status';
+import { PENDING, ERROR, SUCCESS } from '/src/status';
 import { RETURNS_ITEM } from '/src/consts';
 
 /**
@@ -114,15 +114,20 @@ export default class Manager {
 
     Object.keys(queries).forEach(prop => {
       const query = queries[prop];
-      let status;
+      let status = cache.getQueryStatus(query, state);
 
-      // ignoreCache will be 
-      const ignoreCache = query.status === SUCCESS;
+      // respectCache is only taken into account if the status is undefined or
+      // pending; if the status is SUCCESS or ERROR within the query it has
+      // already been resolved.
+      const respectCache = query.status !== SUCCESS && status !== ERROR;
 
-      // If this has expired and we're respecting the cache set the status to
-      // pending. It doesn't matter what we have stored; the state is not
-      // updated when a query expires.
-      if (this.cache.hasQueryExpired(query, state) && !ignoreCache) {
+      // We only respect the cache if the query status is pending or undefined.
+      // You might expect us to respec the cache if the status is SUCCESS: we
+      // don't, because the query property's status is ONLY set if the query has
+      // just been resolved, so we can ignore the cache.
+      // SUCCESS is not set internally on query instances based on cache hits
+      // TODO: tidy into cache hit property?
+      if (this.cache.hasQueryExpired(query, state) && respectCache) {
         status = PENDING;
       } else {
         // We inject statuses for each query into this.props; get the status
