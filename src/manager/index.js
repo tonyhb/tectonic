@@ -2,7 +2,7 @@
 
 import Sources from '/src/sources';
 import Cache from '/src/cache';
-import { SUCCESS } from '/src/status';
+import { PENDING, ERROR, SUCCESS } from '/src/status';
 import { RETURNS_ITEM } from '/src/consts';
 
 /**
@@ -90,8 +90,16 @@ export default class Manager {
    * props returns the query data and loading data for a given set of queries.
    *
    * @param object Object of prop names => queries
+   * @param Immutable.Map tectonic state
+   * @param bool   whether to ignore cache when loading data. this should be
+   *               true when fetching props for rendering a component only
+   *               - this will always happen after a cache has become invalid.
+   *               however, when using query props inside a decorator this
+   *               should be false so that stale props are never passed into
+   *               a Query constructor.
    */
   props(queries, state = undefined) {
+    const { cache } = this;
     let props = {
       status: {},
     };
@@ -106,11 +114,32 @@ export default class Manager {
 
     Object.keys(queries).forEach(prop => {
       const query = queries[prop];
-      const status = state.getIn(['status', query.toString()]);
+      let status = cache.getQueryStatus(query, state);
+
+      // respectCache is only taken into account if the status is undefined or
+      // pending; if the status is SUCCESS or ERROR within the query it has
+      // already been resolved.
+      const respectCache = query.status !== SUCCESS && status !== ERROR;
+
+      // We only respect the cache if the query status is pending or undefined.
+      // You might expect us to respec the cache if the status is SUCCESS: we
+      // don't, because the query property's status is ONLY set if the query has
+      // just been resolved, so we can ignore the cache.
+      // SUCCESS is not set internally on query instances based on cache hits
+      // TODO: tidy into cache hit property?
+      if (this.cache.hasQueryExpired(query, state) && respectCache) {
+        status = PENDING;
+      } else {
+        // We inject statuses for each query into this.props; get the status
+        // for the query.
+        status = cache.getQueryStatus(query, state);
+      }
+
       props.status[prop] = status;
+
       // If this query was a success load the data.
       if (status === SUCCESS) {
-        let [data, _] = this.cache.getQueryData(query, state);
+        let [data, _] = cache.getQueryData(query, state);
         props[prop] = data;
       } else {
         // Add an empty model as the prop so that this.props.model.x works

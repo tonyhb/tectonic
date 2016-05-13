@@ -121,9 +121,32 @@ export function doesSourceSatisfyQueryReturnType(source, query) {
   // we need to figure out the ID to extract and pass that back.
 
   // Note that query.returnType will be undefined if this is a non-GET query.
-  return (source.returns.returnType === query.returnType || query.queryType !== GET);
+  let { returns } = source;
+
+  if (source.isPolymorphic()) {
+    const key = Object.keys(returns)
+      .find(k => returns[k].model === query.model);
+    returns = returns[key];
+  }
+
+  return (returns.returnType === query.returnType || query.queryType !== GET);
 }
 
 export function doesSourceSatisfyQueryType(source, query) {
   return (source.queryType === query.queryType);
+}
+
+// CACHING UTILS
+// =============
+
+export function parseCacheControlHeaders(cc) {
+  // Take the max-age header, if it exists
+  const match = cc.match(/max-age=(\d+)/);
+  if (match === undefined) {
+    return new Date();
+  }
+
+  const seconds = match[1];
+  let now = new Date();
+  return new Date(now.getTime() + (seconds * 1000));
 }

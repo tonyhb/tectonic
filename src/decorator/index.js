@@ -6,6 +6,7 @@ import deepEqual from 'deep-equal';
 
 import Manager from '/src/manager';
 import Query from '/src/query';
+import PropInspector from './propInspector.js';
 import {
   GET,
   CREATE,
@@ -41,7 +42,10 @@ export default function load(queries) {
       constructor(props, context) {
         super(...arguments);
 
+        // TODO: Test that adding .success to this.queries doesn't affect the
+        // constructor queries
         this.queries = queries || {};
+
         // If the queries is a function we need to evaulate it with the current
         // redux state and component props passed in to get our query object.
         if (typeof queries === 'function') {
@@ -49,38 +53,19 @@ export default function load(queries) {
           // function as state. all remaining props are just standard props :)
           const { state, ...props } = props;
 
-          // !! Note: slightly complex issue. At this point we may be rendering
-          // a componet with dependent data queries to be loaded with props and
-          // state.
-          //
-          // IF we've already queried for the parent query we'll already pass
-          // the props into the component during render() (via
-          // manager.props(this.queries)).
-          //
-          // This means that resolving **won't change our props** for the
-          // component: the component has props for the parent query in the
-          // initial render, and resolving **doesnt change the props** therefore
-          // componentWillReceiveProps will never get called and we won't
-          // compute the query function to resolve the child queries. The child
-          // queries will stay in UNDEFINED_PARAMS state forever. 
-          //
-          // To work around this we compute queries using the props from manager
-          // up until this.queries doesn't change.
-          //
-          // TODO: Create a proper DAG or tree of dependencies for each qeury.
-          // This isn't so performant.
-
-          // Compute queries from props and state, then compute the next set of
-          // props from those queries.
-          let computedQueries = queries(props, state);
-          let computedProps = context.manager.props(computedQueries);
-
-          while(deepEqual(computedQueries, queries(computedProps, state)) === false) {
-            computedQueries = queries(computedProps, state);
-            computedProps = context.manager.props(computedQueries);
-          }
-
-          this.queries = computedQueries;
+          this.inspector = new PropInspector({ queryFunc: queries });
+          this.queries = this.inspector.computeDependencies(props, this.context.manager);
+        } else {
+          // These are static queries, but the component may have already been
+          // rendered in a prior app path. This means that we're going to need
+          // to iterate through all queries and reset .status to undefined, so
+          // that we guarantee we don't skip the cache and respect cache control
+          Object.keys(this.queries).forEach(q => {
+            // TODO: Potential clone() method inside query which allows us to
+            // clone a query based on constructor args - instead of this reset
+            this.queries[q].status = undefined;
+            this.queries[q].returnedIds = new Set();
+          });
         }
       }
 
@@ -89,37 +74,47 @@ export default function load(queries) {
       }
 
       /**
-       * componentWillReceiveProps is called after new props are passed down,
-       * typically from queries being resolved and data being available.
+       * componentWillReceiveProps is called after new props are passed down to
+       * our component.
        *
-       * This means that we need to potentially re-calculate the decorator query
-       * function with new props. To do this we use the previous decorator query
-       * evaluation to get new props from the state.
+       * We only need to re-calculate our queries if the props passed down are
+       * different from those that were passed in the constructor.
+       *
+       * And even then, we should only re-resolve queries that have changed.
        *
        */
       componentWillReceiveProps(next) {
-        if (typeof queries === 'function') {
-          // TODO: optimize. We don't need to re-calculate ths function when
-          // status states change.
-          const { state } = next;
+        if (typeof queries === 'function' && next !== undefined) {
+          const { state, ...others } = next;
+
           // use the existing this.queries object from the previous invokation
           // to get new params, then re-invoke queries
-          const props = this.context.manager.props(this.queries)
+          const props = {
+            ...others,
+            ...this.context.manager.props(this.queries),
+          };
 
-          // TODO: TEST IN UNIT TESTS
-          // Now we need to compare whether queries have changed with new props;
-          // if they haven't we should NEVER add and resolve lest we find
-          // ourselves in an infinite loop.
-          const newQueries = this.queries = queries(props, state);
-          if (deepEqual(this.queries, newQueries) === false) {
-            this.queries = newQueries;
-            this.addAndResolveQueries();
-          }
+          // Generate new queries by computing dependencies with the new props
+          // and state.
+          const newQueries = this.inspector.computeDependencies(props);
+
+          // Assign the props newQueries to this.queries; this is gonna retain
+          // query statuses for successful queries and not re-query them even if
+          // the cache is now invalid
+          Object.keys(newQueries).forEach(q => {
+            this.queries[q].params = newQueries[q].params;
+          });
+
+          this.addAndResolveQueries();
         }
       }
 
       componentWillMount() {
         this.addAndResolveQueries();
+      }
+
+      componnetWillUnmount() {
+        this.queries = {};
       }
 
       addAndResolveQueries() {
@@ -235,7 +230,7 @@ export default function load(queries) {
 
         const props = {
           ...this.props,
-          ...manager.props(queries),
+          ...manager.props(queries, undefined, true),
           createModel: ::this.createModel,
           updateModel: ::this.updateModel,
           deleteModel: ::this.deleteModel,

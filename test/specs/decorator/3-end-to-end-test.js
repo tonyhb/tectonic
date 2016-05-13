@@ -14,7 +14,7 @@ import { renderAndFind } from '/test/utils';
 
 describe('@load: e2e end-to-end test', () => {
 
-  it('queries a single model on a non-polymorphic source', () => {
+  it('queries a single model on a non-polymorphic source', (done) => {
     // This is the data returned from the API and should be within the
     // components props.
     const data = {
@@ -70,11 +70,12 @@ describe('@load: e2e end-to-end test', () => {
     window.setTimeout(() => {
       assert.equal(item.props.status.user, status.SUCCESS);
       assert.deepEqual(item.props.user, data);
+      done();
     }, 5);
   });
 
 
-  it('queries a single model on a polymorphic source', () => {
+  it('queries a single model on a polymorphic source', (done) => {
     // This is the data returned from the API and should be within the
     // components props.
     const data = {
@@ -135,10 +136,11 @@ describe('@load: e2e end-to-end test', () => {
     window.setTimeout(() => {
       assert.equal(item.props.status.posts, status.SUCCESS);
       assert.deepEqual(item.props.posts, data.posts);
+      done();
     }, 10);
   });
 
-  it('queries with dependent data based off of a previous API call', () => {
+  it('queries with dependent data based off of a previous API call', (done) => {
     // This is the data returned from the API and should be within the
     // components props.
     const data = {
@@ -164,7 +166,9 @@ describe('@load: e2e end-to-end test', () => {
     manager.fromMock([
       {
         meta: {
-          returns: data.user
+          returns: (success) => {
+            window.setTimeout(() => success(data.user), 5);
+          }
         },
         returns: User.item(),
       },
@@ -187,7 +191,7 @@ describe('@load: e2e end-to-end test', () => {
         return <p>stuff</p>;
       }
     }
-    const WrappedBase = load((state, props) => ({
+    const WrappedBase = load(props => ({
       user: User.getItem(),
       posts: Post.getList({ userID: props.user && props.user.id })
     }))(Base);
@@ -195,6 +199,7 @@ describe('@load: e2e end-to-end test', () => {
 
     window.setTimeout(() => {
       assert.deepEqual(item.props.posts, data.posts);
-    }, 10);
+      done();
+    }, 50);
   });
 });

@@ -4,7 +4,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { createStore, combineReducers } from 'redux';
 import { Manager, Loader, reducer, BaseResolver, CREATE } from 'tectonic';
-import fromSuperagent from 'tectonic-superagent';
+import TectonicSuperagent from 'tectonic-superagent';
 import { Router, Route, hashHistory } from 'react-router';
 
 import { reducer as formReducer } from 'redux-form';
@@ -33,7 +33,11 @@ const store = createStore(combineReducers({
 const manager = new Manager({
   drivers: {
     fromMock: mockDriver,
-    fromSuperagent: fromSuperagent
+    fromSuperagent: new TectonicSuperagent({
+      request: (r) => {
+        return r
+      }
+    })
   },
   resolver: new BaseResolver(),
   store: store

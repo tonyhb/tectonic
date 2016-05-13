@@ -13,7 +13,7 @@ import { User, Post } from '/test/models';
 
 describe('@load: status props', () => {
 
-  it('it injects status into this.props', () => {
+  it('it injects status into this.props', (done) => {
     class Base extends Component {
       static propTypes = {
         status: PropTypes.object,
@@ -46,6 +46,7 @@ describe('@load: status props', () => {
       assert.isDefined(item.props.status.user);
       assert.equal(item.props.status.user, status.ERROR);
       assert.equal(item.props.status.post, status.ERROR);
+      done();
     }, 10);
   });
 

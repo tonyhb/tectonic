@@ -36,7 +36,6 @@ export const recordMethods = [
   'withMutations',
   'asMutable',
   'asImmutable',
-  'toJS',
   'toObject'
 ];
 
@@ -104,6 +103,9 @@ export default function(name, fields, opts = {}) {
           let record = this.record[method].apply(this.record, arguments);
           return new this.constructor(record);
         }.bind(this);
+        this.toJS = function() {
+          return this.record.toJS.apply(this.record, arguments);
+        }
       });
     }
 

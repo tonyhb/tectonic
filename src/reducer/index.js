@@ -23,7 +23,10 @@ const defaultState = new Map({
   data: new Map(),
 
   // Stores a list of queries to the model IDs they returned
-  queriesToIds: new Map()
+  queriesToIds: new Map(),
+
+  // TODO: Merge queriesToId, Status and queriesToExpiry into one map
+  queriesToExpiry: new Map(),
 });
 
 export const UPDATE_QUERY_STATUSES = '@@tectonic/update-query-statuses';
@@ -40,11 +43,12 @@ const reducer = (state = defaultState, action) => {
   // This is called when a query is successful, so we update data, queriesToIds
   // and the status of the query
   if (action.type === UPDATE_DATA) {
-    const { query, data } = action.payload;
+    const { query, data, expires } = action.payload;
 
     return state.withMutations(s => {
       s.mergeDeep({ data: data });
-      s.setIn(['queriesToIds', query.hash()], query.returnedIds);
+      s.setIn(['queriesToIds', query.toString()], query.returnedIds);
+      s.setIn(['queriesToExpiry', query.toString()], expires);
       s.setIn(['status', query.toString()], SUCCESS);
       return s;
     });
