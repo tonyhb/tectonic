@@ -24,9 +24,9 @@ In short:
    injected as props to show loading views.
 
 ```js
-import load, { Manager, Model, Loader } from 'tectonic';
-import { superagent } from 'tectonic/drivers';
-import { DumbResolver } from 'tectonic/resolvers';
+import load, { Manager, Model, Loader, BaseResolver } from 'tectonic';
+// see github.com/tonyhb/tectonic-superagent
+import TectonicSuperagent() from 'tectonic-superagent';
 
 const User = new Model({
   id: 0,
@@ -45,11 +45,9 @@ Org.relationships({
 
 const manager = new Manager({
   drivers: {
-    fromSuperagent: superagent,
-    fromSDK: sdk,
-    fromWebsocket: websocket
+    fromSuperagent: new TectonicSuperagent()
   },
-  resolver: new DumbResolver(),
+  resolver: new BaseResolver(),
   store: store // Redux store
 });
 
@@ -61,7 +59,7 @@ manager.fromSuperagent([
     },
     // These are any parameters for the request (ie query params, post data)
     params: ['id'],
-    // returns should be Model.item, Model.list or an array of many
+    // returns should be Model.item, Model.list or an object of these
     returns: {
       org: Org.item(['id', 'name']),
       repo: Repo.list(['id'])
@@ -78,10 +76,24 @@ manager.fromSuperagent([
 
 @load(props => ({
   org: Org.getItem(['name'], { id: 1 }),
-  dependsOnOrg: Repo.getList({ orgId: props.org.id }), // Wont be called until org is loaded
+  dependsOnOrg: Repo.getList({ orgId: props.org && props.org.id }), // Wont be called until org is loaded
   list: Org.getList(['name'], { start: 0, limit: 20 })
 }))
 class OrgList extends Component {
+
+  static propTypes = {
+	// tectonic automatically tracks statuses of all API calls within
+	// props.status
+    status: React.PropTypes.shape({
+	  org: React.PropTypes.bool,
+	  dependsOnOrg: React.PropTypes.bool,
+	  list: React.PropTypes.bool
+	}),
+
+	org: Org.instanceOf,
+	dependsOnOrg: React.PropTypes.arrayOf(Repo.instanceOf),
+	list : React.PropTypes.arrayOf(Org.instanceOf)
+  }
 
   render() {
   }
