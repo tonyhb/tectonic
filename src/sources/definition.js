@@ -120,7 +120,8 @@ export default class SourceDefinition {
     if (requiredDefinitionKeys.some(i => this[i] === undefined)) {
       throw new Error(
         'Source definitions must contain keys: ' +
-        requiredDefinitionKeys.join(', ')
+        requiredDefinitionKeys.join(', '),
+        this
       );
     }
   }
