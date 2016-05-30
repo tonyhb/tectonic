@@ -47,6 +47,15 @@ export default class Query {
   status = undefined
 
   /**
+   * Duplicates stores references to other query instances which are duplicates
+   * of this query. When we update the status property we also update the status
+   * of each duplicate.
+   * 
+   * See baseResolver.addQuery for more information.
+   */
+  duplicates = []
+
+  /**
    * @param Model
    * @param array|string   Array of fields or RETURNS_ALL_FIELDS
    * @param string GET, CREATE, UPDATE, or DELETE from consts above. Specifies
@@ -133,6 +142,11 @@ export default class Query {
    */
   hash() {
     return this.toString();
+  }
+
+  updateStatus(to) {
+    this.status = to;
+    this.duplicates.forEach(dupe => dupe.status = to);
   }
 
 }

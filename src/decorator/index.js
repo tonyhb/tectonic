@@ -14,6 +14,9 @@ import {
   DELETE
 } from '/src/consts';
 
+import d from 'debug';
+const debug = d('tectonic:decorator');
+
 /**
  * Load is our decorator which accepts an object of queries or a function which
  * takes (state, params) as arguments and returns an object of queries.
@@ -105,6 +108,8 @@ export default function load(queries) {
             this.queries[q].params = newQueries[q].params;
           });
 
+          debug('computed new queries for component', queries);
+
           this.addAndResolveQueries();
         }
       }
@@ -128,6 +133,9 @@ export default function load(queries) {
         if (queryKeys.length === 0) {
           return;
         }
+
+        debug('adding queries to resolver', queries);
+
         // Resolve the queries and load the data.
         queryKeys.forEach(q => {
           manager.addQuery(queries[q]);

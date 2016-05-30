@@ -146,7 +146,10 @@ export function parseCacheControlHeaders(cc) {
     return new Date();
   }
 
-  const seconds = match[1];
-  let now = new Date();
+  let seconds = 0;
+  if (Array.isArray(match)) {
+    seconds = match[1];
+  }
+  const now = new Date();
   return new Date(now.getTime() + (seconds * 1000));
 }

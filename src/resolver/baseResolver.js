@@ -4,6 +4,11 @@ import * as utils from './utils';
 import { UPDATE_QUERY_STATUSES } from '/src/reducer';
 import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '/src/status';
 import { GET } from '/src/consts';
+import d from 'debug';
+if (window !== undefined) {
+  window.tdebug = d;
+}
+const debug = d('tectonic:resolver');
 
 /**
  * BaseResolver is a simple resolver which batches new queries from the
@@ -32,7 +37,6 @@ export default class BaseResolver {
     utils.doesSourceSatisfyQueryReturnType,
     utils.doesSourceSatisfyQueryType
   ];
-
 
   /**
    * List of queries to resolve
@@ -66,7 +70,22 @@ export default class BaseResolver {
    * @param Map  A list of all sources passed from the manager
    */
   addQuery(query, sourceMap) {
-    this.queries[query.toString()] = query;
+    // TODO: Figure out a better way of deduping queries (alongisde setting
+    // statuses in the query directly to force stale caches to match).
+    //
+    // Here, if the query has already been added by many components, we add
+    // references to the duplicate queries so we can set STATUS to success on
+    // each query when it's resolved.
+    //
+    // This prevents each separate component with dupe queries from
+    // re-requesting data.
+    const hash = query.toString();
+
+    if (this.queries[hash] === undefined) {
+      this.queries[query.toString()] = query;
+    } else {
+      this.queries[query.toString()].duplicates.push(query);
+    }
   }
 
   /**
@@ -106,6 +125,8 @@ export default class BaseResolver {
       return;
     }
 
+    debug('resolving queries', this.queries);
+
     queryKeys.forEach(hash => {
       const q = this.queries[hash];
       // We can remove this query from this.queries as it's processed. The
@@ -118,7 +139,7 @@ export default class BaseResolver {
       // allows us to not re-request a query with zero expiry time from
       // a component re-rendering with different props.
       if (q.status === SUCCESS) {
-        // Already has a success status so we don't need to add it to statusMap
+        debug('query already marked as success; skipping', q.toString(), q);
         return;
       }
 
@@ -133,15 +154,18 @@ export default class BaseResolver {
 
         // We have data for this query; this query is resolved and is successful
         if (ok) {
+          debug('query has cached data; success', q.toString(), q);
           this.statusMap[hash] = SUCCESS;
           return;
         }
+      } else {
+          debug('query has stale data', q.toString(), q);
       }
 
       // check if the query status was previously set to pending
       const status = this.cache.getQueryStatus(q, state);
       if (status === PENDING) {
-        console.debug && console.debug('query already pending and in flight; skipping', q);
+        debug('query already pending and in flight; skipping', q.toString(), q);
         // no need to update the query status as it's already pending
         return;
       }
@@ -151,7 +175,7 @@ export default class BaseResolver {
       // TODO: test this is only for get requests
       if (status === ERROR && q.queryType === GET) {
         q.status = ERROR;
-        console.debug && console.debug('query previously failed; skipping', q);
+        debug('query previously failed; skipping', q);
         return;
       }
 
@@ -161,6 +185,7 @@ export default class BaseResolver {
         q.sourceDefinition = sd;
         resolvedQueries.push(q);
         this.statusMap[hash] = PENDING;
+        debug('resolved query', q.toString(), q);
       }
     });
 
@@ -193,6 +218,7 @@ export default class BaseResolver {
    * @return SourceDefinition  sourcedef of query
    */
   resolveItem(query, sourceMap) {
+    debug('resolving query', query);
     const sd = Array.from(sourceMap.values()).find(sourceDef => {
       // Check each source definition against all predicates in our
       // satisfiability chain. This short-circuits the loop of source
@@ -234,9 +260,11 @@ export default class BaseResolver {
     if (params.some(v => v === undefined)) {
       // some query params are undefined; issue a debug and ignore.
       this.statusMap[query.hash()] = UNDEFINED_PARAMS;
-      console.debug && console.debug('ignoring query as it has undefined parameters', query);
+      debug('ignoring query as it has undefined parameters', query);
       return;
     }
+
+    debug('query unresolvable', query);
 
     // Call the callback if it exists with an error
     if (typeof query.callback === 'function') {
@@ -266,11 +294,11 @@ export default class BaseResolver {
     if (data) {
       // TODO: test errors thrown here trigger failure 
       try {
-        query.status = SUCCESS;
+        query.updateStatus(SUCCESS);
         this.cache.storeApiData(query, sourceDef, data, expires);
       } catch (e) {
         console.warn(e);
-        query.status = ERROR;
+        query.updateStatus(ERROR);
         return this.fail(query, sourceDef, e);
       }
     }
