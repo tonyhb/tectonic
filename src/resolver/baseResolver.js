@@ -118,7 +118,7 @@ export default class BaseResolver {
       // allows us to not re-request a query with zero expiry time from
       // a component re-rendering with different props.
       if (q.status === SUCCESS) {
-        this.statusMap[hash] = SUCCESS;
+        // Already has a success status so we don't need to add it to statusMap
         return;
       }
 
@@ -164,10 +164,12 @@ export default class BaseResolver {
       }
     });
 
-    this.store.dispatch({
-      type: UPDATE_QUERY_STATUSES,
-      payload: { ...this.statusMap }
-    });
+    if (Object.keys(this.statusMap).length > 0) {
+      this.store.dispatch({
+        type: UPDATE_QUERY_STATUSES,
+        payload: { ...this.statusMap }
+      });
+    }
 
     // Now we reset the map
     this.statusMap = {};
