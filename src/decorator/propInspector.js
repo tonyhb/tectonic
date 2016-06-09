@@ -50,8 +50,8 @@ export default class PropInspector {
     if (manager) {
       let computedProps = manager.props(queryMap);
 
-      while(deepEqual(queryMap, queryFunc(computedProps)) === false) {
-        queryMap = queryFunc(computedProps);
+      while(deepEqual(queryMap, queryFunc({ ...props, computedProps })) === false) {
+        queryMap = queryFunc({ ...props, computedProps });
         computedProps = manager.props(queryMap);
       }
     }
