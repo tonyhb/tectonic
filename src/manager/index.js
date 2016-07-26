@@ -3,7 +3,7 @@
 import Sources from '/src/sources';
 import Cache from '/src/cache';
 import { PENDING, ERROR, SUCCESS } from '/src/status';
-import { RETURNS_ITEM } from '/src/consts';
+import { RETURNS_ITEM, RETURNS_LIST } from '/src/consts';
 
 /**
  * The manager is the single interface for tectonic. It handles:
@@ -140,7 +140,12 @@ export default class Manager {
       // If this query was a success load the data.
       if (status === SUCCESS) {
         let [data, _] = cache.getQueryData(query, state);
-        props[prop] = data;
+        // This is an array of items
+        if (query.returnType === RETURNS_LIST) {
+          props[prop] = data.map(d => new query.model(d));
+        } else {
+          props[prop] = new query.model(data);
+        }
       } else {
         // Add an empty model as the prop so that this.props.model.x works
         if (query.returnType === RETURNS_ITEM) {

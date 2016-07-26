@@ -69,7 +69,7 @@ describe('@load: e2e end-to-end test', () => {
     // The resolver doesn't start resolving until 5 ms in
     window.setTimeout(() => {
       assert.equal(item.props.status.user, status.SUCCESS);
-      assert.deepEqual(item.props.user, data);
+      assert.deepEqual(item.props.user.toJS(), data);
       done();
     }, 5);
   });
@@ -135,7 +135,10 @@ describe('@load: e2e end-to-end test', () => {
 
     window.setTimeout(() => {
       assert.equal(item.props.status.posts, status.SUCCESS);
-      assert.deepEqual(item.props.posts, data.posts);
+      // We return models which are not deepEqual to our expected data;
+      // iterate through them and turn them into a POJO for comparison
+      const posts = item.props.posts.map(i => i.toJS());
+      assert.deepEqual(posts, data.posts);
       done();
     }, 10);
   });
@@ -198,7 +201,10 @@ describe('@load: e2e end-to-end test', () => {
     const item = renderAndFind(<WrappedBase />, Base, manager);
 
     window.setTimeout(() => {
-      assert.deepEqual(item.props.posts, data.posts);
+      // We return models which are not deepEqual to our expected data;
+      // iterate through them and turn them into a POJO for comparison
+      const posts = item.props.posts.map(i => i.toJS());
+      assert.deepEqual(posts, data.posts);
       done();
     }, 50);
   });
