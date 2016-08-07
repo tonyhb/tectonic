@@ -5,7 +5,7 @@ import { UPDATE_QUERY_STATUSES } from '/src/reducer';
 import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '/src/status';
 import { GET } from '/src/consts';
 import d from 'debug';
-if (window !== undefined) {
+if (typeof window !== 'undefined') {
   window.tdebug = d;
 }
 const debug = d('tectonic:resolver');
