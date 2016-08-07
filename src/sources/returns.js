@@ -28,6 +28,10 @@ export default class Returns {
   // Stores all field names as a key within an object.
   fieldsAsObject = {}
 
+  /**
+   *
+   * @param Class base model class; not an instance of a model
+   */
   constructor(model, fields, returnType) {
     this.model = model;
     this.returnType = returnType;

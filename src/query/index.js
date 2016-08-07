@@ -56,7 +56,7 @@ export default class Query {
   duplicates = []
 
   /**
-   * @param Model
+   * @param Model  model class
    * @param array|string   Array of fields or RETURNS_ALL_FIELDS
    * @param string GET, CREATE, UPDATE, or DELETE from consts above. Specifies
    *               the type of query to be sent across and match for in the
@@ -67,7 +67,11 @@ export default class Query {
    * @param object Body to be sent in request, used for POST, PUT etc.
    */
   constructor({ model, fields, queryType = GET, returnType, params = {}, body, callback }) {
-    model.assertFieldsExist(fields);
+    if (model.constructor && model.constructor.assertFieldsExist) {
+      model.constructor.assertFieldsExist(fields);
+    } else {
+      model.assertFieldsExist(fields);
+    }
 
     this.model = model;
     this.fields = Array.isArray(fields) ? fields.sort() : fields;

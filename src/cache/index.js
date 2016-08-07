@@ -165,8 +165,8 @@ export default class Cache {
         throw new Error('Unable to process data from API; data is not an object', item);
       }
 
-      const idAttr = model.idAttribute;
-      const id = item[idAttr];
+      const { idField } = model;
+      const id = item[idField];
 
       if (id === undefined) {
         throw new Error(`Unable to process data from API; data is missing the ID attribute`, item);

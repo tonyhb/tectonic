@@ -20,32 +20,31 @@ describe('Model', () => {
     assert.equal(a.constructor, User);
   })
 
-  it('throws an error if created without any fields', () => {
-    assert.throws(() => Model('name'), 'A model must contain fields');
+  it('throws an error if created without a name', () => {
+    assert.throws(() => {
+      class Foo extends Model {};
+      const bar = new Foo();
+    }, 'Models must have a static modelName property defined');
   });
 
-  it('throws an error if created without a name', () => {
-    assert.throws(
-      () => new Model('', { id: 0 }),
-      'A model must be defined with a name'
-    );
+  it('throws an error if created without fields', () => {
+    assert.throws(() => {
+      class Foo extends Model {
+        static modelName = 'foo';
+      };
+      const bar = new Foo();
+    }, 'Models must have fields defined with default values');
   });
 
   it('instance has a name', () => {
     let name = 'TestModel';
-    let a = new Model(name, {
-      id: 0
-    });
-
-    assert.equal(name, a.modelName);
-  });
-
-  it('stores field definitions from the constructor', () => {
-    let a = new Model('StoresTest', {
-      id: 0,
-      name: ''
-    });
-    assert.deepEqual(a.fields(), ['id', 'name']);
+    class A extends Model {
+      static modelName = name;
+      static fields = {
+        id: 0
+      };
+    };
+    assert.equal(name, A.modelName);
   });
 
   describe('getList', () => {

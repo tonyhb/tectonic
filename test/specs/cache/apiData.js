@@ -145,13 +145,13 @@ describe('parsing cache data', () => {
       const expires = new Date();
 
       const expected = {
-        User: {
+        user: {
           1: {
             data: apiResponse.user,
             cache: { expires }
           }
         },
-        Post: {
+        post: {
           1: {
             data: apiResponse.posts[0],
             cache: { expires }

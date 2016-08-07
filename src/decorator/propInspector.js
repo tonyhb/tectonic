@@ -105,7 +105,7 @@ export default class PropInspector {
           // 3. Redefine all model attributes as functions which assign query
           //    relationships.
           const proxy = {};
-          queryMap[queryProp].model.fields().forEach(f => {
+          queryMap[queryProp].model.fieldNames().forEach(f => {
             Object.defineProperty(proxy, f, {
               get() {
                 // Return a function called during query construction which

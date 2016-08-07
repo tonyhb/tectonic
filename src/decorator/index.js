@@ -13,6 +13,7 @@ import {
   UPDATE,
   DELETE
 } from '/src/consts';
+import Model from '/src/model';
 
 import d from 'debug';
 const debug = d('tectonic:decorator');
@@ -205,7 +206,7 @@ export default function load(queries) {
       _createQuery(type, opts, callback) {
         // TODO: this is a somewhat hacky way of checking if we were passed
         // a model instance. Fix me?
-        if (opts.constructor.instanceOf !== undefined) {
+        if (opts instanceof Model) {
           opts = { model: opts };
         }
 
