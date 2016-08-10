@@ -2,16 +2,24 @@
 
 import { Model } from 'tectonic';
 
-export const User = new Model('user', {
-  id: 0,
-  name: '',
-  email: ''
-});
+export class User extends Model {
+  static modelName = 'user';
 
-export const Post = new Model('post', {
-  id: 0,
-  title: '',
-  body: '',
-  authorID: 0,
-  author: ''
-});
+  static fields = {
+    id: 0,
+    name: '',
+    email: ''
+  };
+}
+
+export class Post extends Model {
+  static modelName = 'post';
+
+  static fields = {
+    id: 0,
+    title: '',
+    body: '',
+    authorID: 0,
+    author: ''
+  };
+}

@@ -28,20 +28,33 @@ import load, { Manager, Model, Loader, BaseResolver } from 'tectonic';
 // see github.com/tonyhb/tectonic-superagent
 import TectonicSuperagent() from 'tectonic-superagent';
 
-const User = new Model({
-  id: 0,
-  name: '',
-  email: ''
-});
+class User extends Model {
+  static modelName = 'user';
 
-const Org = new Model({
-  id: 0,
-  name: ''
-});
+  static fields = {
+    id: 0,
+    name: '',
+    email: ''
+  };
 
-Org.relationships({
-  members: User.list
-});
+  /**
+   * getObfuscatedEmail is an instance method which allows us to define data
+   * manipulation functions outside of a component in one place. This makes
+   * data manipulation reusable everywhere without writing selectors.
+   */
+  getObfuscatedEmail() {
+    return this.email.replace('@', ' at ');
+  }
+}
+
+class Org extends Model {
+  static modelName = 'org';
+
+  static fields = {
+    id: 0,
+    name: ''
+  };
+}
 
 const manager = new Manager({
   drivers: {
@@ -54,16 +67,20 @@ const manager = new Manager({
 manager.fromSuperagent([
   {
     meta: {
-      call: SDK.func,
+      url: '/api/v0/user/:id',
       transform: (response) => response.data
     },
     // These are any parameters for the request (ie query params, post data)
     params: ['id'],
     // returns should be Model.item, Model.list or an object of these
-    returns: {
-      org: Org.item(['id', 'name']),
-      repo: Repo.list(['id'])
-    }
+    returns: User.item(),
+  },
+  // API call for listing all users
+  {
+    meta: {
+	  url: '/api/v0/users'
+	},
+	returns: User.list()
   }
 ]);
 
