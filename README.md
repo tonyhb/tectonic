@@ -89,7 +89,7 @@ manager.fromSuperagent([
   ...
 </Loader>
 
-// And use the decorator to laod models:
+// And use the decorator to load models:
 
 @load(props => ({
   org: Org.getItem(['name'], { id: 1 }),
