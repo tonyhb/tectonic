@@ -39,6 +39,7 @@ class Post extends Component {
     return (
       <div>
         <h3>{ post.title }</h3>
+        <p>Excerpt: "{ post.getExcerpt() }"</p>
       </div>
     );
   }

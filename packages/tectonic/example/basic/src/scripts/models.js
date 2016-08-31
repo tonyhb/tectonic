@@ -22,4 +22,8 @@ export class Post extends Model {
     authorID: 0,
     author: ''
   };
+
+  getExcerpt() {
+    return this.body.substr(0, 10) + '...';
+  }
 }
