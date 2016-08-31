@@ -1,0 +1,43 @@
+{
+  "name": "tectonic-superagent",
+  "version": "1.0.2",
+  "description": "A tectonic driver for remote AJAX calls using Superagent with callbacks",
+  "main": "transpiled/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "$(npm bin)/babel -d transpiled src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/tonyhb/tectonic-superagent.git"
+  },
+  "keywords": [
+    "tectonic",
+    "tectonic",
+    "driver",
+    "async",
+    "data",
+    "loading",
+    "declarative",
+    "data",
+    "loading",
+    "react",
+    "reactjs",
+    "redux"
+  ],
+  "author": "Tony Holdstock-Brown",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/tonyhb/tectonic-superagent/issues"
+  },
+  "homepage": "https://github.com/tonyhb/tectonic-superagent#readme",
+  "dependencies": {
+    "superagent": "^1.8.3"
+  },
+  "devDependencies": {
+    "babel": "^6.5.2",
+    "babel-cli": "^6.6.5",
+    "babel-core": "^6.7.4",
+    "babel-preset-es2015": "^6.6.0"
+  }
+}
