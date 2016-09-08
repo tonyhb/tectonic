@@ -1,6 +1,6 @@
 {
   "name": "tectonic-superagent",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "A tectonic driver for remote AJAX calls using Superagent with callbacks",
   "main": "transpiled/index.js",
   "scripts": {
