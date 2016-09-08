@@ -7,7 +7,7 @@ import sa from 'superagent';
 // tectonic driver function
 export default class TectonicSuperagent {
 
-  constructor(opts) {
+  constructor(opts = {}) {
 
     const inst = this;
 
