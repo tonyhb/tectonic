@@ -43,7 +43,7 @@ export default function load(queries) {
        */
       queries = {}
 
-      constructor(props, context) {
+      constructor() {
         super(...arguments);
 
         // TODO: Test that adding .success to this.queries doesn't affect the
@@ -55,7 +55,7 @@ export default function load(queries) {
         if (typeof queries === 'function') {
           // remove the tectonic state from props and pass it to the query
           // function as state. all remaining props are just standard props :)
-          const { state, ...props } = props;
+          let { state, ...props } = this.props;
 
           this.inspector = new PropInspector({ queryFunc: queries });
           this.queries = this.inspector.computeDependencies(props, this.context.manager);
