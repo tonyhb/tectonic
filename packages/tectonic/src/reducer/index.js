@@ -19,7 +19,21 @@ const defaultState = new Map({
   //         cache: ...
   //       })
   //   })
+  //
+  // Note that when a model is deleted we update the model map's .deleted
+  // property to true:
+  //
+  //   data = new Map({
+  //     'users': new Map({
+  //       1: new Map({
+  //         data: ...,
+  //         cache: ...,
+  //         deleted: true,
+  //       })
+  //   })
   //          
+  // Any time these are re-queried from the resolver these are wholesale
+  // replaced, removing the `deleted` entry
   data: new Map(),
 
   // Stores a list of queries to the model IDs they returned
@@ -31,6 +45,7 @@ const defaultState = new Map({
 
 export const UPDATE_QUERY_STATUSES = '@@tectonic/update-query-statuses';
 export const UPDATE_DATA = '@@tectonic/update-data';
+export const DELETE_DATA = '@@tectonic/delete-data';
 
 const reducer = (state = defaultState, action) => {
 
@@ -50,8 +65,12 @@ const reducer = (state = defaultState, action) => {
       s.setIn(['queriesToIds', query.toString()], query.returnedIds);
       s.setIn(['queriesToExpiry', query.toString()], expires);
       s.setIn(['status', query.toString()], SUCCESS);
-      return s;
     });
+  }
+
+  if (action.type === DELETE_DATA) {
+    const { modelName, modelId } = action.payload;
+    return state.mergeIn(['data', modelName, modelId], {deleted: true});
   }
 
   return state;

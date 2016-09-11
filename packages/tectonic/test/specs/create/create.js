@@ -45,7 +45,6 @@ describe('creating a resource from within a component', () => {
     // This can be called from our test utils. By allowing a custom
     // model and user we can change this in each test.
     create(model, callback) {
-      console.log(model);
       this.props.createModel(model, callback);
     }
     render = () => <p>Hi</p>;

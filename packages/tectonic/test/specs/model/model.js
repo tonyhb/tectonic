@@ -2,7 +2,7 @@
 
 import { assert } from 'chai';
 import Model from '/src/model';
-import { User } from '/test/models';
+import { User, Post } from '/test/models';
 import React, { Component } from 'react';
 import {
   GET,
@@ -99,6 +99,13 @@ describe('Model', () => {
    * of that model) API endpoints return
    */ 
   describe('returns methods', () => {
+  });
+
+  it('has an instanceOf class prop', () => {
+    assert.isDefined(User.instanceOf)
+    assert.equal(User.instanceOf(User), React.PropTypes.instanceOf(User)(User))
+    assert.equal(User.instanceOf(true), React.PropTypes.instanceOf(User)(true))
+    assert.equal(Post.instanceOf(User), React.PropTypes.instanceOf(Post)(User))
   });
 
 });

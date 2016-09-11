@@ -53,14 +53,8 @@ export function doesSourceSatisfyQueryParams(source, query) {
 }
 
 export function doesSourceSatisfyQueryModel(source, query) {
-  const { returns } = source;
-  if (returns instanceof Returns) {
-    // This only returns one model
-    return returns.model === query.model;
-  }
-
-  // This source returns more than one model
-  return Object.keys(returns).some(k => returns[k].model === query.model);
+  const { model } = source;
+  return Object.keys(model).some(k => model[k] === query.model);
 }
 
 /**
@@ -76,6 +70,10 @@ export function doesSourceSatisfyQueryModel(source, query) {
  */
 export function doesSourceSatisfyAllQueryFields(source, query) {
   let returns = source.returns;
+
+  if (query.fields === undefined) {
+    return true;
+  }
 
   if (source.isPolymorphic()) {
     // If this is polymorphic we need to find the Return item which is for the
@@ -119,6 +117,11 @@ export function doesSourceSatisfyQueryReturnType(source, query) {
   // a component - if the query for ITEM returns a LIST we'll currently pass the
   // entire list down into the component and not the ITEM. That's not correct;
   // we need to figure out the ID to extract and pass that back.
+
+  // Short circuit for queries with no returnType, such as DELETE queries
+  if (query.returnType === undefined) {
+    return true;
+  }
 
   // Note that query.returnType will be undefined if this is a non-GET query.
   let { returns } = source;

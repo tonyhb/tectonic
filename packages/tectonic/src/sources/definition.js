@@ -5,6 +5,7 @@ import {
   GET, CREATE, UPDATE, DELETE,
   RETURNS_NONE
 } from '/src/consts';
+import Model from '/src/model';
 
 /**
  * These keys are required in every source definition
@@ -21,6 +22,8 @@ export default class SourceDefinition {
 
   meta = undefined
   returns = undefined
+
+  model = undefined
 
   /**
    * Array of **required** parameters for the source.
@@ -62,8 +65,9 @@ export default class SourceDefinition {
    * @param {Array} o.optionalParams - array of optional params for the API call
    * @param {Function} o.driverFunc - driver function to call to invoke the source
    * @param {string} o.queryType - the type of query (GET, UPDATE, CREATE, DELETE)
+   * @param {Model} o.model - the model class which this API references
    */
-  constructor({ id, returns, meta, params, optionalParams, driverFunc, queryType = GET }) {
+  constructor({ id, returns, meta, params, optionalParams, driverFunc, queryType = GET, model }) {
     if (id === undefined) {
       id = Math.floor(Math.random() * (1 << 30)).toString(16);
     }
@@ -80,12 +84,14 @@ export default class SourceDefinition {
     // XXX Potentially create a parent class for polymorphic returns so it's not
     // a POJO
     this.returns = returns;
+    this.model = model;
     this.meta = meta;
     this.params = params || [];
     this.optionalParams = optionalParams || [];
     this.driverFunc = driverFunc;
     // Which CRUD action this refers to
     this.queryType = queryType;
+    this.setModelProperty();
 
     if (typeof this.params === 'string') {
       this.params = [this.params];
@@ -94,9 +100,49 @@ export default class SourceDefinition {
       this.optionalParams = [this.optionalParams];
     }
 
-
     // ensure that after setting properties the definition is valid
     this.validate();
+  }
+
+  /**
+   * setModelProperty is called in the source definition constructor to set and
+   * noramlize from the source definition, if necessary.
+   *
+   * this.model is used in the resolver to calculate satisfiability
+   */
+  setModelProperty() {
+    const { model, returns } = this;
+
+    if (model !== undefined && model.idField !== undefined) {
+      // The user specified a `model` type in the source definition but didn't
+      // enclose it in an array.
+      this.model = [model];
+      return;
+    }
+
+    if (Array.isArray(model)) {
+      // this.model is already a normalized array of models that the source
+      // definition uses
+      return;
+    }
+
+    if (returns === undefined || returns === RETURNS_NONE) {
+      // we can't calculate the model that this source definition uses, so we
+      // bail out
+      return;
+    }
+
+    // If models aren't explicitly defined (ie. GET source definitions can list
+    // a `returns` property, not a `model` property) we take it from returns
+    if (returns instanceof Returns) {
+      this.model = [returns.model];
+      return
+    }
+
+    if (returns !== undefined) {
+      // polymorphic returns; extract all models this source returns
+      this.model = Object.keys(returns).map(k => returns[k].model);
+    }
   }
 
   /**
@@ -104,7 +150,7 @@ export default class SourceDefinition {
    * a time
    */
   isPolymorphic() {
-    return !(this.returns instanceof Returns);
+    return this.returns !== RETURNS_NONE && !(this.returns instanceof Returns);
   }
 
   validate() {

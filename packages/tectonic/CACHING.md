@@ -25,7 +25,7 @@ In short:
 ### Querying and storing
 
 1. The resolver inspects and parses response headers from successful queries
-2. The response data and expiry time are passed to the cache in `storeApiData`
+2. The response data and expiry time are passed to the cache in `storeQuery`
 3. The cache stores:
     - Expiry date and IDs for each query in queryToIds as an object: `{ ids:
       [...], expires: new Date() }`

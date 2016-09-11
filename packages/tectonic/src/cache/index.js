@@ -1,11 +1,15 @@
 'use strict';
 
-import { UPDATE_DATA } from '/src/reducer';
+import {
+  UPDATE_DATA,
+  DELETE_DATA,
+} from '/src/reducer';
 import Returns from '/src/sources/returns';
 import {
   RETURNS_ITEM,
   RETURNS_LIST,
-  GET
+  GET,
+  DELETE,
 } from '/src/consts';
 import { Map } from 'immutable';
 
@@ -13,7 +17,6 @@ import { Map } from 'immutable';
  * Cache represents an abstraction over redux' store for saving and reading
  * data.
  *
- * TODO: Reading data
  * TODO: Per-model cache rules
  * TODO: custom cache rules and predicates
  */
@@ -32,6 +35,9 @@ export default class Cache {
   }
 
   /**
+   * storeQuery is called from the resolver after a successful query to store
+   * data in the reducer for future components.
+   *
    * @param Query
    * @param SourceDefinition
    * @param {(object|array)} - array containing list of data, object of
@@ -39,7 +45,24 @@ export default class Cache {
    * 204 this should be undefined.
    * @param Date - date at which this data should expire
    */
-  storeApiData(query, sourceDef, apiResponse, expires = new Date()) {
+  storeQuery(query, sourceDef, apiResponse, expires = new Date()) {
+    if (query.queryType === DELETE) {
+      // Add the ID of this model to the delete blacklist
+      if (query.modelId === undefined) {
+        throw new Error('unknown model ID during DELETE in query: ', query);
+      }
+
+      this.store.dispatch({
+        type: DELETE_DATA,
+        payload: {
+          model: query.model,
+          modelName: query.model.modelName,
+          modelId: query.modelId + '', // modelIds should always be strings in reducers
+        },
+      });
+      return;
+    }
+
     if (!apiResponse) {
       // Probably a 204 - we can back out safely.
       return;
@@ -54,8 +77,8 @@ export default class Cache {
       payload: {
         data,
         query,
-        expires
-      }
+        expires,
+      },
     });
   }
 
@@ -174,7 +197,7 @@ export default class Cache {
 
       // Each query needs to store the IDs of the model it queried for.
       // This is handled in the reducer when UPDATE_DATA is called via
-      // storeApiData.
+      // storeQuery.
       if (query.model === model) {
         // Make sure the ID is a string
         query.returnedIds.add(id + '');
@@ -226,8 +249,10 @@ export default class Cache {
 
     const returnedIds = this.cachedQueryIds(query, state);
 
+    // No IDs were returned when we queried for this item
     if (returnedIds.size === 0) {
-      return [undefined, false];
+      const returns = (query.returnType === RETURNS_LIST) ? [] : undefined;
+      return [returns, true];
     }
 
     if (query.returnType === RETURNS_ITEM && returnedIds.size !== 1) {
@@ -237,28 +262,60 @@ export default class Cache {
     const { modelName } = query.model;
 
     if (query.returnType === RETURNS_ITEM) {
-      // TODO: cache invalidation
-      const data = state.getIn(['data', modelName, returnedIds.values().next().value, 'data'])
-      if (data === undefined) {
+      // XXX tidy this pluck
+      const map = state.getIn(['data', modelName, returnedIds.values().next().value]);
+      const data = this.processCachedModelMap(map);
+      if (data === false) {
         return [undefined, false];
       }
-      return [data.toJS(), true];
+      return [data, true];
     }
 
-    // This returns many items in a list
+    // This returns many items in a list; iterate through all of the returned
+    // IDs and fetch our data
     const data = Array.from(returnedIds).map(id => {
-      const item = state.getIn(['data', modelName, id, 'data']);
-      if (item === undefined) {
-        return false;
-      }
-      return item.toJS();
+      return this.processCachedModelMap(state.getIn(['data', modelName, id]));
     });
 
-    if (data.some(i => i === undefined)) {
-      return [undefined, false];
+    if (data.some(item => item === false)) {
+      return [data.filter(Boolean), false];
     }
 
     return [data, true];
+  }
+
+  /**
+   * processCachedModelMap validates a model instance's data plucked from the
+   * cache.
+   *
+   * It returns false if the data has expired, doesn't exist or has been
+   * deleted, otherwise it returns the model instance data itself
+   *
+   * @param Map
+   * @return Object
+   */
+  processCachedModelMap(map) {
+    if (map === undefined) {
+      return false;
+    }
+
+    const { data, cache, deleted } = map.toObject();
+
+    if (cache !== undefined && cache.expires !== undefined) {
+      const { expires } = cache;
+      // Check the expires header to see if the model is out of date.
+      // Fudge the expiry date by +1 second to avoid timing issues.
+      // XXX should we store expiry per-model or per query? This might not be
+      // necessary
+      if (expires.setSeconds(expires.getSeconds() + 1) < new Date()) {
+        return false;
+      }
+    }
+
+    if (deleted === true) {
+      return false;
+    }
+    return data.toJS();
   }
 
   getQueryStatus(query, state) {

@@ -50,22 +50,43 @@ describe('cache for non-GET requests', () => {
     });
   });
 
-  it('storeApiData should be a no-op with no response data (ie http 204)', () => {
-    // ie delete requests shouldn't be kept in the cache - we should only keep
-    // the query status in the cache
-    //
-    // To store data we call dispatch; this should never be called with no api
-    // response.
-    const dispatchSpy = sinon.spy(store, 'dispatch');
+  describe('DELETE requests', () => {
     const sd = new SourceDefinition({
-      returns: User.item(),
+      queryType: DELETE,
+      params: ['id'],
       meta: {}
     });
-    cache.storeApiData(query, sd, undefined);
-    assert.isFalse(dispatchSpy.called);
+
+    it('throws an error if deletes occur with no model ID', () => {
+      const query = new Query({
+        queryType: DELETE,
+        model: User,
+        params: { id: 1 }
+      });
+      assert.throws(
+        () => cache.storeQuery(query, sd, undefined),
+        "unknown model ID during DELETE in query",
+      );
+    });
+
+    it('sets data as "deleted" in .data', () => {
+      const store = createStore()
+      const cache = new Cache(store);
+      const spy = sinon.spy(cache, 'cachedQueryIds');
+      const query = new Query({
+        queryType: DELETE,
+        model: User,
+        modelId: 1,
+        params: { id: 1 }
+      });
+
+      let state = store.getState().tectonic.toJS();
+      assert.isUndefined(state.data.user);
+
+      cache.storeQuery(query, sd, undefined);
+      state = store.getState().tectonic.toJS();
+      assert.isTrue(state.data.user["1"].deleted);
+    });
   });
 
 });
-
-// TODO:
-// baseResolver should always call non-GET queries.

@@ -65,8 +65,9 @@ export default class Query {
    *               whether the GET query is for a single model or list of models
    * @param object Object of query parameters to values
    * @param object Body to be sent in request, used for POST, PUT etc.
+   * @param mixed  ID of the model instance for UPDATE and DELETE queries
    */
-  constructor({ model, fields, queryType = GET, returnType, params = {}, body, callback }) {
+  constructor({ model, fields, queryType = GET, returnType, params = {}, body, callback, modelId }) {
     if (model.constructor && model.constructor.assertFieldsExist) {
       model.constructor.assertFieldsExist(fields);
     } else {
@@ -74,6 +75,7 @@ export default class Query {
     }
 
     this.model = model;
+    this.modelId = modelId;
     this.fields = Array.isArray(fields) ? fields.sort() : fields;
     this.params = params;
     this.returnType = returnType;

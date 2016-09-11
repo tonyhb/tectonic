@@ -6,6 +6,13 @@
       "body": "q: how many times have you pood yourself in public? a: too many",
       "author": "typicode",
       "authorID": 1
+    },
+    {
+      "id": 2,
+      "title": "a new title",
+      "body": "some body here",
+      "authorID": 1,
+      "author": "typicode"
     }
   ],
   "comments": [

@@ -110,6 +110,8 @@ export default class Manager {
 
     if (state === undefined) {
       state = this.store.getState().tectonic;
+      // if state is still undefined then the reducer hasn't been added to
+      // redux - throw an error
     }
 
     Object.keys(queries).forEach(prop => {
