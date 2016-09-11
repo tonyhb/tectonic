@@ -3,7 +3,14 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { createStore, combineReducers } from 'redux';
-import { Manager, Loader, reducer, BaseResolver, CREATE } from 'tectonic';
+import {
+  Manager,
+  Loader,
+  reducer,
+  BaseResolver,
+  CREATE,
+  DELETE,
+} from 'tectonic';
 import TectonicSuperagent from 'tectonic-superagent';
 import { Router, Route, hashHistory } from 'react-router';
 
@@ -68,6 +75,15 @@ manager.fromSuperagent([
       url: 'http://localhost:3001/posts',
       method: 'POST'
     }
+  },
+  {
+    meta: {
+      url: 'http://localhost:3001/posts/:id',
+      method: 'DELETE',
+    },
+    queryType: DELETE,
+    model: models.Post,
+    params: ['id'],
   }
 ]);
 

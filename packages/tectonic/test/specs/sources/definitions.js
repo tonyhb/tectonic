@@ -2,7 +2,7 @@
 
 import { assert } from 'chai';
 import SourceDefinition from '/src/sources/definition.js';
-import { User } from '/test/models';
+import { User, Post } from '/test/models';
 import { GET, UPDATE, CREATE, DELETE, RETURNS_NONE } from '/src/consts';
 
 describe('SourceDefinition', () => {
@@ -101,6 +101,43 @@ describe('SourceDefinition', () => {
         meta: {}
       });
       assert.deepEqual(def.optionalParams, ['id']);
+    });
+  });
+
+  describe('setModelProperty', () => {
+    it('sets model from single returns', () => {
+      const def = new SourceDefinition({
+        meta: {},
+        returns: User.item(),
+      });
+      assert.deepEqual(def.model, [User]);
+    });
+
+    it('sets .model from polymorphic returns', () => {
+      const def = new SourceDefinition({
+        meta: {},
+        returns: {
+          users: User.item(),
+          posts: Post.list(),
+        },
+      });
+      assert.deepEqual(def.model, [User, Post]);
+    });
+
+    it('sets .model from constructor opts', () => {
+      let def = new SourceDefinition({
+        meta: {},
+        queryType: DELETE,
+        model: [User],
+      });
+      assert.deepEqual(def.model, [User]);
+
+      def = new SourceDefinition({
+        meta: {},
+        queryType: DELETE,
+        model: User,
+      });
+      assert.deepEqual(def.model, [User]);
     });
   });
 

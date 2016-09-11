@@ -22,24 +22,43 @@ export default class Posts extends Component {
         <p>User status: { this.props.status.user }</p>
         <p>User name: { this.props.user && this.props.user.name }</p>
         <p>Post status: { this.props.status.posts }</p>
-        { posts.map(p => <Post post={ p } />) }
+        { posts.map(p => <Post post={ p } key={ p.id } />) }
       </div>
     );
   }
 }
 
+@load()
 class Post extends Component {
   static propTypes = {
-    post: PropTypes.object
+    post: PropTypes.object,
+    deleteModel: PropTypes.func
+  }
+
+  deletePost(evt) {
+    evt.preventDefault();
+    this.props.deleteModel({
+      model: this.props.post,
+      params: {
+        id: this.props.post.id,
+      }
+    });
   }
 
   render() {
     const { post } = this.props;
 
     return (
-      <div>
-        <h3>{ post.title }</h3>
-        <p>Excerpt: "{ post.getExcerpt() }"</p>
+      <div style={ { display: 'flex' } }>
+        <div>
+          <h3>{ post.title }</h3>
+          <p>Excerpt: "{ post.getExcerpt() }"</p>
+        </div>
+        <div>
+          <a href='#' onClick={ ::this.deletePost }>
+            Delete
+          </a>
+        </div>
       </div>
     );
   }

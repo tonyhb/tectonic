@@ -51,6 +51,8 @@ export default class Model {
 
   static idField = 'id';
 
+  static instanceOf = React.PropTypes.instanceOf(this);
+
   record;
 
   constructor(data) {
@@ -104,7 +106,6 @@ export default class Model {
       return this.record.toJS.apply(this.record, arguments);
     }
 
-    this.instanceOf = React.PropTypes.instanceOf(this.constructor);
   }
 
   values() {

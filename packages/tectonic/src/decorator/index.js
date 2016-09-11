@@ -197,35 +197,58 @@ export default function load(queries) {
         this._createQuery(UPDATE, opts, callback);
       }
 
-      // TODO: the delete API is pretty fucking messy. It shouldn't need an
-      // instance?
+      // deleteModel creates a DELETE query for a model instance.
+      // It can be used in the following ways:
+      //
+      // Note that opts.modelId may be specified to
       deleteModel(opts, callback) {
         this._createQuery(DELETE, opts, callback);
+        /*
+         * TODO api cleanup later, see API.md
+        if (typeof opts === 'function' && callback === undefined) {
+          // deleteModel was called like so:
+          // this.props.deleteModel(this.props.user, callback)
+          callback = opts;
+          opts = {};
+        }
+
+        if (typeof model.values === 'function') {
+          opts
+        } 
+        */
       }
 
-      _createQuery(type, opts, callback) {
-        // TODO: this is a somewhat hacky way of checking if we were passed
-        // a model instance. Fix me?
+      _createQuery(type, opts = {}, callback) {
         if (opts instanceof Model) {
           opts = { model: opts };
         }
 
-        const { model, params } = opts;
+        // TODO: should we be able to pass model classes as opts.model,
+        // or opts?
+
+        if (opts.modelId === undefined) {
+          // TODO can we get this from params if not defined here?
+          opts.modelId = opts.model[opts.model.constructor.idField]; // TODO: test
+        }
+
+        const { model, params, modelId } = opts;
 
         // Create a new query for the given type (CREATE, UPDATE etc)
         // Resolver utils only check that the returnType matches when querying
         // for a list; this needs no returnType field.
         const query = new Query({
+          modelId,
           params,
           callback,
           model: model.constructor,
           queryType: type,
-          body: model.values(),
+          body: model.values && model.values(),
         });
 
         const {
           context: { manager }
         } = this;
+
         // TODO: keep track of query in load component for future devtools?
         manager.addQuery(query);
         manager.resolve();

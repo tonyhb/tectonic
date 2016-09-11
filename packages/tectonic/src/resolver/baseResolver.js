@@ -295,7 +295,7 @@ export default class BaseResolver {
       // TODO: test errors thrown here trigger failure 
       try {
         query.updateStatus(SUCCESS);
-        this.cache.storeApiData(query, sourceDef, data, expires);
+        this.cache.storeQuery(query, sourceDef, data, expires);
       } catch (e) {
         console.warn(e);
         query.updateStatus(ERROR);

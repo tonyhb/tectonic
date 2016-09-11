@@ -5,10 +5,12 @@ import { assert } from 'chai';
 import Cache from '/src/cache';
 import SourceDefinition from '/src/sources/definition';
 import Returns from '/src/sources/returns';
+import Query from '/src/query';
 import {
   RETURNS_ITEM,
   RETURNS_LIST,
-  RETURNS_ALL_FIELDS
+  RETURNS_ALL_FIELDS,
+  DELETE,
 } from '/src/consts';
 // test stuff
 import { User, Post } from '/test/models';
@@ -225,30 +227,119 @@ describe('parsing cache data', () => {
     });
   });
 
-  it('getQueryData queries data correctly', () => {
-    const store = createStore();
-    const cache = new Cache(store);
-    const query = User.getItem({ id: 1 });
-    const sd = new SourceDefinition({
-      returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
-      meta: {}
+  describe('processCachedModelMap', () => {
+    xit('returns false with expired data', () => {
     });
-    const apiResponse = {
-      id: 1,
-      name: 'foo',
-      email: 'foo@bar.com'
-    };
+    xit('returns false with deleted data', () => {
+    });
+    xit('returns data with correct cache information', () => {
+    });
+  });
 
-    // Store data and set up state
-    cache.storeApiData(query, sd, apiResponse);
+  describe('getQueryData', () => {
 
-    const state = store.getState().tectonic;
+    it('queries data correctly after a single basic GET', () => {
+      const store = createStore();
+      const cache = new Cache(store);
+      const query = User.getItem({ id: 1 });
+      const sd = new SourceDefinition({
+        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+        meta: {}
+      });
+      const apiResponse = {
+        id: 1,
+        name: 'foo',
+        email: 'foo@bar.com'
+      };
 
-    assert.deepEqual(state.getIn(['queriesToIds', query.hash()]), new Set(['1']));
+      // Store data and set up state
+      cache.storeQuery(query, sd, apiResponse);
+      const state = store.getState().tectonic;
 
-    const [data, ok] = cache.getQueryData(query, state);
-    assert.isTrue(ok);
-    assert.deepEqual(data, apiResponse);
+      assert.deepEqual(state.getIn(['queriesToIds', query.hash()]), new Set(['1']));
+
+      const [data, ok] = cache.getQueryData(query, state);
+      assert.isTrue(ok);
+      assert.deepEqual(data, apiResponse);
+    });
+
+    describe('returns a list of data after GET of RETURNS_LIST', () => {
+      const store = createStore();
+      const cache = new Cache(store);
+      const query = User.getList();
+      const sd = new SourceDefinition({
+        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_LIST),
+        meta: {}
+      });
+      const apiResponse = [
+        {
+          id: 1,
+          name: 'foo',
+          email: 'foo@bar.com'
+        },
+        {
+          id: 2,
+          name: 'baz',
+          email: 'baz@bar.com'
+        }
+      ];
+
+      it('returns data after storing', () => {
+        // Store data and set up state
+        cache.storeQuery(query, sd, apiResponse);
+        const state = store.getState().tectonic;
+        assert.deepEqual(state.getIn(['queriesToIds', query.hash()]), new Set(['1', '2']));
+
+        const [data, ok] = cache.getQueryData(query, state);
+        assert.isTrue(ok);
+        assert.deepEqual(data, apiResponse);
+      });
+
+      it('returns a partial list of data after a DELETE to one of the IDs', () => {
+        const deleteDef = new SourceDefinition({
+          queryType: DELETE,
+          params: ['id'],
+          meta: {}
+        });
+        const deleteQ = new Query({
+          queryType: DELETE,
+          model: User,
+          modelId: 1,
+          parmas: {id: 1},
+        });
+        cache.storeQuery(deleteQ, deleteDef, undefined);
+
+        const state = store.getState().tectonic;
+        const [data, ok] = cache.getQueryData(query, state);
+        // Now that one of the data fields is missing the tuple should return
+        // false to indicate that this needs refetching. Note that the manager
+        // ignores this, so `data` returned from the cache is still passed to
+        // components. This is purely used during resolving, ensuring the same
+        // query will refetch in the future.
+        assert.isFalse(ok);
+        assert.deepEqual(data, [apiResponse[1]]);
+      }); 
+    });
+
+    it('returns an empty array after a 200 API request to a List endpoint which returns nothing', () => {
+      const store = createStore();
+      const cache = new Cache(store);
+      const query = User.getList();
+      const sd = new SourceDefinition({
+        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_LIST),
+        meta: {}
+      });
+      const apiResponse = [];
+
+      cache.storeQuery(query, sd, apiResponse);
+      const state = store.getState().tectonic;
+      assert.deepEqual(state.getIn(['queriesToIds', query.hash()]), new Set([]));
+
+      const [data, ok] = cache.getQueryData(query, state);
+      assert.isTrue(ok);
+      assert.deepEqual(data, []);
+    });
+
   });
 
 });
