@@ -291,17 +291,8 @@ export default class BaseResolver {
     // by default this will return now, meaning this query will never be cached
     const expires = this.parseCacheHeaders(meta.headers);
 
-    if (data) {
-      // TODO: test errors thrown here trigger failure 
-      try {
-        query.updateStatus(SUCCESS);
-        this.cache.storeQuery(query, sourceDef, data, expires);
-      } catch (e) {
-        console.warn(e);
-        query.updateStatus(ERROR);
-        return this.fail(query, sourceDef, e);
-      }
-    }
+    query.updateStatus(SUCCESS);
+    this.cache.storeQuery(query, sourceDef, data, expires);
 
     if (typeof query.callback === 'function') {
       query.callback(null, data);
