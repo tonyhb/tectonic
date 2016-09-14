@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.2] - 2015-09-4
+### Added
+- Added support for submodels inside tectonic models
+
 ## [1.1.1] - 2015-09-11
 ### Fixed
 - Ensures queries are cached with `null` response (HTTP 204)
