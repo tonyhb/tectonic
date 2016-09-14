@@ -2,7 +2,7 @@
 
 import { assert } from 'chai';
 import { User } from '/test/models';
-import { recordMethods } from '/src/model';
+import Model, { recordMethods } from '/src/model';
 
 // A model is backed by an immutable record; it provides getters for defined
 // data, and to set data you should create a new instance of the model with
@@ -61,4 +61,68 @@ describe('Model instance data', () => {
     let user = User.blank();
     assert.equal(user.id, undefined);
   });
+
+  describe('sub-models', () => {
+    class A extends Model {
+      static modelName = 'a';
+      static fields = {
+        id: '',
+        foo: '',
+      }
+
+      sayHi() {
+        return 'hi';
+      }
+    }
+    class B extends Model {
+      static modelName = 'b';
+      static fields = {
+        id: '',
+        a: new A(),
+        baz: '',
+      }
+    }
+
+    it('sets sub-models in .blank', () => {
+      const b = B.blank();
+      assert.deepEqual(
+        b.values(),
+        {
+          id: undefined,
+          baz: '',
+          a: {
+            id: undefined,
+            foo: '',
+          },
+        }
+      );
+      assert.equal(b.a.sayHi(), 'hi');
+    });
+
+    it('sets sub-models from constructor', () => {
+      const item = new B({
+        id: 'b',
+        baz: 'lol',
+        a: {
+          id: 'a',
+          foo: 'test',
+        },
+      });
+
+      assert.deepEqual(
+        item.values(),
+        {
+          id: 'b',
+          baz: 'lol',
+          a: {
+            id: 'a',
+            foo: 'test',
+          },
+        }
+      );
+
+      assert.equal(item.a.sayHi(), 'hi');
+    });
+  });
+
 });

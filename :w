@@ -77,28 +77,20 @@ export default class Model {
       throw new Error('Must supply an ID field for this model');
     }
 
-    if (data !== undefined) {
-      if (data instanceof ModelRecord) {
-        // This allows us to create copies of the model from immutableJS record
-        // methods.
-        this.record = data;
-      } else {
-        // Set data normally, such as new User({ id: 1 });
-
-        // create new submodels if necessary
-        this.constructor.submodelFieldNames().forEach(field => {
-          // TODO: a better way of determining whether something is a model
-          // other than values; instanceof this.constructor doesn't work as they
-          // may be different models
-          if (data[field].values === undefined) {
-            data[field] = new this.constructor.fields[field].constructor(data[field]);
-          }
-        });
-
-        this.record = new ModelRecord(data);
-      }
+    if (data instanceof ModelRecord) {
+      // This allows us to create copies of the model from immutableJS record
+      // methods.
+      this.record = data;
     } else {
-      this.record = new ModelRecord();
+      // Set data normally, such as new User({ id: 1 });
+      this.record = new ModelRecord(data);
+      for (const item in this.constructor.fields) {
+        console.log(this.constructor.fields[item].constructor instanceof this, 'lol');
+        if (this.constructor.fields[item].constructor instanceof this.constructor) {
+          data[item] = new this.constructor.fields[item](data[item]);
+        }
+      }
+      // TODO: Nested models should be set here.
     }
 
     // This creates getters for each field in the model, allowing us to read
@@ -123,16 +115,7 @@ export default class Model {
   }
 
   values() {
-    const data = this.record.toObject();
-    this.constructor.submodelFieldNames().forEach(field => {
-      data[field] = data[field].values();
-    });
-    return data;
-  }
-
-  unsetId() {
-    this.record = this.record.set(this.constructor.idField, undefined);
-    return this;
+    return this.record.toObject()
   }
 
   /**
@@ -159,36 +142,21 @@ export default class Model {
    * immutable's defaults.
    */
   static blank() {
-    let model = new this(this.fields).unsetId();
-    this.submodelFieldNames().forEach(field => {
-      model.set(field, model[field].unsetId());
-    });
-    return model;
+    let ModelRecord = modelRecords[this.modelName];
+
+    // Create a new immutable record which is the basis for storing data within
+    // our model. 
+    if (ModelRecord === undefined) {
+      ModelRecord = new Record(this.fields, this.modelName);
+      modelRecords[this.modelName] = ModelRecord;
+    }
+
+    const record = new ModelRecord({ [this.idField]: undefined })
+    return new this(record);
   }
 
   static fieldNames() {
     return Object.keys(this.fields);
-  }
-
-  /**
-   * submodelFieldNames returns an array of fields which have Model data types.
-   *
-   * @return {Array}
-   */
-  static submodelFieldNames() {
-    if (this.submodelFields !== undefined) {
-      return this.submodelFields;
-    }
-
-    this.submodelFields = [];
-
-    for (const item in this.fields) {
-      if (typeof this.fields[item].values === 'function')  {
-        this.submodelFields.push(item);
-      }
-    }
-
-    return this.submodelFields;
   }
 
   /**
