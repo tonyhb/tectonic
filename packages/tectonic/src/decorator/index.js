@@ -218,13 +218,21 @@ export default function load(queries) {
         */
       }
 
+      getModel(opts, callback) {
+        this._createQuery(GET, opts, callback);
+      }
+
       _createQuery(type, opts = {}, callback) {
         if (opts instanceof Model) {
           opts = { model: opts };
         }
 
-        // TODO: should we be able to pass model classes as opts.model,
-        // or opts?
+        // If we pass a model class as opts.model, 
+        if (typeof opts.model.values !== 'function') {
+          // Quick hack to make things work - below expects an instance of the
+          // model
+          opts.model = new opts.Model();
+        }
 
         if (opts.modelId === undefined) {
           // TODO can we get this from params if not defined here?
@@ -263,6 +271,7 @@ export default function load(queries) {
         const props = {
           ...this.props,
           ...manager.props(queries, undefined, true),
+          getModel: ::this.getModel,
           createModel: ::this.createModel,
           updateModel: ::this.updateModel,
           deleteModel: ::this.deleteModel,
