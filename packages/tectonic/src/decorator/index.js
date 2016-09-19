@@ -231,7 +231,7 @@ export default function load(queries) {
         if (typeof opts.model.values !== 'function') {
           // Quick hack to make things work - below expects an instance of the
           // model
-          opts.model = new opts.Model();
+          opts.model = new opts.model();
         }
 
         if (opts.modelId === undefined) {
