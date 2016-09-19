@@ -4,7 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.1.2] - 2015-09-4
+## [1.1.3] - 2015-09-19
+### Added
+- Added `getModel` to wrapped component for manually fetching
+
+## [1.1.2] - 2015-09-14
 ### Added
 - Added support for submodels inside tectonic models
 
