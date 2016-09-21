@@ -95,6 +95,13 @@ export default class Model {
           }
         });
 
+        // Apply per-model filtering before setting data. This lets us rename
+        // fields per-model, for example if the API response always includes
+        // '.size' which is disallowed using immutable records.
+        if (typeof this.constructor.filter === 'function') {
+          data = this.constructor.filter(data);
+        }
+
         this.record = new ModelRecord(data);
       }
     } else {
