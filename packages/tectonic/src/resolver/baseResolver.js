@@ -43,6 +43,8 @@ export default class BaseResolver {
    */
   queries = {}
 
+  queriesInFlight = {}
+
   /**
    * statusMap holds a list of query hashes to their statuses during resolution.
    * This allows us to manipulate the status of queries in resolveAll,
@@ -177,13 +179,37 @@ export default class BaseResolver {
         debug('query already pending and in flight; skipping', q.toString(), q);
         // update the query's internal status to pending, but no need to update
         // the query status as it's already pending
-        query.updateStatus(PENDING);
+        q.updateStatus(PENDING);
+        // If we're here and the query is PENDING this must mean that the
+        // internal status of the query didn't get set. Perhaps this was added
+        // by a loaded component after the previous in-flight query was
+        // resolved?
+        // In any case, to ensure that the original query which caused the
+        // request cascades down into this one we need to mark this query as
+        // a duplicate.
+        // Otherwise, this query's internal status will still be set to PENDING
+        // (as the parent query doesn't update it) which is inconsistent,
+        // causing data not to be passed down in the manager.
+        const parent = this.queriesInFlight[q.toString()];
+        if (parent === undefined) {
+          console.warn && console.warn(
+            'There is no parent definition found for in-flight query: ',
+            q.toString()
+          );
+        } else {
+          debug('query previously resolved and in-flight; marking dupe', q.toString(), q);
+          parent.duplicates.push(q);
+        }
         return;
       }
 
       // Attempt to resolve a single query from the map of source definitions.
       const sd = this.resolveItem(q, sourceMap)
       if (sd !== undefined) {
+        // Add this query to the reducer's global queryInFlight list for
+        // future dupe linking during the PENDING stage
+        this.queriesInFlight[q.toString()] = q;
+        // Push this to the list which will be processed via drivers
         resolvedQueries.push(q);
         q.sourceDefinition = sd;
         q.updateStatus(PENDING);
@@ -284,6 +310,8 @@ export default class BaseResolver {
   }
 
   success(query, sourceDef, data, meta = {}) {
+    delete this.queriesInFlight[query.toString()];
+
     // TODO: Also update all dependencies of this query as success and
     // re-resolve
 
@@ -303,6 +331,8 @@ export default class BaseResolver {
   }
 
   fail(query, sourceDef, data) {
+    delete this.queriesInFlight[query.toString()];
+
     // TODO: Also update all dependencies of this query as failed
     console.warn(`Query failed on ${query} using sourceDefinition ${sourceDef}: ${data}`);
 

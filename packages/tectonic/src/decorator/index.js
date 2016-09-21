@@ -142,7 +142,7 @@ export default function load(queries) {
           manager.addQuery(queries[q]);
         });
 
-        setTimeout(() => manager.resolve(), 5);
+        manager.resolve();
       }
 
       /**
