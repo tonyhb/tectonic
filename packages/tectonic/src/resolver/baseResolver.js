@@ -135,11 +135,12 @@ export default class BaseResolver {
       // the decorator.
       delete(this.queries[hash]);
 
-      // If the query status is SUCCESS internally we can short-circuit. This
-      // allows us to not re-request a query with zero expiry time from
-      // a component re-rendering with different props.
-      if (q.status === SUCCESS) {
-        debug('query already marked as success; skipping', q.toString(), q);
+      // If the query status is SUCCESS or ERROR internally we can
+      // short-circuit. This allows us to not re-request a query with zero
+      // expiry time from a component re-rendering with different props,
+      // as this internal property is only set in pre-existing queries.
+      if (q.status === SUCCESS || q.status === ERROR) {
+        debug('query already marked internally; skipping', q.toString(), q);
         return;
       }
 
@@ -167,15 +168,6 @@ export default class BaseResolver {
       if (status === PENDING) {
         debug('query already pending and in flight; skipping', q.toString(), q);
         // no need to update the query status as it's already pending
-        return;
-      }
-
-      // If the query previously failed we should skip it if this is a GET
-      // request.
-      // TODO: test this is only for get requests
-      if (status === ERROR && q.queryType === GET) {
-        q.status = ERROR;
-        debug('query previously failed; skipping', q);
         return;
       }
 
