@@ -119,7 +119,7 @@ export default function load(queries) {
         this.addAndResolveQueries();
       }
 
-      componnetWillUnmount() {
+      componetWillUnmount() {
         this.queries = {};
       }
 
