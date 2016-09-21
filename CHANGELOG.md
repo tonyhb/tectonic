@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.7] - 2016-09-21
+### Added
+- Added static `filter` method to models for per-model data filtering, prior to
+  setting model data. This allows you to write custom transform logic for each
+  model
+
+### Changed
+- We now set internal query statuses to PENDING, allowing us to skip these
+  queries in the resolver
+
 ## [1.1.6] - 2016-09-21
 ### Changed
 - Always re-request GET queries with ERROR cache status
