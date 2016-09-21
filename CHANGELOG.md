@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.8] - 2016-09-21
+### Changed
+- Removed `setTimeout` call in decorator by adding in-flight query
+  deduplication. We now track all in-flight queries and match duplicates to
+  their predecessors, ensuring that when the original query succeeds it marks
+  all duplicates as successful (even if they were created after the initial
+  resolution).
+
 ## [1.1.7] - 2016-09-21
 ### Added
 - Added static `filter` method to models for per-model data filtering, prior to
