@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.5]
+### Fixed
+- Ensure DELETE queries have their status set to SUCCESS in reducer for
+  repeatable queries
+
+## [1.1.4] - 2015-09-19
+### Fixed
+- Broken release! Apologies.
+
 ## [1.1.3] - 2015-09-19
 ### Added
 - Added `getModel` to wrapped component for manually fetching
