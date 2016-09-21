@@ -83,9 +83,15 @@ export default class BaseResolver {
 
     if (this.queries[hash] === undefined) {
       this.queries[query.toString()] = query;
-    } else {
-      this.queries[query.toString()].duplicates.push(query);
+      return;
     }
+    if (this.queries[hash] === query) {
+      // This is an exact dupe of a previously set query; skip
+      return;
+    }
+    // This is a technical dupe created by a separate component. Mark so
+    // that updating one status
+    this.queries[query.toString()].duplicates.push(query);
   }
 
   /**
@@ -135,11 +141,13 @@ export default class BaseResolver {
       // the decorator.
       delete(this.queries[hash]);
 
-      // If the query status is SUCCESS or ERROR internally we can
-      // short-circuit. This allows us to not re-request a query with zero
-      // expiry time from a component re-rendering with different props,
-      // as this internal property is only set in pre-existing queries.
-      if (q.status === SUCCESS || q.status === ERROR) {
+      // If the query status is defined internally we can short-circuit; this
+      // has already been processed.
+      //
+      // This allows us to not re-request a query with zero expiry time from a
+      // component re-rendering with different props, as this internal property
+      // is only set in pre-existing queries.
+      if (q.status !== undefined) {
         debug('query already marked internally; skipping', q.toString(), q);
         return;
       }
@@ -167,15 +175,18 @@ export default class BaseResolver {
       const status = this.cache.getQueryStatus(q, state);
       if (status === PENDING) {
         debug('query already pending and in flight; skipping', q.toString(), q);
-        // no need to update the query status as it's already pending
+        // update the query's internal status to pending, but no need to update
+        // the query status as it's already pending
+        query.updateStatus(PENDING);
         return;
       }
 
       // Attempt to resolve a single query from the map of source definitions.
       const sd = this.resolveItem(q, sourceMap)
       if (sd !== undefined) {
-        q.sourceDefinition = sd;
         resolvedQueries.push(q);
+        q.sourceDefinition = sd;
+        q.updateStatus(PENDING);
         this.statusMap[hash] = PENDING;
         debug('resolved query', q.toString(), q);
       }
