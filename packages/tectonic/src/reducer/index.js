@@ -69,8 +69,11 @@ const reducer = (state = defaultState, action) => {
   }
 
   if (action.type === DELETE_DATA) {
-    const { modelName, modelId } = action.payload;
-    return state.mergeIn(['data', modelName, modelId], {deleted: true});
+    const { query, modelName, modelId } = action.payload;
+    return state.withMutations(s => {
+      s.mergeIn(['data', modelName, modelId], {deleted: true});
+      s.setIn(['status', query.toString()], SUCCESS);
+    });
   }
 
   return state;

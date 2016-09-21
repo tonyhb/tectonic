@@ -55,6 +55,7 @@ export default class Cache {
       this.store.dispatch({
         type: DELETE_DATA,
         payload: {
+          query: query,
           model: query.model,
           modelName: query.model.modelName,
           modelId: query.modelId + '', // modelIds should always be strings in reducers

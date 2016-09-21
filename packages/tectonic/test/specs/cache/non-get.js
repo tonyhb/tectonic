@@ -13,8 +13,9 @@ import {
   DELETE,
   RETURNS_ITEM,
   RETURNS_LIST,
-  RETURNS_ALL_FIELDS
+  RETURNS_ALL_FIELDS,
 } from '/src/consts';
+import { SUCCESS } from '/src/status';
 // test stuff
 import { User, Post } from '/test/models';
 import { createStore } from '/test/manager';
@@ -86,6 +87,22 @@ describe('cache for non-GET requests', () => {
       cache.storeQuery(query, sd, undefined);
       state = store.getState().tectonic.toJS();
       assert.isTrue(state.data.user["1"].deleted);
+    });
+
+    it('updates query status to SUCCESS', () => {
+      const store = createStore()
+      const cache = new Cache(store);
+      const spy = sinon.spy(cache, 'cachedQueryIds');
+      const query = new Query({
+        queryType: DELETE,
+        model: User,
+        modelId: 1,
+        params: { id: 1 }
+      });
+      cache.storeQuery(query, sd, undefined);
+
+      let state = store.getState().tectonic.toJS();
+      assert.equal(state.status[query.toString()], SUCCESS);
     });
   });
 
