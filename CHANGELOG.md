@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.9] - 2016-09-21
+### Fixed
+- Fixed undefined val submodule assignment error in model.js
+
 ## [1.1.8] - 2016-09-21
 ### Changed
 - Removed `setTimeout` call in decorator by adding in-flight query
