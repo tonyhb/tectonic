@@ -90,7 +90,7 @@ export default class Model {
           // TODO: a better way of determining whether something is a model
           // other than values; instanceof this.constructor doesn't work as they
           // may be different models
-          if (data[field].values === undefined) {
+          if (data[field] !== undefined && data[field].values === undefined) {
             data[field] = new this.constructor.fields[field].constructor(data[field]);
           }
         });
