@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.13] - 2016-10-04
+### Changed
+- Ensure manager always adds props for PENDING and ERROR states
+
 ## [1.1.11] - 2016-10-04
 ### Changed
 - Changed queries to include a _force property and force() function, ensuring
