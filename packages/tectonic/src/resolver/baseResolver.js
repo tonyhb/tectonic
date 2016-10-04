@@ -58,7 +58,6 @@ export default class BaseResolver {
    * can be used for optimization.
    */
   onAddSourceDef(sourceDef) {
-    // This
   }
 
   /**
@@ -84,16 +83,31 @@ export default class BaseResolver {
     const hash = query.toString();
 
     if (this.queries[hash] === undefined) {
-      this.queries[query.toString()] = query;
+      this.queries[hash] = query;
       return;
     }
     if (this.queries[hash] === query) {
       // This is an exact dupe of a previously set query; skip
       return;
     }
-    // This is a technical dupe created by a separate component. Mark so
-    // that updating one status
-    this.queries[query.toString()].duplicates.push(query);
+
+    // Here this is a technical dupe created by a separate component.
+
+    // If this query is marked so that we ensure it's forced through the
+    // resolver we need to update the parent's query status to remove PENDING,
+    // SUCCESS etc.
+    //
+    // We could always randomly change the query's hash if it's forced, however
+    // we fetch data for queries using the reducer's queryToIds map - if we
+    // randomly change the query hash other "duplicate" but unforced queries
+    // will never receive updates.
+    if (query._force === true) {
+      // Force the parent query through resoution
+      this.queries[hash].status = undefined;
+    }
+
+    // Mark the query as a dupe.
+    this.queries[hash].duplicates.push(query);
   }
 
   /**

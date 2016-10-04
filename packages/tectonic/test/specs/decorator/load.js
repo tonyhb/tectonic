@@ -79,8 +79,8 @@ describe('@load decorators .load prop', () => {
 
       window.setTimeout(() => {
         // User should still be the same
-        assert.deepEqual(item.props.status.user, SUCCESS);
-        assert.equal(item.props.user.values(), data.user);
+        assert.equal(item.props.status.user, SUCCESS);
+        assert.deepEqual(item.props.user.values(), data.user);
         // Check posts got added
         assert.equal(item.props.status.somePost, SUCCESS);
         assert.deepEqual(item.props.somePost.values(), data.post);

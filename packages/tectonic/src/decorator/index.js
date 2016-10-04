@@ -274,7 +274,7 @@ export default function load(queries) {
        */
       load(queries) {
         if (typeof queries !== "object") {
-          throw new Error(`Load argumnet must be an object (ie.
+          throw new Error(`Load argument must be an object (ie.
 this.props.load({
   propName: Model.getItem({ id: 1 })
 })`);
@@ -282,12 +282,17 @@ this.props.load({
         }
 
         Object.keys(queries).forEach(q => {
+          // ensure this query is forced to resolve each time.
+          // See the Query definition's force property for more info.
+          queries[q].force();
           // Update this.queries in this decorator so that render()
           // automatically injects our properties.
           this.queries[q] = queries[q];
           this.queries[q].status = undefined;
           this.queries[q].returnedIds = new Set();
         });
+
+        console.log(this.queries);
 
         this.addAndResolveQueries();
       }

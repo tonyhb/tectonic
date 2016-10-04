@@ -56,6 +56,26 @@ export default class Query {
   duplicates = []
 
   /**
+   * _force represents whether this query will be forced through the
+   * resolver instead of deduplicating when other components have already
+   * requested this data.
+   *
+   * in essence this ensures that the parent query has its internal status set
+   * to `undefined`, which forces re-resolution of the query.
+   *
+   * This is set to true when using the props.load() function passed from the
+   * decorator; queries called this way should always be resolved. If we didn't
+   * do this, the query may be marked as a duplicate to a parent which has its
+   * internal status set to SUCCESS. This bypasses the resolver *and* the cache.
+   *
+   * Note that a duplicated query still respects the cache; it should only be
+   * forced to run through the resolver individually.
+   *
+   * By default this deduplicates the query.
+   */
+  _force = false
+
+  /**
    * @param Model  model class
    * @param array|string   Array of fields or RETURNS_ALL_FIELDS
    * @param string GET, CREATE, UPDATE, or DELETE from consts above. Specifies
@@ -153,6 +173,14 @@ export default class Query {
   updateStatus(to) {
     this.status = to;
     this.duplicates.forEach(dupe => dupe.status = to);
+  }
+
+  /**
+   * force ensures the query runs through resolution instead of short circuiting
+   * because of internal statuses being set on the parent query.
+   */
+  force() {
+    this._force = false;
   }
 
 }
