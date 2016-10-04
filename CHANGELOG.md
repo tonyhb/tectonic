@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.11] - 2016-10-04
+### Changed
+- Changed queries to include a _force property and force() function, ensuring
+  that any queries created through .props.load() are forced to resolve despite
+  potentially having parent queries.
+
 ## [1.1.10] - 2016-10-04
 ### Added
 - Added .load() to component props (see
