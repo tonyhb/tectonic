@@ -265,7 +265,6 @@ export default class Model {
       returnType: RETURNS_LIST
     });
   };
-
 }
 
 function setProp(prototype, name) {
