@@ -227,7 +227,7 @@ export default class Cache {
    *
    */
   cachedQueryIds(query, state) {
-    return state.getIn(['queriesToIds', query.hash()], []);
+    return state.getIn(['queriesToIds', query.hash()], new Set());
   }
 
   /**

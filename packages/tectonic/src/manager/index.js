@@ -139,23 +139,28 @@ export default class Manager {
 
       props.status[prop] = status;
 
-      // If this query was a success load the data.
-      if (status === SUCCESS) {
-        let [data, _] = cache.getQueryData(query, state);
-        // This is an array of items
-        if (query.returnType === RETURNS_LIST) {
-          props[prop] = data.map(d => new query.model(d));
+      // Attempt to load the data regardless of the query status. This will
+      // return the previous data, if possible.
+      let [data, _] = cache.getQueryData(query, state);
+
+      if (data === undefined) {
+        // THere was no data - add defaults, which is a blank model or an empty
+        // array
+        if (query.returnType === RETURNS_ITEM) {
+          data = query.model.blank();
         } else {
-          props[prop] = new query.model(data);
+          data = [];
         }
       } else {
-        // Add an empty model as the prop so that this.props.model.x works
-        if (query.returnType === RETURNS_ITEM) {
-          props[prop] = query.model.blank();
+        // There was data - inflate it into models
+        if (query.returnType === RETURNS_LIST) {
+          data = data.map(d => new query.model(d));
         } else {
-          props[prop] = [];
+          data = new query.model(data);
         }
       }
+
+      props[prop] = data;
     });
 
     return props;
