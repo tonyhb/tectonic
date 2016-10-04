@@ -180,7 +180,7 @@ export default class Query {
    * because of internal statuses being set on the parent query.
    */
   force() {
-    this._force = false;
+    this._force = true;
   }
 
 }
