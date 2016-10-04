@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.10] - 2016-10-04
+### Added
+- Added .load() to component props (see
+  #5ccc6c5123a0c43bd3a7d67fed3e52e825e06a55)
+
 ## [1.1.9] - 2016-09-21
 ### Fixed
 - Fixed undefined val submodule assignment error in model.js
