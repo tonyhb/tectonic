@@ -338,10 +338,6 @@ export default class BaseResolver {
 
     query.updateStatus(SUCCESS);
     this.cache.storeQuery(query, sourceDef, data, expires);
-
-    if (typeof query.callback === 'function') {
-      query.callback(null, data);
-    }
   }
 
   fail(query, sourceDef, data) {
@@ -356,10 +352,6 @@ export default class BaseResolver {
         [query.hash()]: ERROR
       }
     });
-
-    if (typeof query.callback === 'function') {
-      query.callback(data, null);
-    }
   }
 
   /**

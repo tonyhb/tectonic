@@ -1,6 +1,6 @@
 'use strict';
 
-import * as status from '/src/status';
+import * as consts from '/src/consts';
 import {
   GET,
   CREATE,
@@ -8,7 +8,9 @@ import {
   DELETE,
   RETURNS_ITEM,
   RETURNS_LIST,
-  RETURNS_ALL_FIELDS
+  RETURNS_ALL_FIELDS,
+  SUCCESS,
+  ERROR,
 } from '/src/consts';
 import deepEqual from 'deep-equal';
 
@@ -87,7 +89,7 @@ export default class Query {
    * @param object Body to be sent in request, used for POST, PUT etc.
    * @param mixed  ID of the model instance for UPDATE and DELETE queries
    */
-  constructor({ model, fields, queryType = GET, returnType, params = {}, body, callback, modelId }) {
+  constructor({ model, fields, queryType = GET, returnType, params = {}, body, callback, modelId } = {}) {
     if (model.constructor && model.constructor.assertFieldsExist) {
       model.constructor.assertFieldsExist(fields);
     } else {
@@ -115,6 +117,13 @@ export default class Query {
         // context. This will create the parent-child tree relationships.
         this.params[p] = param.call(this);
       }
+    });
+
+    // Create a new promise for the query, and store the resolve/reject items
+    // in the query so we can call it in the resolver
+    this.promise = new Promise((resolve, reject) => {
+      this.resolve = resolve;
+      this.reject = reject;
     });
 
     // When the query is resolved and data is found this stores all of the IDs
@@ -170,9 +179,32 @@ export default class Query {
     return this.toString();
   }
 
-  updateStatus(to) {
+  updateStatus(to, dataOrErr) {
     this.status = to;
     this.duplicates.forEach(dupe => dupe.status = to);
+
+    if (to === SUCCESS) {
+      this.onSuccess(data);
+    }
+    if (to === ERROR) {
+      this.onError(dataOrErr);
+    }
+  }
+
+  onSuccess(data) {
+    const Model = this.model;
+    const instance = new Model(data);
+    if (typeof query.callback === 'function') {
+      query.callback(null, instance);
+    }
+    query.resolve(instance);
+  }
+
+  onError(err) {
+    if (typeof query.callback === 'function') {
+      query.callback(err);
+    }
+    query.reject(err);
   }
 
   /**

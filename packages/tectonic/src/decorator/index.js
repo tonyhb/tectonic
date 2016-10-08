@@ -190,11 +190,11 @@ export default function load(queries) {
        * @param function async-style callback with params (err, response)
        */
       createModel(opts, callback) {
-        this._createQuery(CREATE, opts, callback);
+        return this._createQuery(CREATE, opts, callback);
       }
 
       updateModel(opts, callback) {
-        this._createQuery(UPDATE, opts, callback);
+        return this._createQuery(UPDATE, opts, callback);
       }
 
       // deleteModel creates a DELETE query for a model instance.
@@ -202,27 +202,15 @@ export default function load(queries) {
       //
       // Note that opts.modelId may be specified to
       deleteModel(opts, callback) {
-        this._createQuery(DELETE, opts, callback);
-        /*
-         * TODO api cleanup later, see API.md
-        if (typeof opts === 'function' && callback === undefined) {
-          // deleteModel was called like so:
-          // this.props.deleteModel(this.props.user, callback)
-          callback = opts;
-          opts = {};
-        }
-
-        if (typeof model.values === 'function') {
-          opts
-        } 
-        */
+        return this._createQuery(DELETE, opts, callback);
       }
 
       getModel(opts, callback) {
-        this._createQuery(GET, opts, callback);
+        return this._createQuery(GET, opts, callback);
       }
 
       _createQuery(type, opts = {}, callback) {
+        // TODO API cleanup - see API.md
         if (opts instanceof Model) {
           opts = { model: opts };
         }
@@ -260,6 +248,8 @@ export default function load(queries) {
         // TODO: keep track of query in load component for future devtools?
         manager.addQuery(query);
         manager.resolve();
+
+        return query.promise;
       }
 
       /**
