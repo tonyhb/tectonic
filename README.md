@@ -1,141 +1,284 @@
-# Tectonic
+<h1 align='center'>Tectonic</h1>
 
 -----
 
-This is **not ready** and shouldn't be used until this notice is removed *and*
-it's on NPM.
+<p align='center'>Declarative data loading for REST APIs</p>
 
 -----
 
-Tectonic is a smart data component which handles:
+<h3 align='center'>What does it do?</h3>
 
-- Querying data via your existing REST API with adaptable query drivers
-- Storing state and data within Redux' reducers
-- Cache management
-- Passing data into your components
+Great question! It:
 
-In short:
+- Queries data via your existing REST API with adaptable query drivers
+- Stores state and data within Redux' reducers automatically
+- Respects and manages caching
+- And, best of all, passes fetched data and loading state into your components
 
-1. you explain your REST API in terms of sources
-2. you write standard drivers to communicate with your API, or use built in drivers
-3. you declaratively state what data your components need
-4. tectonic resolves queries, caching and data management to pass data into your
-   components. As a bonus your component also gets the entire async lifecycle
-   injected as props to show loading views.
+What does that mean?
+
+Never define an action for loading data again. And also, never write a
+reducer again. Which means no normalization of data! And no writing reselect
+queries! It happens automatically for you.
+
+<h3 align='center'>Cool. How do I use it?</h3>
+
+First you need to define some models to hold and query data:
 
 ```js
-import load, { Manager, Model, Loader, BaseResolver } from 'tectonic';
-// see github.com/tonyhb/tectonic-superagent
-import TectonicSuperagent() from 'tectonic-superagent';
+import { Model } from 'tectonic';
 
 class User extends Model {
+  // modelName is important; it's used to differentiate models
   static modelName = 'user';
 
+  // fields are used to create an immutable.js record which holds data for an
+  // instance of a model. All fields must be defined here with defaults
   static fields = {
     id: 0,
+    email: '',
     name: '',
-    email: ''
-  };
-
-  /**
-   * getObfuscatedEmail is an instance method which allows us to define data
-   * manipulation functions outside of a component in one place. This makes
-   * data manipulation reusable everywhere without writing selectors.
-   */
-  getObfuscatedEmail() {
-    return this.email.replace('@', ' at ');
-  }
-}
-
-class Org extends Model {
-  static modelName = 'org';
-
-  static fields = {
-    id: 0,
-    name: ''
-  };
-}
-
-const manager = new Manager({
-  drivers: {
-    fromSuperagent: new TectonicSuperagent()
-  },
-  resolver: new BaseResolver(),
-  store: store // Redux store
-});
-
-manager.fromSuperagent([
-  {
-    meta: {
-      url: '/api/v0/user/:id',
-      transform: (response) => response.data
-    },
-    // These are any parameters for the request (ie query params, post data)
-    params: ['id'],
-    // returns should be Model.item, Model.list or an object of these
-    returns: User.item(),
-  },
-  // API call for listing all users
-  {
-    meta: {
-	  url: '/api/v0/users'
-	},
-	returns: User.list()
-  }
-]);
-
-// Wrap your root component like so:
-<Loader manager={ manager }>
-  ...
-</Loader>
-
-// And use the decorator to load models:
-
-@load(props => ({
-  org: Org.getItem(['name'], { id: 1 }),
-  dependsOnOrg: Repo.getList({ orgId: props.org && props.org.id }), // Wont be called until org is loaded
-  list: Org.getList(['name'], { start: 0, limit: 20 })
-}))
-class OrgList extends Component {
-
-  static propTypes = {
-	// tectonic automatically tracks statuses of all API calls within
-	// props.status
-    status: React.PropTypes.shape({
-	  org: React.PropTypes.bool,
-	  dependsOnOrg: React.PropTypes.bool,
-	  list: React.PropTypes.bool
-	}),
-
-	org: Org.instanceOf,
-	dependsOnOrg: React.PropTypes.arrayOf(Repo.instanceOf),
-	list : React.PropTypes.arrayOf(Org.instanceOf)
   }
 
-  render() {
-  }
-
+  // idField defines which field is used as the model identifier. This defaults
+  // to 'id' and should only be set if it's different.
+  // Note that a model must always have an ID; this is how we look up data in
+  // reducer.
+  static idField = 'id';
 }
 ```
 
-Each component remembers its queries. When it receives new props we recalculate
-queries within @load, compare against previous queries to see if items are
-different and only enqueue queries which have changed.
+Then you define your REST API as soures. It's quick and easy, but let's skip it
+to get to the juicy part. Which is declaratively asking for data!
 
----------
+Check it out (I'll tell you what's going on after):
 
-# Components
+```js
+import React, { Component, PropTypes } from 'react';
+import load, { Status } from 'tectonic';
+import { User, Post } from './models.js'; // your models
+const { instanceOf, arrayOf, shape, string } = PropTypes;
 
-### Manager
+@load((props) => {
+  user: User.getItem({ id: props.params.userId }),
+  posts: Post.getList({ email: props.user.email })
+})
+class UserInfo extends Component {
+  static propTypes = {
+    // btw, these are the same keys we passed to '@load'
+    user: instanceOf(User),
+    posts: arrayOf(instanceOf(User)),
 
-### Resolver
+    status: shape({
+      user: instanceOf(Status), // Status is a predefined Tectonic class :)
+      posts: instanceOf(Status),
+    }
+  }
 
-### Cache
+  render() {
+    const { status } = this.props;
+    if (status.user.isPending()) {
+      return <Loading />;
+    }
+    // ...
+  }
+}
+```
 
-The cache is an abstraction over the redux store. When querying the cache, the
-cache pulls data from the store and checks whether it's valid (according to
-cache rules you define). If the data is valid it returns said data. If it's
-invalid it returns `undefined`, causing the resolver to query for data.
+Hella cool right?! Here's what's happening:
 
-When the resolver queries for and successfully receives data it stores it in the
-cache, which delegates actual storage to the redux store.
+You say what props you want within the `@load` decorator. The `@load` decorator
+gets the component's props, so you can use props in the router or from parents
+to load data.
+
+Plus, it automatically handles what we call "dependent data loading". Here,
+`posts` depends on the user's email. We don't get that until the user has
+loaded. Don't worry; this is handled automatically behind the scenes.
+
+Tectonic also adds loading statuses for each of the props to your component!
+
+You can see whether it's pending, successful, or errored using built in
+functions (the actual status is at `.status`, so
+`this.props.status.user.status`). Plus, if there's errors, you get the error
+message at `.error`, so `this.props.status.user.error`. Same goes for the HTTP
+code.
+
+And as a bonus all of the requests are automatically cached and stored according
+to the server's cache headers. So if your server tells us to store something for
+an hour we're not going to make a request for this data for, like, one hour and
+one minute!
+
+Super, super basic interface, and super, super powerful stuff behind the scenes.
+I know, not as cool as GraphQL and relay. But still, if you gotta REST you gotta
+deal, baby.
+
+*Bonus*: Guess what? If three components asked for the same data we'll
+automatically dedupe requests for you. We'll only ask the API once. So don't
+worry. Spam `@load` like you're obsessed!
+
+<h3 align='center'>Mind blown. You mentioned defining API endpoints as sources?</h3>
+
+That's right. See, behind the scenes we need to figure out how to actually load
+your data. This is done by a "resolver".
+
+In order for us to figure that out you need to tell us where your endpoints are;
+what they return; and what required parameters they have.
+
+Here's an example:
+
+```js
+import { Manager, BaseResolver } from 'tectonic';
+import TectonicSuperagent from 'tectonic-superagent';
+
+// Step 1: create your manager (which brings everything together)
+const manager = new Manager({
+  resolver: new BaseResolver(),
+  drivers: {
+    // Drivers are modular functions that request data for us.
+    // This one uses the awesome superagent ajax library.
+    // See packages/tectonic-superagent for more info :)
+    fromSuperagent: new TectonicSuperagent(),
+  },
+  store, // Oh, the manager needs your redux store
+});
+
+// Step 2: Define some API endpoints as sources.
+// Note that each driver becomes a function on `manager` - this
+// is how we know which driver to use when requesting data.
+manager.fromSuperagent([
+  // Each driver takes an array of API endpoints
+  {
+    // LMK what the endpoint returns. In this case it's a single
+    // user item.
+    returns: User.item(),
+    // To get a single user the API endpoint needs a user's ID
+    params: ['id'],
+    meta: {
+      // meta is driver-specific. In this case the superagent driver
+      // needs to know the URL of the API endpoint. It's going to
+      // replace `:id` with the ID parameter when loading data.
+      url: '/api/v1/users/:id',
+    }
+  },
+  {
+    // This returns a list of posts
+    returns: Post.list(),
+    // Each param item is the name of the param you pass into @load. EG:
+    // @load({
+    //    posts: Post.getList({ userId: 1 })
+    //  })
+    params: ['userId'],
+    meta: {
+      url: '/api/v1/users/:userId/posts',
+    },
+  },
+]); 
+```
+
+A lot of concepts.
+
+The manager makes everything tick. It passes "queries" from `@load` into the
+"resolver", which then goes through your sources above to figure out which
+requests to make.
+
+Once we've got data, the manager takes that and puts it into the cache, which is
+an abstraction over a Redux reducer in the store to manage caching.
+
+
+<h3 align='center'>What happens if I make a request without a source?</h3>
+
+We'll throw an error which you can see in your console. Also, we use the `debug` npm package which you can enable via:
+
+```
+tdebug.enable('*');
+```
+
+<h3 align='center'>How do I add the manager to my app?</h3>
+
+Wrap your app with a component which passes context. We call it a "loader":
+
+```js
+import { Provider } from 'react-redux';
+import { Loader } from 'tectonic';
+import store from './store.js';
+import manager from './manager.js'; // your manager with sources defined
+
+const App = () => (
+  <Provider store={ store }>
+    <Loader manager={ manager }>
+      {/* Your app goes here */}
+    </Loader>
+  </Provider>
+);
+
+export default App;
+```
+
+<h3 align='center'>Sweet potato. But can I CRUD?</h3>
+
+Hell yeah baby!
+
+The `@load` decorator also adds a few functions to your components:
+- `createModel` (to create models)
+- `updateModel` (to update models)
+- `deleteModel` (i won't go on)
+- `getModel`
+
+They all have very similar APIs:
+
+```
+@load() // just gimme these functions please!
+class YourForm extends Component {
+  static propTypes = {
+    createModel: PropTypes.func,
+  }
+
+  // imagine onSubmit is called with an object containing model
+  // data...
+  onSubmit(data) {
+    const user = new User(data);
+
+    // Each function takes two arguments: an object of options and a
+    // second callback (if you actually want. I prefer callbacks to
+    // promises.
+    const status = this.props.createModel({
+      model: user,
+    }, ::this.afterSubmit);
+    
+    // But guess what! You get a status for the query too. And you
+    // can use that status like a promise. Fancy, huh?
+    status.then(() => {}, () => {});
+  }
+  
+  afterSubmit(err, result) {
+    if (err !== null) {
+      // poo
+      return;
+    }
+  }
+}
+```
+
+💥💥💥! This is automatically gonna populate the cache, too.
+
+Here's the full options you pass to CRUDdy methods:
+
+```
+{
+  // model is either the model instance you're creating or the model
+  // class you're deleting.
+  model: new User({}) || User,
+
+  // modelId is the ID of the model you're updating or deleting. If this
+  // isn't defined we take it from the model instance in `model`
+  modelId: <...>,
+
+  // params is an object of source parameters for the API request
+  params: {
+  }
+}
+```
+
+<h3 align='center'>Can I see a full example?</h3>
+
+<a href="https://github.com/tonyhb/tectonic/tree/master/packages/tectonic/example/basic">Sure thing, partner. Head here.</a>
