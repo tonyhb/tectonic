@@ -1,12 +1,23 @@
+// @flow
+
+import { Map } from 'immutable';
 import {
   UPDATE_DATA,
   DELETE_DATA,
 } from '../reducer';
+import Model from '../model';
+import Query from '../query';
+import SourceDefinition from '../sources/definition';
+import Provider from '../sources/provider';
 import {
   RETURNS_ITEM,
   RETURNS_LIST,
   GET,
   DELETE,
+} from '../consts';
+import type {
+  ModelData,
+  ModelCollection,
 } from '../consts';
 
 /**
@@ -21,9 +32,9 @@ export default class Cache {
   /**
    * store holds a reference to the redux store
    */
-  store = undefined;
+  store: Object;
 
-  constructor(store) {
+  constructor(store: Object) {
     if (store === undefined || store.dispatch === undefined || store.getState === undefined) {
       throw new Error('Cache must be defined with a redux store');
     }
@@ -41,10 +52,10 @@ export default class Cache {
    * 204 this should be undefined.
    * @param Date - date at which this data should expire
    */
-  storeQuery(query, sourceDef, apiResponse, expires = new Date()) {
+  storeQuery(query: Query, sourceDef: SourceDefinition, apiResponse: Object | Array<Object>, expires: Date = new Date()) {
     if (query.queryType === DELETE) {
       // Add the ID of this model to the delete blacklist
-      if (query.modelId === undefined) {
+      if (query.modelId === undefined || query.modelId === null) {
         throw new Error('unknown model ID during DELETE in query: ', query);
       }
 
@@ -102,29 +113,44 @@ export default class Cache {
    * testing
    * @return object
    */
-  parseApiData(query, sourceDef, apiResponse, expires = new Date()) {
-    const toStore = {};
+  parseApiData(query: Query, sourceDef: SourceDefinition, apiResponse: Object | Array<Object>, expires: Date = new Date()): ModelCollection {
+    const toStore: ModelCollection = {};
 
-    if (sourceDef.isPolymorphic()) {
-      // The source definition returns more than one model, where each key
-      // defines a particular model that it returns.
-      //
-      // Process all of them and add them to `toStore` so we update the store
-      // once.
-      Object.keys(sourceDef.returns).forEach((key) => {
-        const returns = sourceDef.returns[key];
-        // Get the return data for this particular key in the
-        const returnData = this
-          .parseReturnsData(query, returns, returns.model, apiResponse[key], expires);
-        toStore[returns.model.modelName] = returnData;
-      });
-    } else {
-      // this returns just one model (whether that's an individual model or
-      // a list of the same models)
-      const returnData = this
-        .parseReturnsData(query, sourceDef.returns, sourceDef.returns.model, apiResponse, expires);
-      toStore[sourceDef.returns.model.modelName] = returnData;
+    // The following cases may be encountered when parsing an API response from
+    // a source definition:
+    //
+    // 1. Multiple providers, returns an array [FAIL]
+    // 2. Multiple providers, returns an object [OK - LIST/ITEM]
+    // 3. Single provider, returns an array [OK - LIST]
+    // 4. Single provider, returns an object [OK - ITEM]
+
+    // Only fail if we have multiple providers and an array response.
+    if (sourceDef.isPolymorphic() && Array.isArray(apiResponse)) {
+      throw new Error('Unexpected array response from polymorphic API definition', sourceDef, apiResponse);
     }
+
+    sourceDef
+      .returns
+      .defs
+      .forEach((def) => {
+        const { key, provider } = def;
+        let modelData;
+
+        // If this source def has multiple providers and the provider key is
+        // null or undefined throw an error. You need to define
+        if (sourceDef.isPolymorphic() && (key === null || key === undefined)) {
+          throw new Error('Error attempting to parse model data with no key', sourceDef, apiResponse);
+        }
+
+        // This accounts for single provider scenarios
+        if (Array.isArray(apiResponse)) {
+          modelData = this.parseReturnsData(query, provider, provider.model, apiResponse, expires);
+        } else {
+          modelData = this.parseReturnsData(query, provider, provider.model, apiResponse[key], expires);
+        }
+
+        toStore[provider.model.modelName] = modelData;
+      });
 
     return toStore;
   }
@@ -158,9 +184,10 @@ export default class Cache {
    * @param Date  timestamp to add within cache, defaults to now. Used in
    * testing
    * @return object
+   *
+   * TODO: Return type for this function
    */
-  parseReturnsData(query, returns, model, apiResponse, expires) {
-    let resp = apiResponse;
+  parseReturnsData(query: Query, returns: Provider, model: Class<Model>, apiResponse: Object | Array<Object>, expires: Date): ModelData {
     if (returns.returnType === RETURNS_LIST && !Array.isArray(apiResponse)) {
       throw new Error('Data for returning a list must be an array', apiResponse);
     }
@@ -169,12 +196,14 @@ export default class Cache {
       throw new Error('Data for returning an item must be an object', apiResponse);
     }
 
-    if (returns.returnType === RETURNS_ITEM) {
+    let resp: Array<Object>;
+    if (Array.isArray(apiResponse)) {
+      resp = apiResponse;
+    } else {
       // standardize to list so we deal with one case. laziness meeans love
       // homie
       resp = [apiResponse];
     }
-
 
     // Take each instance of model data from the API response and save it in an
     // object to store in redux.
@@ -183,7 +212,7 @@ export default class Cache {
     // }.
     //
     // modelData will contain a map of IDs to data and cache objects
-    return resp.reduce((toStore, item) => {
+    const data: ModelData = resp.reduce((toStore: ModelData, item: Object) => {
       if (typeof item !== 'object') {
         throw new Error('Unable to process data from API; data is not an object', item);
       }
@@ -191,8 +220,8 @@ export default class Cache {
       const { idField } = model;
       const id = item[idField];
 
-      if (id === undefined) {
-        throw new Error('Unable to process data from API; data is missing the ID attribute', item);
+      if (typeof id !== 'string' && typeof id !== 'number') {
+        throw new Error('Unable to process data from API; data is missing the ID attribute as a string or number', item);
       }
 
       // Each query needs to store the IDs of the model it queried for.
@@ -216,6 +245,8 @@ export default class Cache {
 
       return toStore;
     }, {});
+
+    return data;
   }
 
   /**
@@ -225,7 +256,7 @@ export default class Cache {
    * is stale.
    *
    */
-  cachedQueryIds(query, state) {
+  cachedQueryIds(query: Query, state: Map<*, *>): Set<*> {
     return state.getIn(['queriesToIds', query.hash()], new Set());
   }
 
@@ -237,8 +268,10 @@ export default class Cache {
    * @param Map    Tectonic's reducer state (store.getState().tectonic)
    * @return tuple:[data,bool] Data and bool indicating whether item was in
    * cache
+   *
+   * TODO: flow return type for tuple
    */
-  getQueryData(query, state) {
+  getQueryData(query: Query, state: Map<*, *>) {
     // Non-GET queries such as post, put, delete, patch should never have cached
     // data. This ensures that any resolver retries the data, as a resolver
     // should ONLY skip the request if this returns a tuple with false
@@ -256,7 +289,7 @@ export default class Cache {
     }
 
     if (query.returnType === RETURNS_ITEM && returnedIds.size !== 1) {
-      throw new Error(`Invalid returnedIds length for a single item call: ${returnedIds}`);
+      throw new Error(`Invalid returnedIds length for a single item call: ${returnedIds.size}`);
     }
 
     const { modelName } = query.model;
@@ -294,8 +327,8 @@ export default class Cache {
    * @param Map
    * @return Object
    */
-  processCachedModelMap(map) {
-    if (map === undefined) {
+  processCachedModelMap(map: ?Map<*, *>): Object | boolean {
+    if (map === undefined || map === null) {
       return false;
     }
 
@@ -318,7 +351,7 @@ export default class Cache {
     return data.toJS();
   }
 
-  getQueryStatus(query, state) {
+  getQueryStatus(query: Query, state: Map<*, *>) {
     return state.getIn(['status', query.hash()]);
   }
 
@@ -328,7 +361,7 @@ export default class Cache {
    *
    * @return bool
    */
-  hasQueryExpired(query, state) {
+  hasQueryExpired(query: Query, state: Map<*, *>): boolean {
     return state.getIn(['queriesToExpiry', query.hash()], 0) < new Date();
   }
 

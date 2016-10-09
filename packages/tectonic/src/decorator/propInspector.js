@@ -1,4 +1,22 @@
+// @flow
+
 import deepEqual from 'deep-equal';
+
+import type Query from '../query';
+import type Manager from '../manager';
+
+type ConstructorOpts = {
+  queryFunc: Function
+}
+
+type QueryTree = {
+  [key: string]: Query
+}
+
+// Accessor represents a function
+type Accessor = {
+  [key: string]: Function
+}
 
 /**
  * PropInspector is used to detect relationships between queries within a single
@@ -19,11 +37,14 @@ import deepEqual from 'deep-equal';
  */
 export default class PropInspector {
 
-  constructor({ queryFunc }) {
+  queryFunc: Function
+  accessor: Accessor
+
+  constructor({ queryFunc }: ConstructorOpts) {
     this.queryFunc = queryFunc;
   }
 
-  computeDependencies(props, manager) {
+  computeDependencies(props: { [key: string]: Query }, manager: ?Manager): QueryTree {
     const { queryFunc } = this;
     // This gives us a map of prop names to queries.
     // We can use this to determine if queries generate props which other
@@ -47,7 +68,7 @@ export default class PropInspector {
     //
     // To work around this we compute queries using the props from manager
     // up until this.queries doesn't change.
-    if (manager) {
+    if (manager !== null && manager !== undefined) {
       let computedProps = manager.props(queryMap);
 
       while (deepEqual(queryMap, queryFunc({ ...props, computedProps })) === false) {

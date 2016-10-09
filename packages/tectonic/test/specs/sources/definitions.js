@@ -16,7 +16,7 @@ describe('SourceDefinition', () => {
       assert.equal(sd.queryType, GET);
     });
 
-    it('allows Returns to be undefined when the queryType is DELETE', () => {
+    it('allows Provider to be undefined when the queryType is DELETE', () => {
       const sd = new SourceDefinition({
         meta: {},
         queryType: DELETE

@@ -1,15 +1,19 @@
-
+// @flow
 
 import React from 'react';
 import { Record } from 'immutable';
 
-import Returns from '../sources/returns';
+import Provider from '../sources/provider';
 import Query from '../query';
 import {
   GET,
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS,
+} from '../consts';
+import type {
+  ReturnsAllFields,
+  ParamsType,
 } from '../consts';
 
 // recordMethods defines all immutableJS record methods that we want to
@@ -19,7 +23,7 @@ import {
 //   let u = new User({ id: 1 });
 //   u = u.set({ id: 2 });
 //   // u is another User instance with a new immutable record backing attrs
-export const recordMethods = [
+export const recordMethods: Array<string> = [
   'deleteIn',
   'removeIn',
   'merge',
@@ -41,7 +45,7 @@ export const recordMethods = [
 /**
  * modelRecords stores a list of model names to the immutable record class
  */
-const modelRecords = {};
+const modelRecords: { [key: string]: Class<Record<*>> } = {};
 
 function setProp(prototype, name) {
   Object.defineProperty(prototype, name, {
@@ -55,102 +59,18 @@ function setProp(prototype, name) {
 }
 
 export default class Model {
-  static modelName;
+  static modelName: string;
 
-  static fields;
+  static fields: Object = {};
 
   static idField = 'id';
 
   static instanceOf = React.PropTypes.instanceOf(this);
 
-  record;
+  static submodelFields: Array<string>;
 
-  constructor(data) {
-    const { modelName } = this.constructor;
-    let ModelRecord = modelRecords[modelName];
+  record: Record<*>;
 
-    // Create a new immutable record which is the basis for storing data within
-    // our model.
-    if (ModelRecord === undefined) {
-      ModelRecord = new Record(this.constructor.fields, modelName);
-      modelRecords[modelName] = ModelRecord;
-    }
-
-    // validation
-    if (modelName === undefined) {
-      throw new Error('Models must have a static modelName property defined');
-    }
-    if (typeof this.constructor.fields !== 'object') {
-      throw new Error('Models must have fields defined with default values');
-    }
-    if (this.constructor.fields[this.constructor.idField] === undefined) {
-      throw new Error('Must supply an ID field for this model');
-    }
-
-    if (data !== undefined) {
-      if (data instanceof ModelRecord) {
-        // This allows us to create copies of the model from immutableJS record
-        // methods.
-        this.record = data;
-      } else {
-        // Set data normally, such as new User({ id: 1 });
-
-        // create new submodels if necessary
-        this.constructor.submodelFieldNames().forEach((field) => {
-          // TODO: a better way of determining whether something is a model
-          // other than values; instanceof this.constructor doesn't work as they
-          // may be different models
-          if (data[field] !== undefined && data[field].values === undefined) {
-            data[field] = new this.constructor.fields[field].constructor(data[field]);
-          }
-        });
-
-        // Apply per-model filtering before setting data. This lets us rename
-        // fields per-model, for example if the API response always includes
-        // '.size' which is disallowed using immutable records.
-        if (typeof this.constructor.filter === 'function') {
-          data = this.constructor.filter(data);
-        }
-
-        this.record = new ModelRecord(data);
-      }
-    } else {
-      this.record = new ModelRecord();
-    }
-
-    // This creates getters for each field in the model, allowing us to read
-    // data from the model record directly
-    this.constructor.fieldNames().forEach((field) => {
-      setProp(this, field);
-    });
-
-    // For each immutableJS record method create a function which proxies the
-    // call to the immutableJS record then creates a new model instance with
-    // the resulting record.
-    recordMethods.forEach((method) => {
-      this[method] = function (...args) {
-        const record = this.record[method](...args);
-        return new this.constructor(record);
-      }.bind(this);
-    });
-
-    this.toJS = function (...args) {
-      return this.record.toJS(...args);
-    };
-  }
-
-  values() {
-    const data = this.record.toObject();
-    this.constructor.submodelFieldNames().forEach((field) => {
-      data[field] = data[field].values();
-    });
-    return data;
-  }
-
-  unsetId() {
-    this.record = this.record.set(this.constructor.idField, undefined);
-    return this;
-  }
 
   /**
    * Blank returns a copy of the fields as they are defined in the model.
@@ -178,6 +98,7 @@ export default class Model {
   static blank() {
     const model = new this(this.fields).unsetId();
     this.submodelFieldNames().forEach((field) => {
+      // $FlowIgnore
       model.set(field, model[field].unsetId());
     });
     return model;
@@ -214,8 +135,8 @@ export default class Model {
    *
    * @param array
    */
-  static assertFieldsExist(fields = []) {
-    if (fields === RETURNS_ALL_FIELDS) {
+  static assertFieldsExist(fields: Array<string> | ?ReturnsAllFields) {
+    if (fields === '*' || fields === undefined || fields === null) {
       // by default this is true; all fields requires nothing
       // from this predicate
       return;
@@ -239,20 +160,15 @@ export default class Model {
     }
   }
 
-  static item(fields = RETURNS_ALL_FIELDS) {
-    return new Returns(this, fields, RETURNS_ITEM);
+  static item(fields = RETURNS_ALL_FIELDS): Provider {
+    return new Provider(this, fields, RETURNS_ITEM);
   }
 
-  static list(fields = RETURNS_ALL_FIELDS) {
-    return new Returns(this, fields, RETURNS_LIST);
+  static list(fields = RETURNS_ALL_FIELDS): Provider {
+    return new Provider(this, fields, RETURNS_LIST);
   }
 
-  static getItem(fields, params) {
-    // In this case we're only passing in parameters to getItem:
-    // User.getItem({ id: 1 });
-    if (params === undefined) {
-      [fields, params] = [RETURNS_ALL_FIELDS, fields];
-    }
+  static getItem(params: ?ParamsType, fields: ?Array<string>) {
     return new Query({
       model: this,
       fields,
@@ -262,12 +178,7 @@ export default class Model {
     });
   }
 
-  static getList(fields, params) {
-    // In this case we're only passing in parameters to getList:
-    // User.getList({ id: 1 });
-    if (params === undefined) {
-      [fields, params] = [RETURNS_ALL_FIELDS, fields];
-    }
+  static getList(params: ?ParamsType, fields: ?Array<string>) {
     return new Query({
       model: this,
       fields,
@@ -276,4 +187,97 @@ export default class Model {
       returnType: RETURNS_LIST,
     });
   }
+
+  constructor(data: Object) {
+    const { modelName } = this.constructor;
+    let ModelRecord: Class<Record<*>> = modelRecords[modelName];
+
+    // Create a new immutable record which is the basis for storing data within
+    // our model.
+    if (ModelRecord === undefined) {
+      // eslint-disable-next-line new-cap
+      ModelRecord = Record(this.constructor.fields, modelName);
+      modelRecords[modelName] = ModelRecord;
+    }
+
+    // validation
+    if (modelName === undefined) {
+      throw new Error('Models must have a static modelName property defined');
+    }
+    if (typeof this.constructor.fields !== 'object') {
+      throw new Error('Models must have fields defined with default values');
+    }
+    if (this.constructor.fields[this.constructor.idField] === undefined) {
+      throw new Error('Must supply an ID field for this model');
+    }
+
+    if (typeof data === 'object') {
+      // Set data normally, such as new User({ id: 1 });
+
+      // create new submodels if necessary
+      this.constructor.submodelFieldNames().forEach((field) => {
+        // TODO: a better way of determining whether something is a model
+        // other than values; instanceof this.constructor doesn't work as they
+        // may be different models
+        if (data[field] !== undefined && data[field].values === undefined) {
+          data[field] = new this.constructor.fields[field].constructor(data[field]);
+        }
+      });
+
+      // Apply per-model filtering before setting data. This lets us rename
+      // fields per-model, for example if the API response always includes
+      // '.size' which is disallowed using immutable records.
+      if (typeof this.constructor.filter === 'function') {
+        data = this.constructor.filter(data);
+      }
+
+      this.record = new ModelRecord(data);
+    } else {
+      this.record = new ModelRecord();
+    }
+
+    // This creates getters for each field in the model, allowing us to read
+    // data from the model record directly
+    this.constructor.fieldNames().forEach((field) => {
+      setProp(this, field);
+    });
+
+    // For each immutableJS record method create a function which proxies the
+    // call to the immutableJS record then creates a new model instance with
+    // the resulting record.
+    recordMethods.forEach((method) => {
+      // $FlowIgnore: TODO assigned property errors in flow
+      this[method] = function (...args) {
+        // $FlowIgnore: When Record extends Map in flow fix
+        const record = this.record[method](...args);
+        return new this.constructor(record);
+      }.bind(this);
+    });
+  }
+
+  values() {
+    // $FlowIgnore: When Record extends Map in flow fix
+    const data = this.record.toObject();
+    this.constructor.submodelFieldNames().forEach((field) => {
+      data[field] = data[field].values();
+    });
+    return data;
+  }
+
+  unsetId() {
+    this.record = this.record.set(this.constructor.idField, undefined);
+    return this;
+  }
+
+  toJS() {
+    // $FlowIgnore: When Record extends Map in flow fix
+    return this.record.toJS();
+  }
+
+  /*
+  set(key: string, value: any): Model {
+    const newRecord = this.record.set(key, value);
+    return new this.constructor(newRecord);
+  }
+  */
 }

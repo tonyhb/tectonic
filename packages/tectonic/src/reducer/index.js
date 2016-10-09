@@ -1,4 +1,4 @@
-
+// @flow
 
 import { Map } from 'immutable';
 import { SUCCESS } from '../status';
@@ -47,7 +47,9 @@ export const UPDATE_QUERY_STATUSES = '@@tectonic/update-query-statuses';
 export const UPDATE_DATA = '@@tectonic/update-data';
 export const DELETE_DATA = '@@tectonic/delete-data';
 
-const reducer = (state = defaultState, action) => {
+declare type ActionObject = { type: string; payload: Object };
+
+const reducer = (state: Object = defaultState, action: ActionObject) => {
   if (action.type === UPDATE_QUERY_STATUSES) {
     // Add all of the queries from action.payload into state.status.
     // Merging retains past data.
@@ -70,7 +72,7 @@ const reducer = (state = defaultState, action) => {
   if (action.type === DELETE_DATA) {
     const { query, modelName, modelId } = action.payload;
     return state.withMutations((s) => {
-      s.mergeIn(['data', modelName, modelId], { deleted: true });
+      s.setIn(['data', modelName, modelId, 'deleted'], true);
       s.setIn(['status', query.toString()], SUCCESS);
     });
   }

@@ -1,7 +1,17 @@
+// @flow
+
 import d from 'debug';
+import { Map } from 'immutable';
 import * as utils from './utils';
 import { UPDATE_QUERY_STATUSES } from '../reducer';
 import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '../status';
+
+import type {
+  QueryHash,
+} from '../consts';
+import type Query from '../query';
+import type SourceDefinition from '../sources/definition';
+
 
 if (typeof window !== 'undefined') {
   window.tdebug = d;
@@ -29,8 +39,8 @@ const warn = (...args) => {
  */
 export default class BaseResolver {
   // cache and store are set from the manager
-  cache = undefined
-  store = undefined
+  cache: Object // TODO: Cache flow type
+  store: Object
 
   // This query chain is a series of functions which need to return true in order
   // for a source to satisfy a query
@@ -45,9 +55,9 @@ export default class BaseResolver {
   /**
    * List of queries to resolve
    */
-  queries = {}
+  queries: { [key: QueryHash]: Query } = {}
 
-  queriesInFlight = {}
+  queriesInFlight: { [key: QueryHash]: Query } = {}
 
   /**
    * statusMap holds a list of query hashes to their statuses during resolution.
@@ -55,14 +65,13 @@ export default class BaseResolver {
    * resolveItem and unresolvable before dispatching.
    *
    */
-  statusMap = {}
+  statusMap: { [key: QueryHash]: string } = {}
 
   /**
    * This is called ecah time a sourceDefinition is added via the manager. It
    * can be used for optimization.
    */
-  onAddSourceDef() {
-  }
+  onAddSourceDef() {}
 
   /**
    * addQuery is called (via the decorator and manager) to batch queries for
@@ -74,7 +83,7 @@ export default class BaseResolver {
    * @param Query
    * @param Map  A list of all sources passed from the manager
    */
-  addQuery(query) {
+  addQuery(query: Query) {
     // TODO: Figure out a better way of deduping queries (alongisde setting
     // statuses in the query directly to force stale caches to match).
     //
@@ -135,7 +144,7 @@ export default class BaseResolver {
    *
    * @param Map
    */
-  resolveAll(sourceMap) {
+  resolveAll(sourceMap: Map<*, *>) {
     // Get tectonic state once so we can check the cache for each query's data
     // within this loop.
     const state = this.store.getState().tectonic;
@@ -220,7 +229,7 @@ export default class BaseResolver {
 
       // Attempt to resolve a single query from the map of source definitions.
       const sd = this.resolveItem(q, sourceMap);
-      if (sd !== undefined) {
+      if (sd !== undefined && sd !== null) {
         // Add this query to the reducer's global queryInFlight list for
         // future dupe linking during the PENDING stage
         this.queriesInFlight[q.toString()] = q;
@@ -245,9 +254,11 @@ export default class BaseResolver {
 
     resolvedQueries.forEach((query) => {
       const { sourceDefinition: sd } = query;
-      const success = (data, meta) => this.success(query, sd, data, meta);
-      const fail = (data, meta) => this.fail(query, sd, data, meta);
-      sd.driverFunc(sd, query, success, fail);
+      if (sd) {
+        const success = (data, meta) => this.success(query, sd, data, meta);
+        const fail = (data, meta) => this.fail(query, sd, data, meta);
+        sd.driverFunc(sd, query, success, fail);
+      }
     });
   }
 
@@ -261,7 +272,7 @@ export default class BaseResolver {
    * @param Map
    * @return SourceDefinition  sourcedef of query
    */
-  resolveItem(query, sourceMap) {
+  resolveItem(query: Query, sourceMap: Map<*, *>): ?SourceDefinition {
     debug('resolving query', query);
 
     // Check each source definition against all predicates in our
@@ -299,7 +310,7 @@ export default class BaseResolver {
    * if all parameters are supplied and this is called we asssume there is no
    * source available for the given query and issue a console.warning.
    */
-  unresolvable(query) {
+  unresolvable(query: Query) {
     const params = Object.keys(query.params).map(k => query.params[k]);
 
     if (params.some(v => v === undefined)) {
@@ -322,7 +333,7 @@ export default class BaseResolver {
     warn('There is no source definition which resolves the query', query.toString());
   }
 
-  success(query, sourceDef, data, meta = {}) {
+  success(query: Query, sourceDef: SourceDefinition, data: Object | Array<Object>, meta: Object = {}) {
     delete this.queriesInFlight[query.toString()];
 
     // TODO: Also update all dependencies of this query as success and
@@ -343,11 +354,11 @@ export default class BaseResolver {
     }
   }
 
-  fail(query, sourceDef, data) {
+  fail(query: Query, sourceDef: SourceDefinition, data: any) {
     delete this.queriesInFlight[query.toString()];
 
     // TODO: Also update all dependencies of this query as failed
-    warn(`Query failed on ${query} using sourceDefinition ${sourceDef}: ${data}`);
+    warn(`Query failed on ${query.toString()} using sourceDefinition ${sourceDef.toString()}: ${data.toString()}`);
 
     this.store.dispatch({
       type: UPDATE_QUERY_STATUSES,
@@ -369,7 +380,7 @@ export default class BaseResolver {
    * @return Date  date to cache until. if no cache information can be
    * determined this will return now
    */
-  parseCacheHeaders(headers = {}) {
+  parseCacheHeaders(headers: Object = {}) {
     const cc = headers['cache-control'];
     if (cc) {
       return utils.parseCacheControlHeaders(cc);

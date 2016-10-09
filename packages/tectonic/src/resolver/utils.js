@@ -1,9 +1,7 @@
+// @flow
 
-
-import {
-  RETURNS_ALL_FIELDS,
-  GET,
-} from '../consts';
+import Query from '../query';
+import SourceDefinition from '../sources/definition';
 
 // TODO:
 // - `doesSourceSatisfySomeQueryFields` for partial matching
@@ -11,11 +9,8 @@ import {
 
 /**
  * A quick hashing function which produces a unique hash from a string
- *
- * @param string
- * @return int
  */
-export function hash(str) {
+export function hash(str: any): number {
   return str.toString().split('').reduce((sum, n) => {
     sum = ((sum << 5) - sum) + n.charCodeAt(0);
     return sum & sum;
@@ -38,7 +33,7 @@ export function hash(str) {
  * @param Query
  * @return bool
  */
-export function doesSourceSatisfyQueryParams(source, query) {
+export function doesSourceSatisfyQueryParams(source: SourceDefinition, query: Query) {
   const queryKeys = Object.keys(query.params);
 
   if (source.params.length === 0 && queryKeys.length === 0) {
@@ -49,9 +44,9 @@ export function doesSourceSatisfyQueryParams(source, query) {
   return source.params.every(sp => query.params[sp] !== undefined);
 }
 
-export function doesSourceSatisfyQueryModel(source, query) {
+export function doesSourceSatisfyQueryModel(source: SourceDefinition, query: Query) {
   const { model } = source;
-  return Object.keys(model).some(k => model[k] === query.model);
+  return model.some(item => item === query.model);
 }
 
 /**
@@ -65,40 +60,34 @@ export function doesSourceSatisfyQueryModel(source, query) {
  * @param Query
  * @return bool
  */
-export function doesSourceSatisfyAllQueryFields(source, query) {
-  let returns = source.returns;
+export function doesSourceSatisfyAllQueryFields(source: SourceDefinition, query: Query) {
+  const { returns: providerGroup } = source;
 
   if (query.fields === undefined) {
     return true;
   }
 
-  if (source.isPolymorphic()) {
-    // If this is polymorphic we need to find the Return item which is for the
-    // particular query's model
-    const key = Object.keys(returns)
-      .find(k => returns[k].model === query.model);
-    // There is no model for this particular query therefore it can never
-    // provide the fields for the model
-    if (key === undefined) {
-      return false;
-    }
-    returns = returns[key];
+  const provider = providerGroup.providerForModel(query.model);
+  // There is no model for this particular query therefore it can never
+  // provide the fields for the model
+  if (provider === null || provider === undefined) {
+    return false;
   }
 
   // If the source returns all fields this will always satisfy the query
-  if (returns.fields === RETURNS_ALL_FIELDS) {
+  if (provider.fields === '*') {
     return true;
   }
 
   // If the query wants all fields, at this point we know the source can't
   // satisfy this. TODO: partial field matching in which we combine API queries
   // to return all fields.
-  if (query.fields === RETURNS_ALL_FIELDS) {
+  if (query.fields === '*') {
     return false;
   }
 
   // Return whether every field is within this source
-  return query.fields.every(f => returns.fieldsAsObject[f] !== undefined);
+  return query.fields.every(f => provider.fieldsAsObject[f] !== undefined);
 }
 
 /**
@@ -106,7 +95,7 @@ export function doesSourceSatisfyAllQueryFields(source, query) {
  * false.
  *
  */
-export function doesSourceSatisfyQueryReturnType(source, query) {
+export function doesSourceSatisfyQueryReturnType(source: SourceDefinition, query: Query) {
   // TODO: Revert to allowing a RETURNS_LIST call for a RETURNS_ITEM query;
   // overfetching is OK as the LIST query may already be in flight.
   //
@@ -121,25 +110,26 @@ export function doesSourceSatisfyQueryReturnType(source, query) {
   }
 
   // Note that query.returnType will be undefined if this is a non-GET query.
-  let { returns } = source;
+  const { returns: providerGroup } = source;
 
-  if (source.isPolymorphic()) {
-    const key = Object.keys(returns)
-      .find(k => returns[k].model === query.model);
-    returns = returns[key];
+  // This assumes that each source definition will only ever return one type of
+  // the same model if poylmorphic
+  const provider = providerGroup.providerForModel(query.model);
+  if (provider === null || provider === undefined) {
+    return false;
   }
 
-  return (returns.returnType === query.returnType || query.queryType !== GET);
+  return (provider.returnType === query.returnType || query.queryType !== 'GET');
 }
 
-export function doesSourceSatisfyQueryType(source, query) {
+export function doesSourceSatisfyQueryType(source: SourceDefinition, query: Query): boolean {
   return (source.queryType === query.queryType);
 }
 
 // CACHING UTILS
 // =============
 
-export function parseCacheControlHeaders(cc) {
+export function parseCacheControlHeaders(cc: string): Date {
   // Take the max-age header, if it exists
   const match = cc.match(/max-age=(\d+)/);
   if (match === undefined) {
@@ -148,7 +138,7 @@ export function parseCacheControlHeaders(cc) {
 
   let seconds = 0;
   if (Array.isArray(match)) {
-    seconds = match[1];
+    seconds = parseInt(match[1], 10);
   }
   const now = new Date();
   return new Date(now.getTime() + (seconds * 1000));

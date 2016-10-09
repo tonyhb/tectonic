@@ -1,0 +1,15 @@
+[ignore]
+<PROJECT_ROOT>/example/*
+<PROJECT_ROOT>/test/*
+<PROJECT_ROOT>/transpiled/*
+<PROJECT_ROOT>/node_modules/babel*
+<PROJECT_ROOT>/node_modules/fbjs*
+
+[libs]
+<PROJECT_ROOT>/node_modules/fbjs/flow/lib
+<PROJECT_ROOT>/decls.js
+
+[options]
+esproposal.decorators=ignore
+munge_underscores=true
+suppress_comment= \\(.\\|\n\\)*\\$FlowIgnore

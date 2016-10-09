@@ -5,7 +5,7 @@ import { assert } from 'chai';
 import * as utils from '../../../src/resolver/utils';
 import SourceDefinition from '../../../src/sources/definition';
 import Query from '../../../src/query';
-import Returns from '../../../src/sources/returns.js';
+import Provider from '../../../src/sources/provider.js';
 import {
   GET, UPDATE, CREATE, DELETE,
   RETURNS_ITEM,

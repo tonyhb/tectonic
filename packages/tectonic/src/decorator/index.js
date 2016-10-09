@@ -1,3 +1,5 @@
+// @flow
+
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { Map } from 'immutable';
@@ -21,16 +23,22 @@ const debug = d('tectonic:decorator');
  * takes (state, params) as arguments and returns an object of queries.
  *
  */
-export default function load(loadQueries) {
+export default function load(loadQueries: { [key: string]: Query } | Function) {
   // TODO:
   // 3. Call the thunk with store.getState() and this.props
   // 4. Take result of thunk and transform into an array (if it's not already)
   // 5. Iterate through array and figure out how to call and load data
 
-  return WrappedComponent =>
-
-    @connect(state => ({ state: state.tectonic }))
+  return (WrappedComponent: Class<React$Component<*, *, *>>) => {
     class TectonicComponent extends Component {
+      static propTypes = {
+        // State is all redux state
+        state: PropTypes.instanceOf(Map),
+      }
+
+      static contextTypes = {
+        manager: PropTypes.instanceOf(Manager),
+      }
 
       /**
        * Each component stores its resolved queries from each render. This
@@ -39,7 +47,9 @@ export default function load(loadQueries) {
        * to load new data.
        *
        */
-      queries = {}
+      // eslint-disable-next-line react/sort-comp
+      queries: { [key: string]: Query } | Function = {}
+      inspector: PropInspector
 
       constructor(...args) {
         super(...args);
@@ -51,12 +61,12 @@ export default function load(loadQueries) {
         // If the queries is a function we need to evaulate it with the current
         // redux state and component props passed in to get our query object.
         if (typeof this.queries === 'function') {
+          this.inspector = new PropInspector({ queryFunc: this.queries });
+
           // remove the tectonic state from props and pass it to the query
           // function as state. all remaining props are just standard props :)
           const { ...props } = this.props;
           delete props.state;
-
-          this.inspector = new PropInspector({ queryFunc: loadQueries });
           this.queries = this.inspector.computeDependencies(props, this.context.manager);
         } else {
           // These are static queries, but the component may have already been
@@ -72,13 +82,8 @@ export default function load(loadQueries) {
         }
       }
 
-      static propTypes = {
-        // State is all redux state
-        state: PropTypes.instanceOf(Map),
-      }
-
-      static contextTypes = {
-        manager: PropTypes.instanceOf(Manager),
+      componentWillMount() {
+        this.addAndResolveQueries();
       }
 
       /**
@@ -118,10 +123,6 @@ export default function load(loadQueries) {
 
           this.addAndResolveQueries();
         }
-      }
-
-      componentWillMount() {
-        this.addAndResolveQueries();
       }
 
       componetWillUnmount() {
@@ -194,11 +195,11 @@ export default function load(loadQueries) {
        * params
        * @param function async-style callback with params (err, response)
        */
-      createModel(opts, callback) {
+      createModel = (opts, callback) => {
         this._createQuery(CREATE, opts, callback);
       }
 
-      updateModel(opts, callback) {
+      updateModel = (opts, callback) => {
         this._createQuery(UPDATE, opts, callback);
       }
 
@@ -206,7 +207,7 @@ export default function load(loadQueries) {
       // It can be used in the following ways:
       //
       // Note that opts.modelId may be specified to
-      deleteModel(opts, callback) {
+      deleteModel = (opts, callback) => {
         this._createQuery(DELETE, opts, callback);
         /*
          * TODO api cleanup later, see API.md
@@ -223,13 +224,17 @@ export default function load(loadQueries) {
         */
       }
 
-      getModel(opts, callback) {
+      getModel = (opts, callback) => {
         this._createQuery(GET, opts, callback);
       }
 
-      _createQuery(type, opts = {}, callback) {
-        if (opts instanceof Model) {
+      _createQuery(type, input: Model | Object = {}, callback) {
+        let opts: Object = {};
+
+        if (input instanceof Model) {
           opts = { model: opts };
+        } else if (typeof input === 'object') {
+          opts = input;
         }
 
         // If we pass a model class as opts.model,
@@ -309,14 +314,17 @@ this.props.load({
         const props = {
           ...this.props,
           ...manager.props(queries, undefined, true),
-          getModel: ::this.getModel,
-          createModel: ::this.createModel,
-          updateModel: ::this.updateModel,
-          deleteModel: ::this.deleteModel,
-          load: ::this.load,
+          getModel: this.getModel,
+          createModel: this.createModel,
+          updateModel: this.updateModel,
+          deleteModel: this.deleteModel,
+          load: this.load,
         };
 
         return <WrappedComponent { ...props } />;
       }
-    };
+    }
+
+    return connect(state => ({ state: state.tectonic }))(TectonicComponent);
+  };
 }
