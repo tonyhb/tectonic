@@ -4,12 +4,12 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 
 import React, { Component } from 'react';
-import load from '/src/decorator';
-import { CREATE } from '/src/consts';
+import load from '../../../src/decorator';
+import { CREATE } from '../../../src/consts';
 
-import { renderAndFind } from '/test/utils';
-import { createNewManager } from '/test/manager';
-import { User, Post } from '/test/models';
+import { renderAndFind } from '../../utils';
+import { createNewManager } from '../../manager';
+import { User, Post } from '../../models';
 
 // This spec tests creating a model from within a component.
 //

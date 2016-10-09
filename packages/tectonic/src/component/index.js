@@ -1,7 +1,5 @@
-'use strict';
-
-import React, { Component, PropTypes } from 'react';
-import Manager from '/src/manager';
+import { Component, PropTypes } from 'react';
+import Manager from '../manager';
 
 /**
  * Loader is a top-level wrapper component which provides react context for
@@ -13,19 +11,20 @@ import Manager from '/src/manager';
 export default class Loader extends Component {
 
   static propTypes = {
-    manager: PropTypes.instanceOf(Manager)
+    children: PropTypes.node.isRequired,
+    manager: PropTypes.instanceOf(Manager).isRequired,
   }
 
   static childContextTypes = {
-    manager: PropTypes.instanceOf(Manager)
+    manager: PropTypes.instanceOf(Manager),
   }
 
   getChildContext() {
     return {
-      manager: this.props.manager
-    }
+      manager: this.props.manager,
+    };
   }
 
   // TODO: set up context to pass down source into @load component
   render = () => this.props.children;
-} 
+}

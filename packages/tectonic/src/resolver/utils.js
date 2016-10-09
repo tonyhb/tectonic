@@ -1,12 +1,9 @@
-'use strict';
 
-import Returns from '/src/sources/returns';
+
 import {
-  RETURNS_ITEM,
-  RETURNS_LIST,
   RETURNS_ALL_FIELDS,
-  GET
-} from '/src/consts';
+  GET,
+} from '../consts';
 
 // TODO:
 // - `doesSourceSatisfySomeQueryFields` for partial matching
@@ -29,7 +26,7 @@ export function hash(str) {
  * Predicate which checks that a given query contains all required params
  * for the source
  *
- * If a query doesn't provide all required parameters for a source then the 
+ * If a query doesn't provide all required parameters for a source then the
  * source can't satisfy said query.
  *
  * NOTE: This only tests satisfiability of required params.
@@ -42,7 +39,7 @@ export function hash(str) {
  * @return bool
  */
 export function doesSourceSatisfyQueryParams(source, query) {
-  const queryKeys = Object.keys(query.params)
+  const queryKeys = Object.keys(query.params);
 
   if (source.params.length === 0 && queryKeys.length === 0) {
     return true;

@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 
-import Model from '/src/model';
+import Model from '../../../src/model';
 
 describe('reducer', () => {
   describe('UPDATE_DATA', () => {

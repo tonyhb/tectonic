@@ -1,9 +1,9 @@
 'use strict';
 
 import { assert } from 'chai';
-import Sources from '/src/sources';
-import { User } from '/test/models';
-import d from '/test/mockDriver';
+import Sources from '../../../src/sources';
+import { User } from '../../models';
+import d from '../../mockDriver';
 
 describe('Sources', () => {
 

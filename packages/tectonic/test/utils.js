@@ -3,8 +3,8 @@
 import TestUtils from 'react-addons-test-utils';
 import React from 'react';
 import { Provider } from 'react-redux';
-import Loader from '/src/component';
-import { createNewManager } from '/test/manager';
+import Loader from '../src/component';
+import { createNewManager } from './manager';
 
 export const wrap = (jsx, manager = createNewManager()) => {
   return (

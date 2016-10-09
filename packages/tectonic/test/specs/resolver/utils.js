@@ -2,17 +2,17 @@
 
 import { assert } from 'chai';
 
-import * as utils from '/src/resolver/utils';
-import SourceDefinition from '/src/sources/definition';
-import Query from '/src/query';
-import Returns from '/src/sources/returns.js';
+import * as utils from '../../../src/resolver/utils';
+import SourceDefinition from '../../../src/sources/definition';
+import Query from '../../../src/query';
+import Returns from '../../../src/sources/returns.js';
 import {
   GET, UPDATE, CREATE, DELETE,
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/consts';
-import { User, Post } from '/test/models';
+} from '../../../src/consts';
+import { User, Post } from '../../models';
 
 describe('resolver utils', () => {
 

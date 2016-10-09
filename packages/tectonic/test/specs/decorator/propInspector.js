@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 
-import PropInspector from '/src/decorator/propInspector.js';
-import { User, Post } from '/test/models';
-import { createNewManager } from '/test/manager';
+import PropInspector from '../../../src/decorator/propInspector.js';
+import { User, Post } from '../../models';
+import { createNewManager } from '../../manager';
 
 describe('propInspector', () => {
 

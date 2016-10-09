@@ -3,8 +3,8 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 
-import { createNewManager } from '/test/manager.js';
-import { User, Post } from '/test/models';
+import { createNewManager } from '../../manager.js';
+import { User, Post } from '../../models';
 
 describe('manager resolver functionality', () => {
 

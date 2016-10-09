@@ -3,10 +3,10 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 
-import Cache from '/src/cache';
-import Query from '/src/query';
-import SourceDefinition from '/src/sources/definition';
-import Returns from '/src/sources/returns';
+import Cache from '../../../src/cache';
+import Query from '../../../src/query';
+import SourceDefinition from '../../../src/sources/definition';
+import Returns from '../../../src/sources/returns';
 import {
   CREATE,
   UPDATE,
@@ -14,11 +14,11 @@ import {
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS,
-} from '/src/consts';
-import { SUCCESS } from '/src/status';
+} from '../../../src/consts';
+import { SUCCESS } from '../../../src/status';
 // test stuff
-import { User, Post } from '/test/models';
-import { createStore } from '/test/manager';
+import { User, Post } from '../../models';
+import { createStore } from '../../manager';
 
 describe('cache for non-GET requests', () => {
   const store = createStore()

@@ -43,14 +43,14 @@ export default class PropInspector {
     // initial render, and resolving **doesnt change the props** therefore
     // componentWillReceiveProps will never get called and we won't
     // compute the query function to resolve the child queries. The child
-    // queries will stay in UNDEFINED_PARAMS state forever. 
+    // queries will stay in UNDEFINED_PARAMS state forever.
     //
     // To work around this we compute queries using the props from manager
     // up until this.queries doesn't change.
     if (manager) {
       let computedProps = manager.props(queryMap);
 
-      while(deepEqual(queryMap, queryFunc({ ...props, computedProps })) === false) {
+      while (deepEqual(queryMap, queryFunc({ ...props, computedProps })) === false) {
         queryMap = queryFunc({ ...props, computedProps });
         computedProps = manager.props(queryMap);
       }
@@ -65,7 +65,7 @@ export default class PropInspector {
     //
     // When the accessor is called we know that the query which needs these
     // props is dependent on the parent query which generated the prop.
-    Object.keys(queryMap).forEach(queryProp => {
+    Object.keys(queryMap).forEach((queryProp) => {
       Object.defineProperty(this.accessor, queryProp, {
         // query prop accessor
         get() {
@@ -105,20 +105,20 @@ export default class PropInspector {
           // 3. Redefine all model attributes as functions which assign query
           //    relationships.
           const proxy = {};
-          queryMap[queryProp].model.fieldNames().forEach(f => {
+          queryMap[queryProp].model.fieldNames().forEach((f) => {
             Object.defineProperty(proxy, f, {
               get() {
                 // Return a function called during query construction which
                 // assigns the key of the parent Query to the new Query.
-                return function() {
+                return function () {
                   this.parent = queryProp;
                 };
-              }
+              },
             });
           });
 
           return proxy;
-        }
+        },
       });
     });
 
@@ -129,7 +129,7 @@ export default class PropInspector {
 
     // Here we iterate through all items in the tree and reassign parents and
     // children of each query based on the queryMap modified by the proxy above
-    Object.keys(tree).forEach(node => {
+    Object.keys(tree).forEach((node) => {
       const item = queryMap[node];
       const { parent } = tree[node];
 

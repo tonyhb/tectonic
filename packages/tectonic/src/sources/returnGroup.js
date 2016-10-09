@@ -1,4 +1,4 @@
-'use strict';
+
 
 /**
  * ReturnGroup is used within a SourceDefinition to specify what an API returns.

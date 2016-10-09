@@ -3,13 +3,13 @@
 import { assert } from 'chai';
 import React, { Component, PropTypes } from 'react';
 import TestUtils from 'react-addons-test-utils';
-import { renderAndFind } from '/test/utils';
+import { renderAndFind } from '../../utils';
 
-import load from '/src/decorator';
-import * as status from '/src/status';
+import load from '../../../src/decorator';
+import * as status from '../../../src/status';
 
 // Data
-import { User, Post } from '/test/models';
+import { User, Post } from '../../models';
 
 describe('@load: status props', () => {
 

@@ -1,4 +1,4 @@
-'use strict';
+
 
 export default function relationships(model, definitions) {
   if (typeof definitions !== 'object') {

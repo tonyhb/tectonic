@@ -1,9 +1,9 @@
 'use strict';
 
 import { assert } from 'chai';
-import SourceDefinition from '/src/sources/definition.js';
-import { User, Post } from '/test/models';
-import { GET, UPDATE, CREATE, DELETE, RETURNS_NONE } from '/src/consts';
+import SourceDefinition from '../../../src/sources/definition.js';
+import { User, Post } from '../../models';
+import { GET, UPDATE, CREATE, DELETE, RETURNS_NONE } from '../../../src/consts';
 
 describe('SourceDefinition', () => {
 

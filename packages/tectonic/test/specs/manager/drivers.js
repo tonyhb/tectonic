@@ -1,8 +1,8 @@
 'use strict';
 
 import { assert } from 'chai';
-import Manager from '/src/manager';
-import { createStore } from '/test/manager.js';
+import Manager from '../../../src/manager';
+import { createStore } from '../../manager.js';
 
 describe('Defining source drivers', () => {
 

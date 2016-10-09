@@ -1,17 +1,16 @@
-'use strict';
+
 
 import React from 'react';
 import { Record } from 'immutable';
 
-import relationships from './relationships.js';
-import Returns from '/src/sources/returns.js';
-import Query from '/src/query';
+import Returns from '../sources/returns';
+import Query from '../query';
 import {
   GET,
   RETURNS_ITEM,
   RETURNS_LIST,
-  RETURNS_ALL_FIELDS
-} from '/src/consts';
+  RETURNS_ALL_FIELDS,
+} from '../consts';
 
 // recordMethods defines all immutableJS record methods that we want to
 // replicate within our model.
@@ -36,13 +35,24 @@ export const recordMethods = [
   'withMutations',
   'asMutable',
   'asImmutable',
-  'toObject'
+  'toObject',
 ];
 
 /**
  * modelRecords stores a list of model names to the immutable record class
  */
 const modelRecords = {};
+
+function setProp(prototype, name) {
+  Object.defineProperty(prototype, name, {
+    get() {
+      return this.record.get(name);
+    },
+    set() {
+      throw new Error('Cannot set on an immutable model.');
+    },
+  });
+}
 
 export default class Model {
   static modelName;
@@ -60,7 +70,7 @@ export default class Model {
     let ModelRecord = modelRecords[modelName];
 
     // Create a new immutable record which is the basis for storing data within
-    // our model. 
+    // our model.
     if (ModelRecord === undefined) {
       ModelRecord = new Record(this.constructor.fields, modelName);
       modelRecords[modelName] = ModelRecord;
@@ -86,7 +96,7 @@ export default class Model {
         // Set data normally, such as new User({ id: 1 });
 
         // create new submodels if necessary
-        this.constructor.submodelFieldNames().forEach(field => {
+        this.constructor.submodelFieldNames().forEach((field) => {
           // TODO: a better way of determining whether something is a model
           // other than values; instanceof this.constructor doesn't work as they
           // may be different models
@@ -110,28 +120,28 @@ export default class Model {
 
     // This creates getters for each field in the model, allowing us to read
     // data from the model record directly
-    this.constructor.fieldNames().forEach(field => {
+    this.constructor.fieldNames().forEach((field) => {
       setProp(this, field);
     });
 
     // For each immutableJS record method create a function which proxies the
     // call to the immutableJS record then creates a new model instance with
     // the resulting record.
-    recordMethods.forEach(method => {
-      this[method] = function() {
-        let record = this.record[method].apply(this.record, arguments);
+    recordMethods.forEach((method) => {
+      this[method] = function (...args) {
+        const record = this.record[method](...args);
         return new this.constructor(record);
       }.bind(this);
     });
 
-    this.toJS = function() {
-      return this.record.toJS.apply(this.record, arguments);
-    }
+    this.toJS = function (...args) {
+      return this.record.toJS(...args);
+    };
   }
 
   values() {
     const data = this.record.toObject();
-    this.constructor.submodelFieldNames().forEach(field => {
+    this.constructor.submodelFieldNames().forEach((field) => {
       data[field] = data[field].values();
     });
     return data;
@@ -166,8 +176,8 @@ export default class Model {
    * immutable's defaults.
    */
   static blank() {
-    let model = new this(this.fields).unsetId();
-    this.submodelFieldNames().forEach(field => {
+    const model = new this(this.fields).unsetId();
+    this.submodelFieldNames().forEach((field) => {
       model.set(field, model[field].unsetId());
     });
     return model;
@@ -189,11 +199,12 @@ export default class Model {
 
     this.submodelFields = [];
 
-    for (const item in this.fields) {
-      if (typeof this.fields[item].values === 'function')  {
-        this.submodelFields.push(item);
+    Object.keys(this.fields).forEach((k) => {
+      const item = this.fields[k];
+      if (typeof item.values === 'function') {
+        this.submodelFields.push(k);
       }
-    }
+    });
 
     return this.submodelFields;
   }
@@ -213,17 +224,17 @@ export default class Model {
     const modelFields = this.fieldNames();
 
     // Ensure that all fields are defined within our model
-    const missing = fields.reduce((missing, field) => {
+    const missing = fields.reduce((items, field) => {
       if (modelFields.indexOf(field) === -1) {
-        missing.push(field);
+        items.push(field);
       }
-      return missing;
+      return items;
     }, []);
 
     if (missing.length > 0) {
       throw new Error(
-        `All fields must be defined within your model. Missing: ` +
-        missing.join(', ')
+        `All fields must be defined within your model. Missing: ${
+        missing.join(', ')}`
       );
     }
   }
@@ -247,9 +258,9 @@ export default class Model {
       fields,
       params,
       queryType: GET,
-      returnType: RETURNS_ITEM
+      returnType: RETURNS_ITEM,
     });
-  };
+  }
 
   static getList(fields, params) {
     // In this case we're only passing in parameters to getList:
@@ -262,18 +273,7 @@ export default class Model {
       fields,
       params,
       queryType: GET,
-      returnType: RETURNS_LIST
+      returnType: RETURNS_LIST,
     });
-  };
-}
-
-function setProp(prototype, name) {
-  Object.defineProperty(prototype, name, {
-    get: function() {
-      return this.record.get(name);
-    },
-    set: function(value) {
-      throw new Error('Cannot set on an immutable model.');
-    }
-  });
+  }
 }

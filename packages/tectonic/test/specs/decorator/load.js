@@ -1,12 +1,12 @@
 import React from 'react';
 import { assert } from 'chai';
 import sinon from 'sinon';
-import { renderAndFind } from '/test/utils';
+import { renderAndFind } from '../../utils';
 
-import load from '/src/decorator';
-import { User, Post } from '/test/models';
-import { createNewManager } from '/test/manager';
-import { SUCCESS } from '/src/status';
+import load from '../../../src/decorator';
+import { User, Post } from '../../models';
+import { createNewManager } from '../../manager';
+import { SUCCESS } from '../../../src/status';
 
 describe('@load decorators .load prop', () => {
   it('loads new data when passed an object with GET queries', (done) => {

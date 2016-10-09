@@ -1,0 +1,21 @@
+{
+  "parser": "babel-eslint",
+  "extends": "airbnb",
+  "rules": {
+    "max-len": 0,
+    "no-bitwise": 0,
+    "no-param-reassign": 1,
+    "no-underscore-dangle": 0,
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "react/jsx-curly-spacing": 0,
+    "react/prefer-stateless-function": [1, { "ignorePureComponents": true }],
+    "class-methods-use-this": 1,
+    "jsx-quotes": 0,
+    "no-debugger": 1,
+  },
+  "globals": {
+	"window": true,
+  	"document": true,
+  }
+}
+

@@ -1,11 +1,8 @@
-'use strict';
-
 import Returns from './returns';
 import {
   GET, CREATE, UPDATE, DELETE,
-  RETURNS_NONE
-} from '/src/consts';
-import Model from '/src/model';
+  RETURNS_NONE,
+} from '../consts';
 
 /**
  * These keys are required in every source definition
@@ -136,7 +133,7 @@ export default class SourceDefinition {
     // a `returns` property, not a `model` property) we take it from returns
     if (returns instanceof Returns) {
       this.model = [returns.model];
-      return
+      return;
     }
 
     if (returns !== undefined) {
@@ -157,7 +154,7 @@ export default class SourceDefinition {
     const chain = [
       ::this.validateRequiredKeys,
       ::this.validateReturns,
-      ::this.validateQueryType
+      ::this.validateQueryType,
     ];
     chain.forEach(f => f());
   }
@@ -165,8 +162,8 @@ export default class SourceDefinition {
   validateRequiredKeys() {
     if (requiredDefinitionKeys.some(i => this[i] === undefined)) {
       throw new Error(
-        'Source definitions must contain keys: ' +
-        requiredDefinitionKeys.join(', '),
+        `Source definitions must contain keys: ${
+        requiredDefinitionKeys.join(', ')}`,
         this
       );
     }
@@ -176,7 +173,7 @@ export default class SourceDefinition {
     const { returns, queryType } = this;
 
     if (queryType !== GET && returns === RETURNS_NONE) {
-      return true;
+      return;
     }
 
     // If this is a single Returns instance this is valid
@@ -193,7 +190,7 @@ export default class SourceDefinition {
       );
     }
 
-    Object.keys(returns).forEach(item => {
+    Object.keys(returns).forEach((item) => {
       if (!(returns[item] instanceof Returns)) {
         throw new Error(
           'You must pass a concrete return value or object to `returns` ' +
@@ -201,13 +198,15 @@ export default class SourceDefinition {
         );
       }
     });
+
+    return;
   }
 
   validateQueryType() {
     const { queryType } = this;
-    if (queryType !== GET && queryType !== CREATE && 
+    if (queryType !== GET && queryType !== CREATE &&
         queryType !== UPDATE && queryType !== DELETE) {
-        throw new Error(
+      throw new Error(
           'You must specify the type of query using one of GET, CREATE, ' +
           'UPDATE or DELETE'
         );

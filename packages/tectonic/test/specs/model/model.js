@@ -1,17 +1,17 @@
 'use strict';
 
 import { assert } from 'chai';
-import Model from '/src/model';
-import { User, Post } from '/test/models';
+import Model from '../../../src/model';
+import { User, Post } from '../../models';
 import React, { Component } from 'react';
 import {
   GET,
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/consts';
+} from '../../../src/consts';
 
-import { render } from '/test/utils';
+import { render } from '../../utils';
 
 describe('Model', () => {
 

@@ -1,10 +1,6 @@
-'use strict';
-
 import {
-  RETURNS_ITEM,
-  RETURNS_LIST,
-  RETURNS_ALL_FIELDS
-} from '/src/consts';
+  RETURNS_ALL_FIELDS,
+} from '../consts';
 
 /**
  * Returns defines a single entity returned from an API response.
@@ -49,14 +45,14 @@ export default class Returns {
     // And if this isn't an array already we've been passed a non-string and
     // non-array so throw an error.
     if (!Array.isArray(fields)) {
-      throw new Error('Unknown field type ' + typeof fields);
+      throw new Error(`Unknown field type ${typeof fields}`);
     }
 
     model.assertFieldsExist(fields);
 
     // Store each field as the key to an object for O(1) lookups when testing
     // query field satisfiability
-    fields.forEach(f => this.fieldsAsObject[f] = true);
+    fields.forEach((f) => { this.fieldsAsObject[f] = true; });
 
     // Finally set the fields that this source returns
     this.fields = fields;

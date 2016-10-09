@@ -1,4 +1,4 @@
-'use strict';
+
 
 const PENDING = 'PENDING';
 const SUCCESS = 'SUCCESS';

@@ -1,17 +1,13 @@
-'use strict';
-
 import {
   UPDATE_DATA,
   DELETE_DATA,
-} from '/src/reducer';
-import Returns from '/src/sources/returns';
+} from '../reducer';
 import {
   RETURNS_ITEM,
   RETURNS_LIST,
   GET,
   DELETE,
-} from '/src/consts';
-import { Map } from 'immutable';
+} from '../consts';
 
 /**
  * Cache represents an abstraction over redux' store for saving and reading
@@ -55,10 +51,10 @@ export default class Cache {
       this.store.dispatch({
         type: DELETE_DATA,
         payload: {
-          query: query,
+          query,
           model: query.model,
           modelName: query.model.modelName,
-          modelId: query.modelId + '', // modelIds should always be strings in reducers
+          modelId: `${query.modelId}`, // modelIds should always be strings in reducers
         },
       });
       return;
@@ -107,7 +103,7 @@ export default class Cache {
    * @return object
    */
   parseApiData(query, sourceDef, apiResponse, expires = new Date()) {
-    let toStore = {};
+    const toStore = {};
 
     if (sourceDef.isPolymorphic()) {
       // The source definition returns more than one model, where each key
@@ -115,16 +111,18 @@ export default class Cache {
       //
       // Process all of them and add them to `toStore` so we update the store
       // once.
-      Object.keys(sourceDef.returns).forEach(key => {
+      Object.keys(sourceDef.returns).forEach((key) => {
         const returns = sourceDef.returns[key];
         // Get the return data for this particular key in the
-        const returnData = this._parseReturnsData(query, returns, returns.model, apiResponse[key], expires);
+        const returnData = this
+          .parseReturnsData(query, returns, returns.model, apiResponse[key], expires);
         toStore[returns.model.modelName] = returnData;
       });
     } else {
       // this returns just one model (whether that's an individual model or
       // a list of the same models)
-      const returnData = this._parseReturnsData(query, sourceDef.returns, sourceDef.returns.model, apiResponse, expires);
+      const returnData = this
+        .parseReturnsData(query, sourceDef.returns, sourceDef.returns.model, apiResponse, expires);
       toStore[sourceDef.returns.model.modelName] = returnData;
     }
 
@@ -161,19 +159,20 @@ export default class Cache {
    * testing
    * @return object
    */
-  _parseReturnsData(query, returns, model, apiResponse, expires) {
+  parseReturnsData(query, returns, model, apiResponse, expires) {
+    let resp = apiResponse;
     if (returns.returnType === RETURNS_LIST && !Array.isArray(apiResponse)) {
-      throw new Error(`Data for returning a list must be an array`, apiResponse);
+      throw new Error('Data for returning a list must be an array', apiResponse);
     }
 
     if (returns.returnType === RETURNS_ITEM && apiResponse.constructor.toString().indexOf('Object') === -1) {
-      throw new Error(`Data for returning an item must be an object`, apiResponse);
+      throw new Error('Data for returning an item must be an object', apiResponse);
     }
 
     if (returns.returnType === RETURNS_ITEM) {
       // standardize to list so we deal with one case. laziness meeans love
       // homie
-      apiResponse = [apiResponse];
+      resp = [apiResponse];
     }
 
 
@@ -184,7 +183,7 @@ export default class Cache {
     // }.
     //
     // modelData will contain a map of IDs to data and cache objects
-    return apiResponse.reduce((toStore, item) => {
+    return resp.reduce((toStore, item) => {
       if (typeof item !== 'object') {
         throw new Error('Unable to process data from API; data is not an object', item);
       }
@@ -193,7 +192,7 @@ export default class Cache {
       const id = item[idField];
 
       if (id === undefined) {
-        throw new Error(`Unable to process data from API; data is missing the ID attribute`, item);
+        throw new Error('Unable to process data from API; data is missing the ID attribute', item);
       }
 
       // Each query needs to store the IDs of the model it queried for.
@@ -201,7 +200,7 @@ export default class Cache {
       // storeQuery.
       if (query.model === model) {
         // Make sure the ID is a string
-        query.returnedIds.add(id + '');
+        query.returnedIds.add(`${id}`);
       }
 
       toStore[id] = {
@@ -211,8 +210,8 @@ export default class Cache {
         // a query can be skipped based on the IDs it expects and each model's
         // cache information
         cache: {
-          expires
-        }
+          expires,
+        },
       };
 
       return toStore;
@@ -274,9 +273,9 @@ export default class Cache {
 
     // This returns many items in a list; iterate through all of the returned
     // IDs and fetch our data
-    const data = Array.from(returnedIds).map(id => {
-      return this.processCachedModelMap(state.getIn(['data', modelName, id]));
-    });
+    const data = Array.from(returnedIds).map(
+      id => this.processCachedModelMap(state.getIn(['data', modelName, id]))
+    );
 
     if (data.some(item => item === false)) {
       return [data.filter(Boolean), false];

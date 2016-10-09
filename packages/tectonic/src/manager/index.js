@@ -1,9 +1,9 @@
-'use strict';
 
-import Sources from '/src/sources';
-import Cache from '/src/cache';
-import { PENDING, ERROR, SUCCESS } from '/src/status';
-import { RETURNS_ITEM, RETURNS_LIST } from '/src/consts';
+
+import Sources from '../sources';
+import Cache from '../cache';
+import { PENDING, ERROR, SUCCESS } from '../status';
+import { RETURNS_ITEM, RETURNS_LIST } from '../consts';
 
 /**
  * The manager is the single interface for tectonic. It handles:
@@ -44,11 +44,11 @@ export default class Manager {
       throw new Error('You must supply at least one driver to instantiate a manager');
     }
 
-    if ( ! resolver) {
+    if (!resolver) {
       throw new Error('You must pass a resolver to instantiate a manager');
     }
 
-    this.cache = new Cache(store)
+    this.cache = new Cache(store);
     this.store = store;
     this.resolver = resolver;
     this.sources = new Sources();
@@ -60,11 +60,11 @@ export default class Manager {
     // Make each driver callable via its key bound to our current context. This
     // allows us to add definitions for each driver by calling
     // sources[driverName](), ie: sources.fromSDK([...]);
-    Object.keys(drivers).forEach(driver => {
+    Object.keys(drivers).forEach((driver) => {
       const driverFunc = drivers[driver];
       // When calling the driver name run processDefinitions to add the
       // definitions to the Source class.
-      this[driver] = (defs) =>
+      this[driver] = defs =>
         this.sources.processDefinitions(driverFunc, defs, this.resolver);
     });
   }
@@ -100,11 +100,11 @@ export default class Manager {
    */
   props(queries, state = undefined) {
     const { cache } = this;
-    let props = {
+    const props = {
       status: {},
     };
 
-    if ( ! queries) {
+    if (!queries) {
       return props;
     }
 
@@ -114,8 +114,9 @@ export default class Manager {
       // redux - throw an error
     }
 
-    Object.keys(queries).forEach(prop => {
+    Object.keys(queries).forEach((prop) => {
       const query = queries[prop];
+      const Model = query.model;
       let status = cache.getQueryStatus(query, state);
 
       // respectCache is only taken into account if the status is undefined or
@@ -141,7 +142,7 @@ export default class Manager {
 
       // Attempt to load the data regardless of the query status. This will
       // return the previous data, if possible.
-      let [data, _] = cache.getQueryData(query, state);
+      let data = cache.getQueryData(query, state)[0];
 
       if (data === undefined) {
         // THere was no data - add defaults, which is a blank model or an empty
@@ -151,13 +152,10 @@ export default class Manager {
         } else {
           data = [];
         }
+      } else if (query.returnType === RETURNS_LIST) {
+        data = data.map(d => new Model(d));
       } else {
-        // There was data - inflate it into models
-        if (query.returnType === RETURNS_LIST) {
-          data = data.map(d => new query.model(d));
-        } else {
-          data = new query.model(data);
-        }
+        data = new Model(data);
       }
 
       props[prop] = data;

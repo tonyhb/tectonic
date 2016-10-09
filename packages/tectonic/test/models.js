@@ -1,6 +1,6 @@
 'use strict';
 
-import Model from '/src/model';
+import Model from '../src/model';
 
 export class User extends Model {
   static modelName = 'user';

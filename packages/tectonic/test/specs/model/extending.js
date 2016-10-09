@@ -2,7 +2,7 @@
 
 import { assert } from 'chai';
 
-import Model from '/src/model';
+import Model from '../../../src/model';
 
 class Foo extends Model {
   static modelName = 'foo';

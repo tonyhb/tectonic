@@ -9,9 +9,9 @@
 
 import { assert } from 'chai';
 
-import Query from '/src/query';
-import PropInspector from '/src/decorator/propInspector.js';
-import { User, Post } from '/test/models';
+import Query from '../../../src/query';
+import PropInspector from '../../../src/decorator/propInspector.js';
+import { User, Post } from '../../models';
 
 describe('query trees', () => {
   const props = { a: 1 };

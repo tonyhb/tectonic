@@ -1,7 +1,7 @@
-'use strict';
+
 
 import { Map } from 'immutable';
-import { SUCCESS } from '/src/status';
+import { SUCCESS } from '../status';
 
 const defaultState = new Map({
   // Status stores a map of query hashes to statuses of said query
@@ -31,7 +31,7 @@ const defaultState = new Map({
   //         deleted: true,
   //       })
   //   })
-  //          
+  //
   // Any time these are re-queried from the resolver these are wholesale
   // replaced, removing the `deleted` entry
   data: new Map(),
@@ -48,7 +48,6 @@ export const UPDATE_DATA = '@@tectonic/update-data';
 export const DELETE_DATA = '@@tectonic/delete-data';
 
 const reducer = (state = defaultState, action) => {
-
   if (action.type === UPDATE_QUERY_STATUSES) {
     // Add all of the queries from action.payload into state.status.
     // Merging retains past data.
@@ -60,8 +59,8 @@ const reducer = (state = defaultState, action) => {
   if (action.type === UPDATE_DATA) {
     const { query, data, expires } = action.payload;
 
-    return state.withMutations(s => {
-      s.mergeDeep({ data: data });
+    return state.withMutations((s) => {
+      s.mergeDeep({ data });
       s.setIn(['queriesToIds', query.toString()], query.returnedIds);
       s.setIn(['queriesToExpiry', query.toString()], expires);
       s.setIn(['status', query.toString()], SUCCESS);
@@ -70,13 +69,13 @@ const reducer = (state = defaultState, action) => {
 
   if (action.type === DELETE_DATA) {
     const { query, modelName, modelId } = action.payload;
-    return state.withMutations(s => {
-      s.mergeIn(['data', modelName, modelId], {deleted: true});
+    return state.withMutations((s) => {
+      s.mergeIn(['data', modelName, modelId], { deleted: true });
       s.setIn(['status', query.toString()], SUCCESS);
     });
   }
 
   return state;
-}
+};
 
 export default reducer;

@@ -2,24 +2,24 @@
 
 import { assert } from 'chai';
 
-import Cache from '/src/cache';
-import SourceDefinition from '/src/sources/definition';
-import Returns from '/src/sources/returns';
-import Query from '/src/query';
+import Cache from '../../../src/cache';
+import SourceDefinition from '../../../src/sources/definition';
+import Returns from '../../../src/sources/returns';
+import Query from '../../../src/query';
 import {
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS,
   DELETE,
-} from '/src/consts';
+} from '../../../src/consts';
 // test stuff
-import { User, Post } from '/test/models';
-import { createStore } from '/test/manager';
+import { User, Post } from '../../models';
+import { createStore } from '../../manager';
 
 describe('parsing cache data', () => {
   const cache = new Cache(createStore());
 
-  describe('_parseReturnsData', () => {
+  describe('parseReturnsData', () => {
 
     it('parses a Return of RETURNS_ITEM correctly', () => {
       const sd = new SourceDefinition({
@@ -40,7 +40,7 @@ describe('parsing cache data', () => {
         }
       };
       assert.deepEqual(
-        cache._parseReturnsData(User.getItem(), sd.returns, User, apiResponse, expires),
+        cache.parseReturnsData(User.getItem(), sd.returns, User, apiResponse, expires),
         expected
       );
     });
@@ -75,7 +75,7 @@ describe('parsing cache data', () => {
         }
       };
       assert.deepEqual(
-        cache._parseReturnsData(User.getList(), sd.returns, User, apiResponse, expires),
+        cache.parseReturnsData(User.getList(), sd.returns, User, apiResponse, expires),
         expected
       );
     });
@@ -93,7 +93,7 @@ describe('parsing cache data', () => {
       }];
 
       assert.throws(
-        () => cache._parseReturnsData(User.getItem(), sd.returns, User, apiResponse),
+        () => cache.parseReturnsData(User.getItem(), sd.returns, User, apiResponse),
         `Data for returning an item must be an object`
       );
     })
@@ -111,7 +111,7 @@ describe('parsing cache data', () => {
       };
 
       assert.throws(
-        () => cache._parseReturnsData(User.getList(), sd.returns, User, apiResponse),
+        () => cache.parseReturnsData(User.getList(), sd.returns, User, apiResponse),
         'Data for returning a list must be an array'
       );
     })

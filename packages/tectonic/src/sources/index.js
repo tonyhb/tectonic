@@ -1,6 +1,4 @@
-'use strict';
-
-import SourceDefinition from './definition.js';
+import SourceDefinition from './definition';
 
 /**
  * {
@@ -31,16 +29,16 @@ export default class Sources {
    * @param Resolver concrete instance of the resolver being used in the manager
    */
   processDefinitions(driverFunc, defsToProcess, resolver) {
-    if ( ! Array.isArray(defsToProcess)) {
+    if (!Array.isArray(defsToProcess)) {
       throw new Error('Source definitions must be defined in an array');
     }
 
     // TODO: Test that this stores definitions
-    defsToProcess.forEach(def => {
+    defsToProcess.forEach((def) => {
       // Add the driver function to the source
       def.driverFunc = driverFunc;
 
-      const item = new SourceDefinition(def)
+      const item = new SourceDefinition(def);
       this.definitions.set(item.id, item);
 
       // TODO: Test that this is called

@@ -3,12 +3,12 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
 
-import { createNewManager } from '/test/manager';
-import { User, Post } from '/test/models';
-import Query from '/src/query';
-import BaseResolver from '/src/resolver/baseResolver.js';
-import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '/src/status';
-import { GET, CREATE, UPDATE, DELETE } from '/src/consts';
+import { createNewManager } from '../../manager';
+import { User, Post } from '../../models';
+import Query from '../../../src/query';
+import BaseResolver from '../../../src/resolver/baseResolver.js';
+import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '../../../src/status';
+import { GET, CREATE, UPDATE, DELETE } from '../../../src/consts';
 
 describe('BaseResolver', () => {
   describe('addQuery', () => {

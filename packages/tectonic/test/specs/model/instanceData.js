@@ -1,8 +1,8 @@
 'use strict';
 
 import { assert } from 'chai';
-import { User } from '/test/models';
-import Model, { recordMethods } from '/src/model';
+import { User } from '../../models';
+import Model, { recordMethods } from '../../../src/model';
 
 // A model is backed by an immutable record; it provides getters for defined
 // data, and to set data you should create a new instance of the model with

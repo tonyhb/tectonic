@@ -2,13 +2,13 @@
 
 import { assert } from 'chai';
 
-import { User } from '/test/models.js';
-import Returns from '/src/sources/returns.js';
+import { User } from '../../models.js';
+import Returns from '../../../src/sources/returns.js';
 import {
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
-} from '/src/consts';
+} from '../../../src/consts';
 
 describe('returns', () => {
 

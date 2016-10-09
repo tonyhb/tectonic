@@ -2,10 +2,10 @@
 
 import { assert } from 'chai';
 import React, { Component } from 'react';
-import load from '/src/decorator';
+import load from '../../../src/decorator';
 import TestUtils from 'react-addons-test-utils';
 
-import { renderAndFind } from '/test/utils';
+import { renderAndFind } from '../../utils';
 
 describe('@load: basic component rendering', () => {
 

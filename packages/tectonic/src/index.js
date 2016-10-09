@@ -1,4 +1,4 @@
-'use strict';
+
 
 export default from './decorator';
 export Model from './model';
@@ -9,4 +9,4 @@ export reducer from './reducer';
 // Resolvers
 export BaseResolver from './resolver/baseResolver.js';
 
-export * from './consts'; 
+export * from './consts';

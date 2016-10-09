@@ -4,13 +4,13 @@ import { assert } from 'chai';
 import React, { Component, PropTypes } from 'react';
 import TestUtils from 'react-addons-test-utils';
 
-import load from '/src/decorator';
-import * as status from '/src/status';
+import load from '../../../src/decorator';
+import * as status from '../../../src/status';
 
 // test
-import { User, Post } from '/test/models';
-import { createNewManager } from '/test/manager';
-import { renderAndFind } from '/test/utils';
+import { User, Post } from '../../models';
+import { createNewManager } from '../../manager';
+import { renderAndFind } from '../../utils';
 
 describe('@load: e2e end-to-end test', () => {
 
@@ -196,7 +196,7 @@ describe('@load: e2e end-to-end test', () => {
     }
     const WrappedBase = load(props => ({
       user: User.getItem(),
-      posts: Post.getList({ userID: props.user && props.user.id })
+      posts: Post.getList({ userID: props.user && props.user.id }),
     }))(Base);
     const item = renderAndFind(<WrappedBase />, Base, manager);
 

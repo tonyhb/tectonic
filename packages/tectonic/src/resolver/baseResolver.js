@@ -1,14 +1,18 @@
-'use strict';
-
-import * as utils from './utils';
-import { UPDATE_QUERY_STATUSES } from '/src/reducer';
-import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '/src/status';
-import { GET } from '/src/consts';
 import d from 'debug';
+import * as utils from './utils';
+import { UPDATE_QUERY_STATUSES } from '../reducer';
+import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '../status';
+
 if (typeof window !== 'undefined') {
   window.tdebug = d;
 }
 const debug = d('tectonic:resolver');
+
+const warn = (...args) => {
+  if (console && typeof console.warn === 'function') {
+    console.warn(...args);
+  }
+};
 
 /**
  * BaseResolver is a simple resolver which batches new queries from the
@@ -35,7 +39,7 @@ export default class BaseResolver {
     utils.doesSourceSatisfyQueryModel,
     utils.doesSourceSatisfyAllQueryFields,
     utils.doesSourceSatisfyQueryReturnType,
-    utils.doesSourceSatisfyQueryType
+    utils.doesSourceSatisfyQueryType,
   ];
 
   /**
@@ -57,7 +61,7 @@ export default class BaseResolver {
    * This is called ecah time a sourceDefinition is added via the manager. It
    * can be used for optimization.
    */
-  onAddSourceDef(sourceDef) {
+  onAddSourceDef() {
   }
 
   /**
@@ -70,7 +74,7 @@ export default class BaseResolver {
    * @param Query
    * @param Map  A list of all sources passed from the manager
    */
-  addQuery(query, sourceMap) {
+  addQuery(query) {
     // TODO: Figure out a better way of deduping queries (alongisde setting
     // statuses in the query directly to force stale caches to match).
     //
@@ -115,7 +119,7 @@ export default class BaseResolver {
    * a sourceDefinition.
    *
    * This resolver uses the following process for resolution:
-   * 
+   *
    * 1. Check the cache to see if we have valid data
    *    Yes: Query resolved
    *    No: continue steps
@@ -140,7 +144,7 @@ export default class BaseResolver {
     // definitions after resolution.
     // TODO: if two different queries use the same sourcedef this will be called
     // twice here.
-    let resolvedQueries = [];
+    const resolvedQueries = [];
 
     const queryKeys = Object.keys(this.queries);
     if (queryKeys.length === 0) {
@@ -149,13 +153,13 @@ export default class BaseResolver {
 
     debug('resolving queries', this.queries);
 
-    queryKeys.forEach(hash => {
+    queryKeys.forEach((hash) => {
       const q = this.queries[hash];
       // We can remove this query from this.queries as it's processed. The
       // only queries we need to process in the future are based off of
       // dependent data loading, and these will be re-added by future renders of
       // the decorator.
-      delete(this.queries[hash]);
+      delete (this.queries[hash]);
 
       // If the query status is defined internally we can short-circuit; this
       // has already been processed.
@@ -170,12 +174,12 @@ export default class BaseResolver {
 
       // Only check query data if the query has data that is NOT stale; ie we
       // have cached data
-      if ( ! this.cache.hasQueryExpired(q, state)) {
+      if (!this.cache.hasQueryExpired(q, state)) {
         // Check if the query is in the cache. getQueryData returns a tuple; if
         // the second parameter of the tuple is true we already have data for this
         // query and can skip it. However, if this returns FALSE we MUST
         // process the query again unless it's in-flight.
-        const [data, ok] = this.cache.getQueryData(q, state);
+        const ok = this.cache.getQueryData(q, state)[1];
 
         // We have data for this query; this query is resolved and is successful
         if (ok) {
@@ -184,7 +188,7 @@ export default class BaseResolver {
           return;
         }
       } else {
-          debug('query has stale data', q.toString(), q);
+        debug('query has stale data', q.toString(), q);
       }
 
       // check if the query status was previously set to pending
@@ -206,10 +210,7 @@ export default class BaseResolver {
         // causing data not to be passed down in the manager.
         const parent = this.queriesInFlight[q.toString()];
         if (parent === undefined) {
-          console.warn && console.warn(
-            'There is no parent definition found for in-flight query: ',
-            q.toString()
-          );
+          warn('There is no parent definition found for in-flight query: ', q.toString());
         } else {
           debug('query previously resolved and in-flight; marking dupe', q.toString(), q);
           parent.duplicates.push(q);
@@ -218,7 +219,7 @@ export default class BaseResolver {
       }
 
       // Attempt to resolve a single query from the map of source definitions.
-      const sd = this.resolveItem(q, sourceMap)
+      const sd = this.resolveItem(q, sourceMap);
       if (sd !== undefined) {
         // Add this query to the reducer's global queryInFlight list for
         // future dupe linking during the PENDING stage
@@ -235,14 +236,14 @@ export default class BaseResolver {
     if (Object.keys(this.statusMap).length > 0) {
       this.store.dispatch({
         type: UPDATE_QUERY_STATUSES,
-        payload: { ...this.statusMap }
+        payload: { ...this.statusMap },
       });
     }
 
     // Now we reset the map
     this.statusMap = {};
 
-    resolvedQueries.forEach(query => {
+    resolvedQueries.forEach((query) => {
       const { sourceDefinition: sd } = query;
       const success = (data, meta) => this.success(query, sd, data, meta);
       const fail = (data, meta) => this.fail(query, sd, data, meta);
@@ -262,15 +263,16 @@ export default class BaseResolver {
    */
   resolveItem(query, sourceMap) {
     debug('resolving query', query);
-    const sd = Array.from(sourceMap.values()).find(sourceDef => {
-      // Check each source definition against all predicates in our
-      // satisfiability chain. This short-circuits the loop of source
-      // definitions returining true on the first source that satisfies the
-      // query.
-      //
-      // This is dumb. You should make a smarter one.
-      return this.satisfiabilityChain.every(i => i(sourceDef, query) === true);
-    });
+
+    // Check each source definition against all predicates in our
+    // satisfiability chain. This short-circuits the loop of source
+    // definitions returining true on the first source that satisfies the
+    // query.
+    //
+    // This is dumb. You should make a smarter one.
+    const sd = Array.from(sourceMap.values()).find(
+      sourceDef => this.satisfiabilityChain.every(i => i(sourceDef, query) === true)
+    );
 
     if (sd === undefined) {
       this.unresolvable(query);
@@ -317,10 +319,7 @@ export default class BaseResolver {
 
     this.statusMap[query.hash()] = ERROR;
     query.status = ERROR;
-    console.warn && console.warn(
-      'There is no source definition which resolves the query',
-      query.toString()
-    );
+    warn('There is no source definition which resolves the query', query.toString());
   }
 
   success(query, sourceDef, data, meta = {}) {
@@ -348,13 +347,13 @@ export default class BaseResolver {
     delete this.queriesInFlight[query.toString()];
 
     // TODO: Also update all dependencies of this query as failed
-    console.warn(`Query failed on ${query} using sourceDefinition ${sourceDef}: ${data}`);
+    warn(`Query failed on ${query} using sourceDefinition ${sourceDef}: ${data}`);
 
     this.store.dispatch({
       type: UPDATE_QUERY_STATUSES,
       payload: {
-        [query.hash()]: ERROR
-      }
+        [query.hash()]: ERROR,
+      },
     });
 
     if (typeof query.callback === 'function') {

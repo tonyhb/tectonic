@@ -1,8 +1,8 @@
 'use strict';
 
-import Manager from '/src/manager';
-import BaseResolver from '/src/resolver/baseResolver.js';
-import reducer from '/src/reducer';
+import Manager from '../src/manager';
+import BaseResolver from '../src/resolver/baseResolver.js';
+import reducer from '../src/reducer';
 
 // Import a custom mocking driver for our tests
 import mock from './mockDriver';
