@@ -19,13 +19,10 @@ import { createStore } from '../../manager';
 describe('parsing cache data', () => {
   const cache = new Cache(createStore());
 
-  describe('parseReturnsData', () => {
+  describe('parseProvider', () => {
 
     it('parses a Return of RETURNS_ITEM correctly', () => {
-      const sd = new SourceDefinition({
-        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
-        meta: {}
-      });
+      const provider = new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM);
       const apiResponse = {
         id: 1,
         name: 'foo',
@@ -40,16 +37,19 @@ describe('parsing cache data', () => {
         }
       };
       assert.deepEqual(
-        cache.parseReturnsData(User.getItem(), sd.returns, User, apiResponse, expires),
+        cache.parseProvider(
+          User.getItem(),
+          provider,
+          User,
+          apiResponse,
+          expires,
+        ),
         expected
       );
     });
 
     it('parses a Return of RETURNS_LIST correctly', () => {
-      const sd = new SourceDefinition({
-        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_LIST),
-        meta: {}
-      });
+      const provider = new Provider(User, RETURNS_ALL_FIELDS, RETURNS_LIST);
       const apiResponse = [
         {
           id: 1,
@@ -75,17 +75,14 @@ describe('parsing cache data', () => {
         }
       };
       assert.deepEqual(
-        cache.parseReturnsData(User.getList(), sd.returns, User, apiResponse, expires),
+        cache.parseProvider(User.getList(), provider, User, apiResponse, expires),
         expected
       );
     });
 
     it('throws an error parsing a RETURNS_ITEM when an array is passed', () => {
       // This returns an item therefore the API response should be an object.
-      const sd = new SourceDefinition({
-        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
-        meta: {}
-      });
+      const provider = new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM);
       const apiResponse = [{
         id: 1,
         name: 'foo',
@@ -93,17 +90,14 @@ describe('parsing cache data', () => {
       }];
 
       assert.throws(
-        () => cache.parseReturnsData(User.getItem(), sd.returns, User, apiResponse),
+        () => cache.parseProvider(User.getItem(), provider, User, apiResponse),
         `Data for returning an item must be an object`
       );
     })
 
     it('throws an error parsing a RETURNS_LIST when an object is passed', () => {
       // This returns an item therefore the API response should be an object.
-      const sd = new SourceDefinition({
-        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_LIST),
-        meta: {}
-      });
+      const provider = new Provider(User, RETURNS_ALL_FIELDS, RETURNS_LIST);
       const apiResponse = {
         id: 1,
         name: 'foo',
@@ -111,7 +105,7 @@ describe('parsing cache data', () => {
       };
 
       assert.throws(
-        () => cache.parseReturnsData(User.getList(), sd.returns, User, apiResponse),
+        () => cache.parseProvider(User.getList(), provider, User, apiResponse),
         'Data for returning a list must be an array'
       );
     })

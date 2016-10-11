@@ -61,13 +61,13 @@ export function doesSourceSatisfyQueryModel(source: SourceDefinition, query: Que
  * @return bool
  */
 export function doesSourceSatisfyAllQueryFields(source: SourceDefinition, query: Query) {
-  const { returns: providerGroup } = source;
+  const { providers } = source;
 
   if (query.fields === undefined) {
     return true;
   }
 
-  const provider = providerGroup.providerForModel(query.model);
+  const provider = providers.providerForModel(query.model);
   // There is no model for this particular query therefore it can never
   // provide the fields for the model
   if (provider === null || provider === undefined) {
@@ -110,11 +110,11 @@ export function doesSourceSatisfyQueryReturnType(source: SourceDefinition, query
   }
 
   // Note that query.returnType will be undefined if this is a non-GET query.
-  const { returns: providerGroup } = source;
+  const { providers } = source;
 
   // This assumes that each source definition will only ever return one type of
   // the same model if poylmorphic
-  const provider = providerGroup.providerForModel(query.model);
+  const provider = providers.providerForModel(query.model);
   if (provider === null || provider === undefined) {
     return false;
   }

@@ -96,7 +96,7 @@ export default class Query {
   queryType: QueryType
   returnType: ?ReturnType
   body: any
-  params: ParamsType
+  params: ParamsType = {}
   fields: Array<string> | ReturnsAllFields
   returnedIds: Set<any>
 
@@ -131,7 +131,7 @@ export default class Query {
     }
 
     this.model.assertFieldsExist(fields);
-    this.fields = Array.isArray(fields) ? fields.sort() : fields;
+    this.fields = Array.isArray(fields) ? fields.sort() : '*';
     this.returnType = returnType;
     this.queryType = queryType;
     this.body = body;

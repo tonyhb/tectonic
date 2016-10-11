@@ -61,7 +61,7 @@ function setProp(prototype, name) {
 export default class Model {
   static modelName: string;
 
-  static fields: Object = {};
+  static fields: Object;
 
   static idField = 'id';
 
@@ -204,7 +204,7 @@ export default class Model {
     if (modelName === undefined) {
       throw new Error('Models must have a static modelName property defined');
     }
-    if (typeof this.constructor.fields !== 'object') {
+    if (!this.constructor.fields || typeof this.constructor.fields !== 'object') {
       throw new Error('Models must have fields defined with default values');
     }
     if (this.constructor.fields[this.constructor.idField] === undefined) {

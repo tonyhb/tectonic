@@ -23,7 +23,7 @@ const debug = d('tectonic:decorator');
  * takes (state, params) as arguments and returns an object of queries.
  *
  */
-export default function load(loadQueries: { [key: string]: Query } | Function) {
+export default function load(loadQueries: { [key: string]: Query } | Function = {}) {
   // TODO:
   // 3. Call the thunk with store.getState() and this.props
   // 4. Take result of thunk and transform into an array (if it's not already)
@@ -48,7 +48,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function) {
        *
        */
       // eslint-disable-next-line react/sort-comp
-      queries: { [key: string]: Query } | Function = {}
+      queries: { [key: string]: Query } = {}
       inspector: PropInspector
 
       constructor(...args) {
@@ -56,12 +56,11 @@ export default function load(loadQueries: { [key: string]: Query } | Function) {
 
         // TODO: Test that adding .success to this.queries doesn't affect the
         // constructor queries
-        this.queries = loadQueries || {};
 
         // If the queries is a function we need to evaulate it with the current
         // redux state and component props passed in to get our query object.
-        if (typeof this.queries === 'function') {
-          this.inspector = new PropInspector({ queryFunc: this.queries });
+        if (typeof loadQueries === 'function') {
+          this.inspector = new PropInspector({ queryFunc: loadQueries });
 
           // remove the tectonic state from props and pass it to the query
           // function as state. all remaining props are just standard props :)
@@ -69,6 +68,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function) {
           delete props.state;
           this.queries = this.inspector.computeDependencies(props, this.context.manager);
         } else {
+          this.queries = loadQueries;
           // These are static queries, but the component may have already been
           // rendered in a prior app path. This means that we're going to need
           // to iterate through all queries and reset .status to undefined, so
@@ -232,7 +232,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function) {
         let opts: Object = {};
 
         if (input instanceof Model) {
-          opts = { model: opts };
+          opts = { model: input };
         } else if (typeof input === 'object') {
           opts = input;
         }
@@ -283,7 +283,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function) {
        *
        * This will re-inject properties from the
        */
-      load(queries) {
+      load = (queries) => {
         if (typeof queries !== 'object') {
           throw new Error(`Load argument must be an object (ie.
 this.props.load({

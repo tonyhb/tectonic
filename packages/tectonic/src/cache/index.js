@@ -120,17 +120,13 @@ export default class Cache {
     // a source definition:
     //
     // 1. Multiple providers, returns an array [FAIL]
-    // 2. Multiple providers, returns an object [OK - LIST/ITEM]
-    // 3. Single provider, returns an array [OK - LIST]
-    // 4. Single provider, returns an object [OK - ITEM]
-
-    // Only fail if we have multiple providers and an array response.
-    if (sourceDef.isPolymorphic() && Array.isArray(apiResponse)) {
-      throw new Error('Unexpected array response from polymorphic API definition', sourceDef, apiResponse);
-    }
+    // 2. Multiple providers, returns an object [OK - each key represents
+    //    a single provider's data]
+    // 3. Single provider, returns an array [OK - list]
+    // 4. Single provider, returns an object [OK - item]
 
     sourceDef
-      .returns
+      .providers
       .defs
       .forEach((def) => {
         const { key, provider } = def;
@@ -142,11 +138,15 @@ export default class Cache {
           throw new Error('Error attempting to parse model data with no key', sourceDef, apiResponse);
         }
 
-        // This accounts for single provider scenarios
-        if (Array.isArray(apiResponse)) {
-          modelData = this.parseReturnsData(query, provider, provider.model, apiResponse, expires);
+        if (sourceDef.isPolymorphic()) {
+          // Fail as described in the scenario above; this polymorphic API
+          // response needs an object
+          if (Array.isArray(apiResponse)) {
+            throw new Error('Unexpected array response from polymorphic API definition', sourceDef, apiResponse);
+          }
+          modelData = this.parseProvider(query, provider, provider.model, apiResponse[key], expires);
         } else {
-          modelData = this.parseReturnsData(query, provider, provider.model, apiResponse[key], expires);
+          modelData = this.parseProvider(query, provider, provider.model, apiResponse, expires);
         }
 
         toStore[provider.model.modelName] = modelData;
@@ -156,8 +156,8 @@ export default class Cache {
   }
 
   /**
-   * parseReturnsData produces an object we save in the redux store for each
-   * Returns instance within a sourceDefinition.
+   * parseProvider produces an object we save in the redux store for each
+   * Provider instance within a sourceDefinition.
    *
    * For a single Returns instance this will produce an object as follows:
    * {
@@ -178,7 +178,7 @@ export default class Cache {
    *
    * @param Query   Query so we can add the IDs of returned data to the query
    * for caching
-   * @param Returns
+   * @param Provider
    * @param Model
    * @param object API data
    * @param Date  timestamp to add within cache, defaults to now. Used in
@@ -187,12 +187,12 @@ export default class Cache {
    *
    * TODO: Return type for this function
    */
-  parseReturnsData(query: Query, returns: Provider, model: Class<Model>, apiResponse: Object | Array<Object>, expires: Date): ModelData {
-    if (returns.returnType === RETURNS_LIST && !Array.isArray(apiResponse)) {
+  parseProvider(query: Query, provider: Provider, model: Class<Model>, apiResponse: Object | Array<Object>, expires: Date): ModelData {
+    if (provider.returnType === RETURNS_LIST && !Array.isArray(apiResponse)) {
       throw new Error('Data for returning a list must be an array', apiResponse);
     }
 
-    if (returns.returnType === RETURNS_ITEM && apiResponse.constructor.toString().indexOf('Object') === -1) {
+    if (provider.returnType === RETURNS_ITEM && Array.isArray(apiResponse)) {
       throw new Error('Data for returning an item must be an object', apiResponse);
     }
 

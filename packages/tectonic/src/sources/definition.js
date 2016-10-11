@@ -11,7 +11,7 @@ import type {
 } from '../consts';
 import type Model from '../model';
 
-type ConstructorOpts = {
+export type SourceDefinitionOpts = {
   id: string;
   returns: Provider | { [key: string]: Provider } | ?string;
   meta: Object;
@@ -33,7 +33,7 @@ type ConstructorOpts = {
 export default class SourceDefinition {
   id: string
   meta: Object
-  returns: ProviderGroup
+  providers: ProviderGroup
   model: Array<Class<Model>>
   driverFunc: Function
   queryType: QueryType
@@ -76,13 +76,20 @@ export default class SourceDefinition {
     driverFunc,
     model,
     queryType = GET,
-  }: ConstructorOpts = {}) {
+  }: SourceDefinitionOpts = {}) {
     if (id === undefined) {
       id = Math.floor(Math.random() * (1 << 30)).toString(16);
     }
 
+    if (typeof returns === 'function') {
+      throw new Error(
+        'You must pass a concrete return value or object to `returns` ' +
+        '(such as Model.item())'
+      );
+    }
+
     this.id = id;
-    this.returns = new ProviderGroup(returns);
+    this.providers = new ProviderGroup(returns);
     this.meta = meta;
     this.params = params || [];
     this.optionalParams = optionalParams || [];
@@ -110,7 +117,7 @@ export default class SourceDefinition {
    */
   setModelProperty(model: ?Class<Model> | ?Array<Class<Model>>) {
     if (model === undefined || model === null) {
-      this.model = this.returns.models();
+      this.model = this.providers.models();
       return;
     }
 
@@ -127,7 +134,7 @@ export default class SourceDefinition {
    * a time
    */
   isPolymorphic(): boolean {
-    return this.returns.isPolymorphic();
+    return this.providers.isPolymorphic();
   }
 
   validate() {
@@ -140,14 +147,14 @@ export default class SourceDefinition {
   }
 
   validateRequiredKeys = () => {
-    if (this.returns === undefined || this.meta === undefined) {
-      throw new Error('Source definitions must contain keys: meta, returns', this);
+    if (this.providers === undefined || this.meta === undefined) {
+      throw new Error('Source definitions must contain keys: returns, meta', this);
     }
   }
 
   validateReturns = () => {
-    if (this.queryType === 'GET' && this.returns.returnsNone) {
-      throw new Error('Source definition must contain `returns` key for GET queries', this);
+    if (this.queryType === 'GET' && this.providers.returnsNone) {
+      throw new Error('Source definitions must contain `returns` key for GET queries', this);
     }
     return;
   }

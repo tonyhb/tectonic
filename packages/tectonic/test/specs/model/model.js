@@ -65,7 +65,7 @@ describe('Model', () => {
     });
 
     it('adds fields if specified', () => {
-      let query = User.getList(['name'], { id: 1 });
+      let query = User.getList({ id: 1 }, ['name']);
       assert.deepEqual(query.fields, ['name']);
     });
   });
@@ -88,7 +88,7 @@ describe('Model', () => {
     });
 
     it('adds fields if specified', () => {
-      let query = User.getItem(['name'], { id: 1 });
+      let query = User.getItem({ id: 1 }, ['name']);
       assert.equal(query.returnType, RETURNS_ITEM);
       assert.deepEqual(query.fields, ['name']);
     });

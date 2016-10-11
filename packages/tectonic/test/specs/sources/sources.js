@@ -33,7 +33,7 @@ describe('Sources', () => {
       // No returns
       assert.throws(
         () => sources.processDefinitions(d, [{meta: {}}]),
-        'Source definitions must contain keys: returns, meta'
+        'Source definitions must contain `returns` key for GET queries'
       );
 
       // No meta
