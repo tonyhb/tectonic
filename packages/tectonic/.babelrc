@@ -1,7 +1,10 @@
 {
   "presets": ["es2015", "react", "stage-0"],
   "plugins": [
+    "transform-decorators",
+    "syntax-decorators",
     "transform-decorators-legacy",
+    "transform-flow-strip-types",
   ],
   "sourceRoot": "."
 }

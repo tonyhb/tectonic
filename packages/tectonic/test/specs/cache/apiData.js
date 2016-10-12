@@ -4,7 +4,7 @@ import { assert } from 'chai';
 
 import Cache from '../../../src/cache';
 import SourceDefinition from '../../../src/sources/definition';
-import Returns from '../../../src/sources/returns';
+import Provider from '../../../src/sources/provider';
 import Query from '../../../src/query';
 import {
   RETURNS_ITEM,
@@ -19,13 +19,10 @@ import { createStore } from '../../manager';
 describe('parsing cache data', () => {
   const cache = new Cache(createStore());
 
-  describe('parseReturnsData', () => {
+  describe('parseProvider', () => {
 
     it('parses a Return of RETURNS_ITEM correctly', () => {
-      const sd = new SourceDefinition({
-        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
-        meta: {}
-      });
+      const provider = new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM);
       const apiResponse = {
         id: 1,
         name: 'foo',
@@ -40,16 +37,19 @@ describe('parsing cache data', () => {
         }
       };
       assert.deepEqual(
-        cache.parseReturnsData(User.getItem(), sd.returns, User, apiResponse, expires),
+        cache.parseProvider(
+          User.getItem(),
+          provider,
+          User,
+          apiResponse,
+          expires,
+        ),
         expected
       );
     });
 
     it('parses a Return of RETURNS_LIST correctly', () => {
-      const sd = new SourceDefinition({
-        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_LIST),
-        meta: {}
-      });
+      const provider = new Provider(User, RETURNS_ALL_FIELDS, RETURNS_LIST);
       const apiResponse = [
         {
           id: 1,
@@ -75,17 +75,14 @@ describe('parsing cache data', () => {
         }
       };
       assert.deepEqual(
-        cache.parseReturnsData(User.getList(), sd.returns, User, apiResponse, expires),
+        cache.parseProvider(User.getList(), provider, User, apiResponse, expires),
         expected
       );
     });
 
     it('throws an error parsing a RETURNS_ITEM when an array is passed', () => {
       // This returns an item therefore the API response should be an object.
-      const sd = new SourceDefinition({
-        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
-        meta: {}
-      });
+      const provider = new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM);
       const apiResponse = [{
         id: 1,
         name: 'foo',
@@ -93,17 +90,14 @@ describe('parsing cache data', () => {
       }];
 
       assert.throws(
-        () => cache.parseReturnsData(User.getItem(), sd.returns, User, apiResponse),
+        () => cache.parseProvider(User.getItem(), provider, User, apiResponse),
         `Data for returning an item must be an object`
       );
     })
 
     it('throws an error parsing a RETURNS_LIST when an object is passed', () => {
       // This returns an item therefore the API response should be an object.
-      const sd = new SourceDefinition({
-        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_LIST),
-        meta: {}
-      });
+      const provider = new Provider(User, RETURNS_ALL_FIELDS, RETURNS_LIST);
       const apiResponse = {
         id: 1,
         name: 'foo',
@@ -111,7 +105,7 @@ describe('parsing cache data', () => {
       };
 
       assert.throws(
-        () => cache.parseReturnsData(User.getList(), sd.returns, User, apiResponse),
+        () => cache.parseProvider(User.getList(), provider, User, apiResponse),
         'Data for returning a list must be an array'
       );
     })
@@ -122,8 +116,8 @@ describe('parsing cache data', () => {
     it('parses a polymorphic returns correctly', () => {
       const sd = new SourceDefinition({
         returns: {
-          user: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
-          posts: new Returns(Post, RETURNS_ALL_FIELDS, RETURNS_LIST),
+          user: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+          posts: new Provider(Post, RETURNS_ALL_FIELDS, RETURNS_LIST),
         },
         meta: {}
       });
@@ -174,7 +168,7 @@ describe('parsing cache data', () => {
   describe('sets Query.returnedIds', () => {
     it('with a single non-polymorphic query and return', () => {
       const sd = new SourceDefinition({
-        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
         meta: {}
       });
       const apiResponse = {
@@ -191,8 +185,8 @@ describe('parsing cache data', () => {
     it('with a polymorphic query and return', () => {
       const sd = new SourceDefinition({
         returns: {
-          user: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
-          posts: new Returns(Post, RETURNS_ALL_FIELDS, RETURNS_LIST),
+          user: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+          posts: new Provider(Post, RETURNS_ALL_FIELDS, RETURNS_LIST),
         },
         meta: {}
       });
@@ -243,7 +237,7 @@ describe('parsing cache data', () => {
       const cache = new Cache(store);
       const query = User.getItem({ id: 1 });
       const sd = new SourceDefinition({
-        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
         meta: {}
       });
       const apiResponse = {
@@ -268,7 +262,7 @@ describe('parsing cache data', () => {
       const cache = new Cache(store);
       const query = User.getList();
       const sd = new SourceDefinition({
-        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_LIST),
+        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_LIST),
         meta: {}
       });
       const apiResponse = [
@@ -326,7 +320,7 @@ describe('parsing cache data', () => {
       const cache = new Cache(store);
       const query = User.getList();
       const sd = new SourceDefinition({
-        returns: new Returns(User, RETURNS_ALL_FIELDS, RETURNS_LIST),
+        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_LIST),
         meta: {}
       });
       const apiResponse = [];

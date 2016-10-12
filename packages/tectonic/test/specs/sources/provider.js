@@ -3,23 +3,23 @@
 import { assert } from 'chai';
 
 import { User } from '../../models.js';
-import Returns from '../../../src/sources/returns.js';
+import Provider from '../../../src/sources/provider.js';
 import {
   RETURNS_ITEM,
   RETURNS_LIST,
   RETURNS_ALL_FIELDS
 } from '../../../src/consts';
 
-describe('returns', () => {
+describe('provider', () => {
 
   describe('validation', () => {
     it('throws an error if you pass anything but a string or array', () => {
       assert.throws(
-        () => new Returns(User, 1, RETURNS_ITEM)
+        () => new Provider(User, 1, RETURNS_ITEM)
         `Unknown field type`
       );
       assert.throws(
-        () => new Returns(User, {}, RETURNS_ITEM)
+        () => new Provider(User, {}, RETURNS_ITEM)
         `Unknown field type`
       );
 

@@ -1,12 +1,16 @@
-import {
-  RETURNS_ALL_FIELDS,
+// @flow
+
+import type Model from '../model';
+import type {
+  ReturnType,
+  ReturnsAllFields,
 } from '../consts';
 
 /**
- * Returns defines a single entity returned from an API response.
+ * Provider defines a single entity returned from an API response.
  *
  * If an API response returns more than one entity (ie. a post with embedded
- * comments), the source definition should use an object with many Return
+ * comments), the source definition should use an object with many Provider
  * classes:
  *
  * returns: {
@@ -15,24 +19,22 @@ import {
  * }
  *
  */
-export default class Returns {
+export default class Provider {
 
-  model = undefined
-  returnType = undefined
-  fields = undefined
-
+  // Whether this will return an item, list, or nothing
+  returnType: ReturnType
+  // The model this returns
+  model: Class<Model>
+  // Whether this returns all fields or a subset of fields
+  fields: ReturnsAllFields | Array<string>
   // Stores all field names as a key within an object.
-  fieldsAsObject = {}
+  fieldsAsObject: { [key: string]: boolean } = {}
 
-  /**
-   *
-   * @param Class base model class; not an instance of a model
-   */
-  constructor(model, fields, returnType) {
+  constructor(model: Class<Model>, fields: ReturnsAllFields | Array<string>, returnType: ReturnType) {
     this.model = model;
     this.returnType = returnType;
 
-    if (fields === RETURNS_ALL_FIELDS) {
+    if (fields === '*') {
       this.fields = fields;
       return;
     }

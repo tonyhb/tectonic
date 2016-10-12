@@ -16,12 +16,12 @@ describe('SourceDefinition', () => {
       assert.equal(sd.queryType, GET);
     });
 
-    it('allows Returns to be undefined when the queryType is DELETE', () => {
+    it('allows Provider to be undefined when the queryType is DELETE', () => {
       const sd = new SourceDefinition({
         meta: {},
         queryType: DELETE
       });
-      assert.equal(sd.returns, RETURNS_NONE);
+      assert.equal(sd.providers.returnsNone, true);
     });
   });
 
@@ -34,7 +34,7 @@ describe('SourceDefinition', () => {
       // No returns
       assert.throws(
         () => new SourceDefinition({meta: {}}),
-        'Source definitions must contain keys: returns, meta'
+        'Source definitions must contain `returns` key for GET queries'
       );
       // No meta
       assert.throws(
@@ -49,7 +49,7 @@ describe('SourceDefinition', () => {
           meta: {},
           queryType: GET
         }),
-        'Source definitions must contain keys: returns, meta'
+        'Source definitions must contain `returns` key for GET queries'
       );
     });
 

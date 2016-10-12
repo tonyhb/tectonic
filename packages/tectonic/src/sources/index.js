@@ -1,3 +1,5 @@
+// @flow
+
 import SourceDefinition from './definition';
 
 /**
@@ -24,11 +26,13 @@ export default class Sources {
    * SourceDefinnition as an argument. The resolver can use this to optimize
    * query resolution at their discretion.
    *
+   * TODO: Better flow typechecking
+   *
    * @param function driver function to invoke when the source is used
    * @param array array of source definitions
    * @param Resolver concrete instance of the resolver being used in the manager
    */
-  processDefinitions(driverFunc, defsToProcess, resolver) {
+  processDefinitions(driverFunc: Function, defsToProcess: Array<Object>, resolver: Object) {
     if (!Array.isArray(defsToProcess)) {
       throw new Error('Source definitions must be defined in an array');
     }

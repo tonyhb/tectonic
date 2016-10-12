@@ -1,9 +1,17 @@
-
+// @flow
 
 import Sources from '../sources';
 import Cache from '../cache';
 import { PENDING, ERROR, SUCCESS } from '../status';
 import { RETURNS_ITEM, RETURNS_LIST } from '../consts';
+
+import type Query from '../query';
+
+export type ManagerOpts = {
+  store: Object, // todo: redux flow
+  drivers: { [key: string]: Function }, // todo: Driver type
+  resolver: Object, // todo: Resolver type
+}
 
 /**
  * The manager is the single interface for tectonic. It handles:
@@ -38,8 +46,12 @@ import { RETURNS_ITEM, RETURNS_LIST } from '../consts';
  */
 export default class Manager {
 
+  store: Object
+  cache: Object
+  resolver: Object
+  sources: Sources
 
-  constructor({ store, drivers, resolver }) {
+  constructor({ store, drivers, resolver }: ManagerOpts = {}) {
     if (typeof drivers !== 'object') {
       throw new Error('You must supply at least one driver to instantiate a manager');
     }
@@ -64,7 +76,7 @@ export default class Manager {
       const driverFunc = drivers[driver];
       // When calling the driver name run processDefinitions to add the
       // definitions to the Source class.
-      this[driver] = defs =>
+      (this: Object)[driver] = defs =>
         this.sources.processDefinitions(driverFunc, defs, this.resolver);
     });
   }
@@ -74,7 +86,7 @@ export default class Manager {
    *
    * @param Query
    */
-  addQuery(query) {
+  addQuery(query: Query) {
     this.resolver.addQuery(query, this.sources.definitions);
   }
 
@@ -98,7 +110,7 @@ export default class Manager {
    *               should be false so that stale props are never passed into
    *               a Query constructor.
    */
-  props(queries, state = undefined) {
+  props(queries: { [key: string]: Query }, state: ?Map<*, *> = undefined) {
     const { cache } = this;
     const props = {
       status: {},
@@ -108,7 +120,7 @@ export default class Manager {
       return props;
     }
 
-    if (state === undefined) {
+    if (state === undefined || state === null) {
       state = this.store.getState().tectonic;
       // if state is still undefined then the reducer hasn't been added to
       // redux - throw an error

@@ -203,6 +203,7 @@ describe('@load: e2e end-to-end test', () => {
     window.setTimeout(() => {
       // We return models which are not deepEqual to our expected data;
       // iterate through them and turn them into a POJO for comparison
+      console.log("PROPS", item.props);
       const posts = item.props.posts.map(i => i.toJS());
       assert.deepEqual(posts, data.posts);
       done();

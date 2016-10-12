@@ -1,3 +1,5 @@
+// @flow
+
 import { Component, PropTypes } from 'react';
 import Manager from '../manager';
 

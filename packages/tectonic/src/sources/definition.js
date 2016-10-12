@@ -1,13 +1,29 @@
-import Returns from './returns';
+// @flow
+
+import ProviderGroup from './providerGroup';
+import Provider from './provider';
 import {
   GET, CREATE, UPDATE, DELETE,
-  RETURNS_NONE,
 } from '../consts';
 
-/**
- * These keys are required in every source definition
- */
-const requiredDefinitionKeys = ['returns', 'meta'];
+import type {
+  QueryType,
+} from '../consts';
+import type Model from '../model';
+
+export type SourceDefinitionOpts = {
+  id: string;
+  returns: Provider | { [key: string]: Provider } | ?string;
+  meta: Object;
+  params: ?Array<string>;
+  optionalParams: ?Array<string>;
+  driverFunc: Function;
+
+  // model may be explicitly set for non-GET queries; otherwise, for GET queries
+  // this is typically resolved from the Returns parameter
+  model: ?Class<Model>;
+  queryType: QueryType;
+};
 
 /**
  * A source definition is a concrete definition for an API call or endpoint
@@ -15,25 +31,23 @@ const requiredDefinitionKeys = ['returns', 'meta'];
  *
  */
 export default class SourceDefinition {
-  id = undefined
-
-  meta = undefined
-  returns = undefined
-
-  model = undefined
+  id: string
+  meta: Object
+  providers: ProviderGroup
+  model: Array<Class<Model>>
+  driverFunc: Function
+  queryType: QueryType
 
   /**
    * Array of **required** parameters for the source.
    * These can be query parameters, postdata or parameters for URL replacement.
    */
-  params = undefined
+  params: Array<string>
 
   /**
    * Array of optional parameters for the source
    */
-  optionalParams = undefined
-
-  driverFunc = undefined
+  optionalParams: Array<string>
 
   /**
    * Create a new source definition to be used as a source for an API call.
@@ -52,43 +66,37 @@ export default class SourceDefinition {
    *           // object, automatically adding driverFunc and constructing
    *           // the returns parameter for you.
    * ]);
-   *
-   * @param {string} o.id - unique ID of source definition; randomly generated if
-   * ommitted
-   * @param {(Returns|Object)} o.returns - instance of Returns or object of
-   * many Returns as values
-   * @param {Object} o.meta - object containing unique source driver functionality
-   * @param {Array} o.params - array of **required** parameters for the API call
-   * @param {Array} o.optionalParams - array of optional params for the API call
-   * @param {Function} o.driverFunc - driver function to call to invoke the source
-   * @param {string} o.queryType - the type of query (GET, UPDATE, CREATE, DELETE)
-   * @param {Model} o.model - the model class which this API references
    */
-  constructor({ id, returns, meta, params, optionalParams, driverFunc, queryType = GET, model }) {
+  constructor({
+    id,
+    returns,
+    meta,
+    params,
+    optionalParams,
+    driverFunc,
+    model,
+    queryType = GET,
+  }: SourceDefinitionOpts = {}) {
     if (id === undefined) {
       id = Math.floor(Math.random() * (1 << 30)).toString(16);
     }
 
-    // If the queryType is UPDATE, CREATE or DELETE (ie. not GET) then the
-    // server *is* allowed to respond with 204 no content. This means that
-    // `returns` can be undefined for non-GET queries; we must automatically
-    // transform this into RETURNS_NONE.
-    if (queryType !== GET && returns === undefined) {
-      returns = RETURNS_NONE;
+    if (typeof returns === 'function') {
+      throw new Error(
+        'You must pass a concrete return value or object to `returns` ' +
+        '(such as Model.item())'
+      );
     }
 
     this.id = id;
-    // XXX Potentially create a parent class for polymorphic returns so it's not
-    // a POJO
-    this.returns = returns;
-    this.model = model;
+    this.providers = new ProviderGroup(returns);
     this.meta = meta;
     this.params = params || [];
     this.optionalParams = optionalParams || [];
     this.driverFunc = driverFunc;
     // Which CRUD action this refers to
     this.queryType = queryType;
-    this.setModelProperty();
+    this.setModelProperty(model);
 
     if (typeof this.params === 'string') {
       this.params = [this.params];
@@ -107,102 +115,51 @@ export default class SourceDefinition {
    *
    * this.model is used in the resolver to calculate satisfiability
    */
-  setModelProperty() {
-    const { model, returns } = this;
-
-    if (model !== undefined && model.idField !== undefined) {
-      // The user specified a `model` type in the source definition but didn't
-      // enclose it in an array.
-      this.model = [model];
+  setModelProperty(model: ?Class<Model> | ?Array<Class<Model>>) {
+    if (model === undefined || model === null) {
+      this.model = this.providers.models();
       return;
     }
 
     if (Array.isArray(model)) {
-      // this.model is already a normalized array of models that the source
-      // definition uses
+      this.model = model;
       return;
     }
 
-    if (returns === undefined || returns === RETURNS_NONE) {
-      // we can't calculate the model that this source definition uses, so we
-      // bail out
-      return;
-    }
-
-    // If models aren't explicitly defined (ie. GET source definitions can list
-    // a `returns` property, not a `model` property) we take it from returns
-    if (returns instanceof Returns) {
-      this.model = [returns.model];
-      return;
-    }
-
-    if (returns !== undefined) {
-      // polymorphic returns; extract all models this source returns
-      this.model = Object.keys(returns).map(k => returns[k].model);
-    }
+    this.model = [model];
   }
 
   /**
    * Returns true if this source definition fetches more than one model at
    * a time
    */
-  isPolymorphic() {
-    return this.returns !== RETURNS_NONE && !(this.returns instanceof Returns);
+  isPolymorphic(): boolean {
+    return this.providers.isPolymorphic();
   }
 
   validate() {
     const chain = [
-      ::this.validateRequiredKeys,
-      ::this.validateReturns,
-      ::this.validateQueryType,
+      this.validateRequiredKeys,
+      this.validateReturns,
+      this.validateQueryType,
     ];
     chain.forEach(f => f());
   }
 
-  validateRequiredKeys() {
-    if (requiredDefinitionKeys.some(i => this[i] === undefined)) {
-      throw new Error(
-        `Source definitions must contain keys: ${
-        requiredDefinitionKeys.join(', ')}`,
-        this
-      );
+  validateRequiredKeys = () => {
+    if (this.providers === undefined || this.meta === undefined) {
+      throw new Error('Source definitions must contain keys: returns, meta', this);
     }
   }
 
-  validateReturns() {
-    const { returns, queryType } = this;
-
-    if (queryType !== GET && returns === RETURNS_NONE) {
-      return;
+  validateReturns = () => {
+    if (this.queryType === 'GET' && this.providers.returnsNone) {
+      throw new Error('Source definitions must contain `returns` key for GET queries', this);
     }
-
-    // If this is a single Returns instance this is valid
-    if (returns instanceof Returns) {
-      return;
-    }
-
-    // Otherwise this should be an object in which all values are Returns
-    // instances
-    if (typeof returns !== 'object') {
-      throw new Error(
-        'You must pass a concrete return value or object to `returns` ' +
-        '(such as Model.item())'
-      );
-    }
-
-    Object.keys(returns).forEach((item) => {
-      if (!(returns[item] instanceof Returns)) {
-        throw new Error(
-          'You must pass a concrete return value or object to `returns` ' +
-          '(such as Model.item())'
-        );
-      }
-    });
-
     return;
   }
 
-  validateQueryType() {
+  validateQueryType = () => {
     const { queryType } = this;
     if (queryType !== GET && queryType !== CREATE &&
         queryType !== UPDATE && queryType !== DELETE) {

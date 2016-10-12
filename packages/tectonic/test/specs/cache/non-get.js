@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import Cache from '../../../src/cache';
 import Query from '../../../src/query';
 import SourceDefinition from '../../../src/sources/definition';
-import Returns from '../../../src/sources/returns';
+import Provider from '../../../src/sources/provider';
 import {
   CREATE,
   UPDATE,
