@@ -4,11 +4,11 @@ import d from 'debug';
 import { Map } from 'immutable';
 import * as utils from './utils';
 import { UPDATE_QUERY_STATUSES } from '../reducer';
-import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '../status';
 
 import type {
   QueryHash,
 } from '../consts';
+import type Status, { StatusOpts } from '../status/status';
 import type Query from '../query';
 import type SourceDefinition from '../sources/definition';
 
@@ -65,7 +65,7 @@ export default class BaseResolver {
    * resolveItem and unresolvable before dispatching.
    *
    */
-  statusMap: { [key: QueryHash]: string } = {}
+  statusMap: { [key: QueryHash]: StatusOpts } = {}
 
   /**
    * This is called ecah time a sourceDefinition is added via the manager. It
@@ -193,7 +193,9 @@ export default class BaseResolver {
         // We have data for this query; this query is resolved and is successful
         if (ok) {
           debug('query has cached data; success', q.toString(), q);
-          this.statusMap[hash] = SUCCESS;
+          this.statusMap[hash] = {
+            status: 'SUCCESS',
+          };
           return;
         }
       } else {
@@ -202,11 +204,11 @@ export default class BaseResolver {
 
       // check if the query status was previously set to pending
       const status = this.cache.getQueryStatus(q, state);
-      if (status === PENDING) {
+      if (status.isPending()) {
         debug('query already pending and in flight; skipping', q.toString(), q);
         // update the query's internal status to pending, but no need to update
         // the query status as it's already pending
-        q.updateStatus(PENDING);
+        q.updateStatus('PENDING');
         // If we're here and the query is PENDING this must mean that the
         // internal status of the query didn't get set. Perhaps this was added
         // by a loaded component after the previous in-flight query was
@@ -228,7 +230,7 @@ export default class BaseResolver {
       }
 
       // Attempt to resolve a single query from the map of source definitions.
-      const sd = this.resolveItem(q, sourceMap);
+      const sd = this.resolveItem(q, sourceMap, status);
       if (sd !== undefined && sd !== null) {
         // Add this query to the reducer's global queryInFlight list for
         // future dupe linking during the PENDING stage
@@ -236,8 +238,10 @@ export default class BaseResolver {
         // Push this to the list which will be processed via drivers
         resolvedQueries.push(q);
         q.sourceDefinition = sd;
-        q.updateStatus(PENDING);
-        this.statusMap[hash] = PENDING;
+        q.updateStatus('PENDING');
+        this.statusMap[hash] = {
+          status: 'PENDING',
+        };
         debug('resolved query', q.toString(), q);
       }
     });
@@ -272,8 +276,33 @@ export default class BaseResolver {
    * @param Map
    * @return SourceDefinition  sourcedef of query
    */
-  resolveItem(query: Query, sourceMap: Map<*, *>): ?SourceDefinition {
+  resolveItem(query: Query, sourceMap: Map<*, *>, status: Status): ?SourceDefinition {
     debug('resolving query', query);
+
+    const params = Object.keys(query.params).map(k => query.params[k]);
+    if (params.some(v => v === undefined)) {
+      // Only udpate the stored query status object if we're changing status to
+      // UNDEFINED_PARAMS from another status.
+      //
+      // If we change the status object from UNDEFINED_PARMAS to
+      // UNDEFINED_PARAMS react's equality checking will still think this is
+      // a new prop, as objects do not compare.
+      //
+      // This will cause an inifnite loop in rendering.
+      //
+      // Note that we don't need to do this for other statuses as setting the
+      // query's .status parameter short-circuits reoslution; this is never done
+      // for UNDEFINED_PARAMS to ensure re-resolution of the query with new
+      // props.
+      if (!status.isUndefinedParams()) {
+        this.statusMap[query.hash()] = {
+          status: 'UNDEFINED_PARAMS',
+        };
+      }
+
+      debug('ignoring query as it has undefined parameters', query);
+      return null;
+    }
 
     // Check each source definition against all predicates in our
     // satisfiability chain. This short-circuits the loop of source
@@ -311,15 +340,6 @@ export default class BaseResolver {
    * source available for the given query and issue a console.warning.
    */
   unresolvable(query: Query) {
-    const params = Object.keys(query.params).map(k => query.params[k]);
-
-    if (params.some(v => v === undefined)) {
-      // some query params are undefined; issue a debug and ignore.
-      this.statusMap[query.hash()] = UNDEFINED_PARAMS;
-      debug('ignoring query as it has undefined parameters', query);
-      return;
-    }
-
     debug('query unresolvable', query);
 
     // Call the callback if it exists with an error
@@ -328,8 +348,12 @@ export default class BaseResolver {
       query.callback('There is no source definition which resolves the query', null);
     }
 
-    this.statusMap[query.hash()] = ERROR;
-    query.status = ERROR;
+    this.statusMap[query.hash()] = {
+      status: 'ERROR',
+      error: 'There is no source definition which resolves the query',
+    };
+
+    query.updateStatus('ERROR');
     warn('There is no source definition which resolves the query', query.toString());
   }
 
@@ -346,7 +370,7 @@ export default class BaseResolver {
     // by default this will return now, meaning this query will never be cached
     const expires = this.parseCacheHeaders(meta.headers);
 
-    query.updateStatus(SUCCESS);
+    query.updateStatus('SUCCESS');
     this.cache.storeQuery(query, sourceDef, data, expires);
 
     if (typeof query.callback === 'function') {
@@ -354,7 +378,7 @@ export default class BaseResolver {
     }
   }
 
-  fail(query: Query, sourceDef: SourceDefinition, data: any) {
+  fail(query: Query, sourceDef: SourceDefinition, data: string, meta: {status?: number} = {}) {
     delete this.queriesInFlight[query.toString()];
 
     // TODO: Also update all dependencies of this query as failed
@@ -363,7 +387,11 @@ export default class BaseResolver {
     this.store.dispatch({
       type: UPDATE_QUERY_STATUSES,
       payload: {
-        [query.hash()]: ERROR,
+        [query.hash()]: {
+          status: 'ERROR',
+          code: meta.status,
+          error: data,
+        },
       },
     });
 

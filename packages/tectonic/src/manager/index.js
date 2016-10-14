@@ -2,10 +2,13 @@
 
 import Sources from '../sources';
 import Cache from '../cache';
-import { PENDING, ERROR, SUCCESS } from '../status';
+import Status from '../status/status';
 import { RETURNS_ITEM, RETURNS_LIST } from '../consts';
 
 import type Query from '../query';
+import type {
+  Props,
+} from '../consts';
 
 export type ManagerOpts = {
   store: Object, // todo: redux flow
@@ -112,7 +115,7 @@ export default class Manager {
    */
   props(queries: { [key: string]: Query }, state: ?Map<*, *> = undefined) {
     const { cache } = this;
-    const props = {
+    const props: Props = {
       status: {},
     };
 
@@ -134,7 +137,7 @@ export default class Manager {
       // respectCache is only taken into account if the status is undefined or
       // pending; if the status is SUCCESS or ERROR within the query it has
       // already been resolved.
-      const respectCache = query.status !== SUCCESS && status !== ERROR;
+      const respectCache = query.status !== 'SUCCESS' && !status.isError();
 
       // We only respect the cache if the query status is pending or undefined.
       // You might expect us to respec the cache if the status is SUCCESS: we
@@ -143,11 +146,7 @@ export default class Manager {
       // SUCCESS is not set internally on query instances based on cache hits
       // TODO: tidy into cache hit property?
       if (this.cache.hasQueryExpired(query, state) && respectCache) {
-        status = PENDING;
-      } else {
-        // We inject statuses for each query into this.props; get the status
-        // for the query.
-        status = cache.getQueryStatus(query, state);
+        status = new Status({ status: 'PENDING' });
       }
 
       props.status[prop] = status;

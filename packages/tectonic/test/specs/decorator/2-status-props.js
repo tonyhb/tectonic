@@ -5,8 +5,8 @@ import React, { Component, PropTypes } from 'react';
 import TestUtils from 'react-addons-test-utils';
 import { renderAndFind } from '../../utils';
 
+import Status from '../../../src/status/status';
 import load from '../../../src/decorator';
-import * as status from '../../../src/status';
 
 // Data
 import { User, Post } from '../../models';
@@ -24,7 +24,7 @@ describe('@load: status props', () => {
         const { user } = this.props;
         // We inject a `status` prop which is an object containing loading
         // states for all props specified within @load
-        if (this.props.status.user === status.PENDING) {
+        if (this.props.status.user.isPending()) {
           return <p>Loading...</p>;
         }
         return <p>{ this.props.user.name }</p>
@@ -44,8 +44,8 @@ describe('@load: status props', () => {
     window.setTimeout(() => {
       // Right now we've not defined a sourcedefinition, so this should error
       assert.isDefined(item.props.status.user);
-      assert.equal(item.props.status.user, status.ERROR);
-      assert.equal(item.props.status.post, status.ERROR);
+      assert.deepEqual(item.props.status.user, new Status({ status: 'ERROR', error: 'There is no source definition which resolves the query' }));
+      assert.deepEqual(item.props.status.post, new Status({ status: 'ERROR', error: 'There is no source definition which resolves the query' }));
       done();
     }, 10);
   });

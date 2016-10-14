@@ -7,7 +7,6 @@ import { createNewManager } from '../../manager';
 import { User, Post } from '../../models';
 import Query from '../../../src/query';
 import BaseResolver from '../../../src/resolver/baseResolver.js';
-import { PENDING, SUCCESS, ERROR, UNDEFINED_PARAMS } from '../../../src/status';
 import { GET, CREATE, UPDATE, DELETE } from '../../../src/consts';
 
 describe('BaseResolver', () => {
@@ -21,7 +20,7 @@ describe('BaseResolver', () => {
       m.addQuery(q);
       assert.equal(Object.keys(m.resolver.queries).length, 1);
       assert.isDefined(m.resolver.queries[q.hash()]);
-      assert.equal(m.resolver.queries[q.hash()], q);
+      assert.deepEqual(m.resolver.queries[q.hash()], q);
     });
 
   });
@@ -159,9 +158,9 @@ describe('BaseResolver', () => {
         const q = User.getItem({ id: 1 })
         m.addQuery(q);
         m.resolve();
-        assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), PENDING);
+        assert.deepEqual(m.store.getState().tectonic.getIn(['status', q.hash()]), { status: 'PENDING' });
         window.setTimeout(() => {
-          assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), SUCCESS);
+          assert.deepEqual(m.store.getState().tectonic.getIn(['status', q.hash()]), { status: 'SUCCESS' });
         }, 2000);
       });
 
@@ -171,7 +170,10 @@ describe('BaseResolver', () => {
         const q = Post.getItem({ id: 1 })
         m.addQuery(q);
         m.resolve();
-        assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), ERROR);
+        assert.deepEqual(
+          m.store.getState().tectonic.getIn(['status', q.hash()]),
+          { status: 'ERROR', error: 'There is no source definition which resolves the query' }
+        );
       });
 
       it('sets queries with undefined params to UNDEFINED_PARAMS', () => {
@@ -180,7 +182,7 @@ describe('BaseResolver', () => {
         const q = User.getItem({ id: undefined })
         m.addQuery(q);
         m.resolve();
-        assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), UNDEFINED_PARAMS);
+        assert.deepEqual(m.store.getState().tectonic.getIn(['status', q.hash()]), { status: 'UNDEFINED_PARAMS' });
       });
     });
   });
@@ -200,7 +202,10 @@ describe('BaseResolver', () => {
       const q = User.getItem({ id: 1});
       m.addQuery(q);
       m.resolve();
-      assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), ERROR);
+      assert.deepEqual(
+        m.store.getState().tectonic.getIn(['status', q.hash()]),
+        { status: 'ERROR', error: 'There is no source definition which resolves the query' }
+      );
     });
 
     it('doesnt use GET for a CREATE query', () => {
@@ -222,7 +227,10 @@ describe('BaseResolver', () => {
       });
       m.addQuery(q);
       m.resolve();
-      assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), ERROR);
+      assert.deepEqual(
+        m.store.getState().tectonic.getIn(['status', q.hash()]),
+        { status: 'ERROR', error: 'There is no source definition which resolves the query' }
+      );
     });
 
     it('calls a CREATE query successfully', () => {
@@ -248,7 +256,7 @@ describe('BaseResolver', () => {
       });
       m.addQuery(q);
       m.resolve();
-      assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), SUCCESS);
+      assert.deepEqual(m.store.getState().tectonic.getIn(['status', q.hash()]), { status: 'SUCCESS' });
     });
 
     it('calls an UPDATE query (http PUT/PATCH depending on driver) with params', () => {
@@ -291,7 +299,7 @@ describe('BaseResolver', () => {
       });
       m.addQuery(q);
       m.resolve();
-      assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), SUCCESS);
+      assert.deepEqual(m.store.getState().tectonic.getIn(['status', q.hash()]), { status: 'SUCCESS' });
       assert.equal(q.sourceDefinition.id, 'ok');
     });
 
@@ -331,7 +339,7 @@ describe('BaseResolver', () => {
       const spy = sinon.spy(q, 'callback');
       m.addQuery(q);
       m.resolve();
-      assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), SUCCESS);
+      assert.deepEqual(m.store.getState().tectonic.getIn(['status', q.hash()]), { status: 'SUCCESS' });
       assert(spy.withArgs(null, { id: '1' }).calledOnce);
     });
 
@@ -342,7 +350,10 @@ describe('BaseResolver', () => {
       const spy = sinon.spy(q, 'callback');
       m.addQuery(q);
       m.resolve();
-      assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), ERROR);
+      assert.deepEqual(
+        m.store.getState().tectonic.getIn(['status', q.hash()]),
+        { status: 'ERROR', error: 'There is no source definition which resolves the query' }
+      );
       assert(spy.withArgs('There is no source definition which resolves the query', null).calledOnce);
     });
 
@@ -352,7 +363,13 @@ describe('BaseResolver', () => {
       const spy = sinon.spy(q, 'callback');
       m.addQuery(q);
       m.resolve();
-      assert.equal(m.store.getState().tectonic.getIn(['status', q.hash()]), ERROR);
+      assert.deepEqual(
+        m.store.getState().tectonic.getIn(['status', q.hash()]),
+        {
+          status: 'ERROR',
+          code: undefined,
+          error: 'either pass success/fail state in query params or provide meta.returns',
+        });
       assert(spy.withArgs('either pass success/fail state in query params or provide meta.returns', null).calledOnce);
     });
   });

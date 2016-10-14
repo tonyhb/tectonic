@@ -15,7 +15,6 @@ import {
   RETURNS_LIST,
   RETURNS_ALL_FIELDS,
 } from '../../../src/consts';
-import { SUCCESS } from '../../../src/status';
 // test stuff
 import { User, Post } from '../../models';
 import { createStore } from '../../manager';
@@ -102,7 +101,7 @@ describe('cache for non-GET requests', () => {
       cache.storeQuery(query, sd, undefined);
 
       let state = store.getState().tectonic.toJS();
-      assert.equal(state.status[query.toString()], SUCCESS);
+      assert.deepEqual(state.status[query.toString()], { status: 'SUCCESS' });
     });
   });
 
