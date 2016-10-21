@@ -4,9 +4,9 @@ import sinon from 'sinon';
 import { renderAndFind } from '../../utils';
 
 import load from '../../../src/decorator';
+import Status from '../../../src/status/status';
 import { User, Post } from '../../models';
 import { createNewManager } from '../../manager';
-import { SUCCESS } from '../../../src/status';
 
 describe('@load decorators .load prop', () => {
   it('loads new data when passed an object with GET queries', (done) => {
@@ -57,7 +57,8 @@ describe('@load decorators .load prop', () => {
       }
 
       render() {
-        if (this.props.status.somePost === SUCCESS) {
+        const { status } = this.props;
+        if (status.somePost && status.somePost.isSuccess()) {
           done();
         }
 
@@ -71,7 +72,7 @@ describe('@load decorators .load prop', () => {
     const item = renderAndFind(<WrappedComponent />, A, manager);
 
     window.setTimeout(() => {
-      assert.equal(item.props.status.user, SUCCESS);
+      assert.deepEqual(item.props.status.user, new Status({ status: 'SUCCESS' }));
       assert.deepEqual(item.props.user.values(), data.user);
       assert.isUndefined(item.props.status.somePost);
       assert.isUndefined(item.props.somePost);
@@ -79,10 +80,10 @@ describe('@load decorators .load prop', () => {
 
       window.setTimeout(() => {
         // User should still be the same
-        assert.equal(item.props.status.user, SUCCESS);
+        assert.deepEqual(item.props.status.user, new Status({ status: 'SUCCESS' }));
         assert.deepEqual(item.props.user.values(), data.user);
         // Check posts got added
-        assert.equal(item.props.status.somePost, SUCCESS);
+        assert.deepEqual(item.props.status.user, new Status({ status: 'SUCCESS' }));
         assert.deepEqual(item.props.somePost.values(), data.post);
       });
 

@@ -9,6 +9,7 @@ import Model from '../model';
 import Query from '../query';
 import SourceDefinition from '../sources/definition';
 import Provider from '../sources/provider';
+import Status from '../status/status';
 import {
   RETURNS_ITEM,
   RETURNS_LIST,
@@ -19,6 +20,9 @@ import type {
   ModelData,
   ModelCollection,
 } from '../consts';
+import type {
+  StatusOpts,
+} from '../status/status';
 
 /**
  * Cache represents an abstraction over redux' store for saving and reading
@@ -351,8 +355,9 @@ export default class Cache {
     return data.toJS();
   }
 
-  getQueryStatus(query: Query, state: Map<*, *>) {
-    return state.getIn(['status', query.hash()]);
+  getQueryStatus(query: Query, state: Map<*, *>): Status {
+    const status = state.getIn(['status', query.hash()], ({}: StatusOpts));
+    return new Status(status);
   }
 
   /**

@@ -1,5 +1,8 @@
 // @flow
 
+import type Status from './status/status';
+import type Model from './model';
+
 // These consts are used within queries to state whether the query lists,
 // creates, updates or deletes a model
 export const GET = 'GET';
@@ -53,4 +56,11 @@ export type ModelData = {
 
 export type ModelCollection = {
   [key: ModelName]: ModelData
+};
+
+export type Props = {
+  status: {
+    [key: string]: Status,
+  },
+  [key: string]: ?Array<Model> | ?Model,
 };

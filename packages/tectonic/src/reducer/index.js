@@ -1,7 +1,12 @@
 // @flow
 
 import { Map } from 'immutable';
-import { SUCCESS } from '../status';
+
+export const UPDATE_QUERY_STATUSES = '@@tectonic/update-query-statuses';
+export const UPDATE_DATA = '@@tectonic/update-data';
+export const DELETE_DATA = '@@tectonic/delete-data';
+
+type ActionObject = { type: string; payload: Object };
 
 const defaultState = new Map({
   // Status stores a map of query hashes to statuses of said query
@@ -43,17 +48,13 @@ const defaultState = new Map({
   queriesToExpiry: new Map(),
 });
 
-export const UPDATE_QUERY_STATUSES = '@@tectonic/update-query-statuses';
-export const UPDATE_DATA = '@@tectonic/update-data';
-export const DELETE_DATA = '@@tectonic/delete-data';
-
-declare type ActionObject = { type: string; payload: Object };
-
 const reducer = (state: Object = defaultState, action: ActionObject) => {
   if (action.type === UPDATE_QUERY_STATUSES) {
     // Add all of the queries from action.payload into state.status.
     // Merging retains past data.
-    return state.mergeIn(['status'], action.payload);
+    return state.set('status', state.get('status').withMutations((s) => {
+      Object.keys(action.payload).forEach((k) => { s.set(k, action.payload[k]); });
+    }));
   }
 
   // This is called when a query is successful, so we update data, queriesToIds
@@ -65,7 +66,7 @@ const reducer = (state: Object = defaultState, action: ActionObject) => {
       s.mergeDeep({ data });
       s.setIn(['queriesToIds', query.toString()], query.returnedIds);
       s.setIn(['queriesToExpiry', query.toString()], expires);
-      s.setIn(['status', query.toString()], SUCCESS);
+      s.setIn(['status', query.toString()], { status: 'SUCCESS' });
     });
   }
 
@@ -73,7 +74,7 @@ const reducer = (state: Object = defaultState, action: ActionObject) => {
     const { query, modelName, modelId } = action.payload;
     return state.withMutations((s) => {
       s.setIn(['data', modelName, modelId, 'deleted'], true);
-      s.setIn(['status', query.toString()], SUCCESS);
+      s.setIn(['status', query.toString()], { status: 'SUCCESS' });
     });
   }
 

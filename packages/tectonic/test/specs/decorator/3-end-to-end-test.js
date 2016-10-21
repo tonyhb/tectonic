@@ -5,7 +5,7 @@ import React, { Component, PropTypes } from 'react';
 import TestUtils from 'react-addons-test-utils';
 
 import load from '../../../src/decorator';
-import * as status from '../../../src/status';
+import Status from '../../../src/status/status';
 
 // test
 import { User, Post } from '../../models';
@@ -50,7 +50,7 @@ describe('@load: e2e end-to-end test', () => {
         const { user } = this.props;
         // We inject a `status` prop which is an object containing loading
         // states for all props specified within @load
-        if (this.props.status.user === status.PENDING) {
+        if (this.props.status.user.isPending()) {
           return <p>Loading...</p>;
         }
         return <p>{ this.props.user.name }</p>
@@ -68,7 +68,7 @@ describe('@load: e2e end-to-end test', () => {
 
     // The resolver doesn't start resolving until 5 ms in
     window.setTimeout(() => {
-      assert.equal(item.props.status.user, status.SUCCESS);
+      assert.deepEqual(item.props.status.user, new Status({ status: 'SUCCESS' }));
       assert.deepEqual(item.props.user.toJS(), data);
       done();
     }, 5);
@@ -134,7 +134,7 @@ describe('@load: e2e end-to-end test', () => {
     const item = renderAndFind(<WrappedBase />, Base, manager);
 
     window.setTimeout(() => {
-      assert.equal(item.props.status.posts, status.SUCCESS);
+      assert.deepEqual(item.props.status.posts, new Status({ status: 'SUCCESS' }));
       // We return models which are not deepEqual to our expected data;
       // iterate through them and turn them into a POJO for comparison
       const posts = item.props.posts.map(i => i.toJS());
@@ -203,7 +203,6 @@ describe('@load: e2e end-to-end test', () => {
     window.setTimeout(() => {
       // We return models which are not deepEqual to our expected data;
       // iterate through them and turn them into a POJO for comparison
-      console.log("PROPS", item.props);
       const posts = item.props.posts.map(i => i.toJS());
       assert.deepEqual(posts, data.posts);
       done();
