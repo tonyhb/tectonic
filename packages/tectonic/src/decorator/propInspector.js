@@ -44,12 +44,12 @@ export default class PropInspector {
     this.queryFunc = queryFunc;
   }
 
-  computeDependencies(props: { [key: string]: Query }, manager: ?Manager): QueryTree {
+  computeDependencies(props: { [key: string]: Query }, manager: ?Manager, reduxState: Object = {}): QueryTree {
     const { queryFunc } = this;
     // This gives us a map of prop names to queries.
     // We can use this to determine if queries generate props which other
     // queries depend on.
-    let queryMap = queryFunc(props);
+    let queryMap = queryFunc(props, reduxState);
 
     // !! Note: slightly complex issue. At this point we may be rendering
     // a componet with dependent data queries to be loaded with props and
@@ -71,10 +71,15 @@ export default class PropInspector {
     if (manager !== null && manager !== undefined) {
       let computedProps = manager.props(queryMap);
 
-      while (deepEqual(queryMap, queryFunc({ ...props, computedProps })) === false) {
-        queryMap = queryFunc({ ...props, computedProps });
+      while (deepEqual(queryMap, queryFunc({ ...props, computedProps }, reduxState)) === false) {
+        queryMap = queryFunc({ ...props, computedProps }, reduxState);
         computedProps = manager.props(queryMap);
       }
+    }
+
+    if (queryMap === undefined) {
+      // TODO: test
+      throw new Error('@load decorator function must return an object');
     }
 
     // The accessor we're creating needs to have all default props from the
@@ -146,7 +151,7 @@ export default class PropInspector {
     // Call the decorator's query function again using the accessor.
     // This will return an object of prop names to queries with correct
     // parent relationships.
-    const tree = this.queryFunc(this.accessor);
+    const tree = this.queryFunc(this.accessor, reduxState);
 
     // Here we iterate through all items in the tree and reassign parents and
     // children of each query based on the queryMap modified by the proxy above

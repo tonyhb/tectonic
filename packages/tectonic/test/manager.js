@@ -11,16 +11,20 @@ import { createStore as reduxCreateStore, combineReducers } from 'redux';
 
 export const createStore = () => {
   return reduxCreateStore(combineReducers({
-    tectonic: reducer
+    tectonic: reducer,
+    misc: (state = {}, action) => {
+      if (action.type === 'MISC') {
+        return action.payload;
+      }
+      return state;
+    }
   }));
 }
 
 // createNewManager creates a completely fresh instance of a manager using the
 // BaseResolver by default
 export const createNewManager = (resolver = new BaseResolver()) => {
-  const store = reduxCreateStore(combineReducers({
-    tectonic: reducer
-  }));
+  const store = createStore();
 
   const manager = new Manager({
     drivers: {

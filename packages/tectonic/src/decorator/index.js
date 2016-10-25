@@ -53,6 +53,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
 
       constructor(...args) {
         super(...args);
+        const { manager } = this.context;
 
         // TODO: Test that adding .success to this.queries doesn't affect the
         // constructor queries
@@ -66,7 +67,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
           // function as state. all remaining props are just standard props :)
           const { ...props } = this.props;
           delete props.state;
-          this.queries = this.inspector.computeDependencies(props, this.context.manager);
+          this.queries = this.inspector.computeDependencies(props, manager, manager.store.getState());
         } else {
           this.queries = loadQueries;
           // These are static queries, but the component may have already been
@@ -110,7 +111,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
 
           // Generate new queries by computing dependencies with the new props
           // and state.
-          const newQueries = this.inspector.computeDependencies(props);
+          const newQueries = this.inspector.computeDependencies(props, null, this.context.manager.store.getState());
 
           // Assign the props newQueries to this.queries; this is gonna retain
           // query statuses for successful queries and not re-query them even if

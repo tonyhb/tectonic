@@ -34,4 +34,14 @@ describe('@load: basic component rendering', () => {
     assert.equal(item.props.foo, 'bar');
   });
 
+  it('throws an error when @load doesnt return an object fron a function', () => {
+    class Child extends Component {
+      render = () => <p>Child</p>;
+    }
+    const WrappedChild = load(() => {})(Child);
+    assert.throws(() => {
+      const item = renderAndFind(<WrappedChild />, Child);
+    }, '@load decorator function must return an object');
+  });
+
 });

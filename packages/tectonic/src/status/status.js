@@ -16,7 +16,7 @@ export default class Status {
   code: ?number
   error: ?string
 
-  constructor({ status, code, error}: StatusOpts = { }) {
+  constructor({ status, code, error }: StatusOpts = {}) {
     if (status) {
       this.status = status;
     }
