@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.2.1] - 2016-10-21
+### Added
+- Allow @load() to connect to state via @load((props, state) => {})
+
+## [1.2.0] - 2016-10-21
+### Added
+- Added new Status object injected for each @load query key. This replaces
+  string statuses with new information including the HTTP status code and error
+  message.
+- Added flow
+
 ## [1.1.13] - 2016-10-04
 ### Changed
 - Ensure manager always adds props for PENDING and ERROR states
