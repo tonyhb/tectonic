@@ -56,7 +56,7 @@ export default class TectonicSuperagent {
         }
 
         if (transform) {
-          return success(transform(res.body), res);
+          return success(transform(res), res);
         }
 
         return success(res.body, res);
