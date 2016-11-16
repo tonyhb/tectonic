@@ -1,6 +1,6 @@
 // @flow
 
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { Map } from 'immutable';
 import d from 'debug';
@@ -30,7 +30,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
   // 5. Iterate through array and figure out how to call and load data
 
   return (WrappedComponent: Class<React$Component<*, *, *>>) => {
-    class TectonicComponent extends Component {
+    class TectonicComponent extends PureComponent {
       static propTypes = {
         // State is all redux state
         state: PropTypes.instanceOf(Map),
