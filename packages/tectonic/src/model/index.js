@@ -122,7 +122,7 @@ export default class Model {
 
     Object.keys(this.fields).forEach((k) => {
       const item = this.fields[k];
-      if (typeof item.values === 'function') {
+      if (item instanceof Model) {
         this.submodelFields.push(k);
       }
     });
