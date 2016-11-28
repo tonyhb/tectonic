@@ -97,6 +97,7 @@ export default class Query {
   returnType: ?ReturnType
   body: any
   params: ParamsType = {}
+  // TODO: ReturnsNoFields, for deletes. This shouldn't be "undefined"
   fields: Array<string> | ReturnsAllFields
   returnedIds: Set<any>
 
@@ -136,7 +137,6 @@ export default class Query {
     this.queryType = queryType;
     this.body = body;
     this.callback = callback;
-
     this.children = [];
 
     // To create query trees we need to iterate through each param and see if

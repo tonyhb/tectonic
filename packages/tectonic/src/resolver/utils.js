@@ -63,7 +63,7 @@ export function doesSourceSatisfyQueryModel(source: SourceDefinition, query: Que
 export function doesSourceSatisfyAllQueryFields(source: SourceDefinition, query: Query) {
   const { providers } = source;
 
-  if (query.fields === undefined) {
+  if (query.fields === undefined || query.queryType === 'DELETE') {
     return true;
   }
 
