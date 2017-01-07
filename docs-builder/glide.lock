@@ -1,0 +1,8 @@
+hash: 81968f557573016644878f4e950b61b77c91c6815f67b5255cca4182103ff49a
+updated: 2017-01-08T12:12:47.533392373Z
+imports:
+- name: github.com/russross/blackfriday
+  version: 0b647d0506a698cca42caca173e55559b12a69f2
+- name: github.com/shurcooL/sanitized_anchor_name
+  version: 1dba4b3954bc059efc3991ec364f9f9a35f597d2
+testImports: []

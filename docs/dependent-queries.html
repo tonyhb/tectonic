@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang='en'>
+<head>
+  <title>Tectonic - Making Queries</title>
+  <!-- I understand that this could be made better, but I really wanna get the docs out. Plus HTTP2! :D -->
+<link href="https://fonts.googleapis.com/css?family=Droid+Sans|Droid+Serif" rel="stylesheet">
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/4.1.0/sanitize.min.css' />
+<link rel='stylesheet' href='/tectonic/styles.css' />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+
+</head>
+<body>
+  <div class='wrapper'>
+    <div class='sidebar'>
+  <ol>
+    <a href='/tectonic/guide-setup.html'><li>Installation</li></a>
+    <li>
+      Queries
+      <ol>
+        <a href='/tectonic/basic-queries.html'><li>Basic GET queries</li></a>
+        <a href='/tectonic/dependent-queries.html'><li>Dependent data loading</li></a>
+      </ol>
+    </li>
+    <li>
+      API Documentation
+      <ol>
+        <a href='/tectonic/api-decorator.html'><li><code>@load</code> decorator API</li></a>
+        <a href='/tectonic/api-manager.html'><li>Manager API</li></a>
+        <a href='/tectonic/api-source-definitions.html'><li>Source definition API</li></a>
+      </ol>
+    </li>
+    <li>
+      Internals
+      <ol>
+        <a href='/tectonic/internals-cache.html'><li>Cache</li></a>
+        <a href='/tectonic/internals-decorator.html'><li>Decorator</li></a>
+        <a href='/tectonic/internals-driver.html'><li>Driver</li></a>
+        <a href='/tectonic/internals-manager.html'><li>Manager</li></a>
+        <a href='/tectonic/internals-model.html'><li>Model</li></a>
+        <a href='/tectonic/internals-propinspector.html'><li>PropInspector</li></a>
+        <a href='/tectonic/internals-query.html'><li>Query</li></a>
+        <a href='/tectonic/internals-reducer.html'><li>Reducer</li></a>
+        <a href='/tectonic/internals-resolver.html'><li>Resolver</li></a>
+        <a href='/tectonic/internals-source-definition.html'><li>Source Definition</li></a>
+    </li>
+  </ol>
+</div>
+
+    <div class='content'>
+      <div>
+        <h1>Queries</h1>
+
+<h2>Dependent data in GET queries</h2>
+
+<p>What do we mean by dependent data?  Say you have an N+1 problem: you need to
+load a user by name in order to retrieve their ID, then you need to
+use the ID to load the user&rsquo;s posts.  The timeline looks like this:</p>
+
+<pre><code>load user -&gt; load posts
+</code></pre>
+
+<p>We can handle this within one <code>@load</code> decorator:</p>
+
+<pre><code class="language-javascript">// This is declared as a variable for easier explanation below; you can
+// write this directly in @load() in normal code.
+const queryFunc = (props) =&gt; ({
+  user: UserModel.getItem({ name: props.userName }),
+  posts: PostModel.getList({ userId: props.user &amp;&amp; props.user.id }),
+});
+
+@load(queryFunc)
+class MyComponent extends React.Component {
+  // ...
+}
+</code></pre>
+
+<p>This will first load the user, then once we have the user&rsquo;s ID from the
+username it will load the posts.</p>
+
+<h3>How does this work?</h3>
+
+<p>The decorator passes all props recieved from the parent component <em>along with
+the props from your queries</em> (<code>user</code> and <code>posts</code>) into <code>queryFunc</code>.  To start
+these will be your default values - the data has not yet been loaded.</p>
+
+<p>So the query for <code>posts</code> will be <code>PostModel.getList({ userId: undefined })</code> or
+some other such default.</p>
+
+<p>Remember that the resolver <strong>doesn&rsquo;t resolve any queries which have an
+undefined parameter</strong>.  This means that PostModel.getList&rsquo;s resolution will be
+postponed as there&rsquo;s no userId.</p>
+
+<p>When the user query is finally resolved this component is re-rendered, so the
+decorator&rsquo;s <code>queryFunc</code> is re-evaluated with the new user props.  Now that we
+have a user ID from the loaded data the post query will be resolved.</p>
+
+<h3>Is this necessary?</h3>
+
+<p>You could use two wrappers, though colocating queries inside one data loading
+component makes things cleaner and easier when these situations occur.</p>
+
+<p>It does add complexity. We have to continually inspect props and create a kind
+of ES7 proxy to detect when dependent data loading occurs.</p>
+
+      </div>
+    </div>
+  </div>
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+
+

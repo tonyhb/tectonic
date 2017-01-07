@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang='en'>
+<head>
+  <title>Tectonic - Declarative REST loader for react + redux</title>
+  <!-- I understand that this could be made better, but I really wanna get the docs out. Plus HTTP2! :D -->
+<link href="https://fonts.googleapis.com/css?family=Droid+Sans|Droid+Serif" rel="stylesheet">
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/4.1.0/sanitize.min.css' />
+<link rel='stylesheet' href='/tectonic/styles.css' />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+
+</head>
+<body>
+  <div id='hero'>
+    <div class='container'>
+      <div class='intro'>
+        <h1>Tectonic</h1>
+        <p>A declerative REST data loader for react + redux</p>
+        <a href='https://github.com/tonyhb/tectonic'>GitHub</a>
+        <a href='/tectonic/guide-setup.html'>Documentation</a>
+      </div>
+      <div class='demo'>
+        <pre><code class='language-javascript'>import load, { Status } from 'tectonic';
+import UserModel from './models/user.js';
+
+@load((props) => ({
+  // load a single User item from props.currentUserId, and inject
+  // it as `currentUser`
+  currentUser: UserModel.getItem({ id: props.currentUserId })
+}))
+class MyComponent extends React.PureComponent {
+  static propTypes = {
+    // automatic status injection
+    status: PropTypes.shape({
+      currentUser: PropTypes.instanceOf(Status)
+    }),
+    // automatic injection of data, including sane defaults whilst loading
+    currentUser: PropTypes.instanceOf(UserModel)
+  }
+  
+  render() {
+    const { status, currentUser } = this.props;
+    if (status.currentUser.isPending()) {
+      return &lt;Loading /&gt;;
+    }
+  
+    return &lt;p&gt;Username: { currentUser.name }&lt;/p&gt;
+  }
+}</code></pre>
+
+      </div>
+    </div>
+  </div>
+  <div class='faq'>
+    <h2>What is Tectonic?</h2>
+
+<p>Tectonic is a small library that makes loading REST API data a one-liner within your redux apps.</p>
+
+<h2>Why should I use it?</h2>
+
+<p>You&rsquo;ll write 80% less data loading code: no more action, reducer, normalizr, reselect boilerplate.</p>
+
+<p>Tectonic handles all actions, reducer data management, and prop injection for you &emdash; with one line.  Plus you can swap out real data for fake data using a mock driver with one line.</p>
+
+<p>Overall, it&rsquo;s fast to write and maintain, plus it&rsquo;ll save your sanity.</p>
+
+<h2>But I love writing actions, normalizers, reducers, and reselect queries!</h2>
+
+<p>Homie, you loco!.  We won&rsquo;t reach out from your monitor and slap you, but if you don&rsquo;t get your data shape right you&rsquo;ll spend a ton of time reworking each reselect query and reducer.  Plus, this takes a <em>lot of time</em>.  Don&rsquo;t you get bored?</p>
+
+<h2>What about GraphQL?  I wanna use that.</h2>
+
+<p>Love it!  Unfortunately you need a GraphQL endpoint to hit, though, and sometimes that&rsquo;s <em>just not available</em>.  In this case Tectonic provides an adapter for you to have declerative data loading over a REST API which will tide you over.</p>
+
+<p>If you can use it you should&hellip; relay 2 is looking excellent and Apollo is also very great work.</p>
+
+<h2>How do I get started?</h2>
+
+<p>Head over to the SETUP GUIDE to learn how to use it.</p>
+
+<h2>You got one of those example projects?</h2>
+
+<p>Knock yourself out!</p>
+
+<h2>How does it work?</h2>
+
+<p>Each time you ask for data to be loaded via THE <code>@load</code> DECORATOR you create a QUERY.  This query specifies things like whether you&rsquo;re asking for a single item or a list of items, the MODEL that you need loaded, and the parameters you&rsquo;re passing in to load data.</p>
+
+<p>Tectonic then takes each query and passes it to a RESOLVER.   It&rsquo;s the RESOLVER&rsquo;S job to inspect each query and match it against every SOURCE DEFINITION that you specified, figuring out which API endpoint to hit.  Once the RESOLVER has a valid SOURCE DEFINITION for a QUERY, tectonic invokes the SOURCE DEFINITION to load your data.  The data is then normalized and stored with cache information from the server&rsquo;s response inside tectonic&rsquo;s REDUCER.</p>
+
+<p>Finally, THE <code>@load</code> DECORATOR is given the data for each query and passes it down to your component.</p>
+
+<p>This is a pretty basic overview that hides the complexity of the resolver and decorator.  Things like dependent data loading (eg. load user A then once user A&rsquo;s data is loaded use those props to load their list of posts, or N+1 problems) make this more complex.  For more information on how Tectonic works check out the INTERNALS documentation.</p>
+
+<h2>What are these decorator, models, and sources you mention?</h2>
+
+<p>Ah.  Great question.  Kind of key to the whole thing, really.</p>
+
+<p>Head to the getting started guide for an overview, or the INTERNALS guide to read more on each part.</p>
+
+<h2>Why are they called source definitions and not API endpoints?</h2>
+
+<p>They don&rsquo;t necessarily have to be an API endpoint.  What if you&rsquo;re using a mock driver, or a localstorage driver?  😇</p>
+
+<h2>Is it ready to use?</h2>
+
+<p>A few places are using it in production, working out the kinks and improving the API as we go.  The API <em>will probably</em> change as we progress to version 2.0 and there may be bugs.  That said, give it a go and file an issue if you run into anything.</p>
+
+<h2>How does it make AJAX requests?</h2>
+
+<p>Requests are invoked via DRIVERS, so it&rsquo;s interchangeable.  Tectonic ships with a SUPERAGENT driver which (as you might expect) uses the awesome SUPERAGENT library to make requests.</p>
+
+<h2>Wait. Tell me more about these drivers!</h2>
+
+<p>DRIVERS power the logic behind making each API request.  That means you can do some wonderful things with it, such as wrap a driver with a <code>LocalStorage</code> adapter that caches API requests for use offline and provides API responses even if the data connection goes down.</p>
+
+<h2>Can we use websockets?</h2>
+
+<p>If you help WRITE A DRIVER for it then yup, sure!</p>
+
+<h2>How do I file an issue?</h2>
+
+<p>Head over to GitHub, my friend.  I&rsquo;ll be waiting for you, in a totally non creepy way.</p>
+
+  <div>
+
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+

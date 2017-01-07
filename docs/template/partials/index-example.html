@@ -1,0 +1,27 @@
+<pre><code class='language-javascript'>import load, { Status } from 'tectonic';
+import UserModel from './models/user.js';
+
+@load((props) => ({
+  // load a single User item from props.currentUserId, and inject
+  // it as `currentUser`
+  currentUser: UserModel.getItem({ id: props.currentUserId })
+}))
+class MyComponent extends React.PureComponent {
+  static propTypes = {
+    // automatic status injection
+    status: PropTypes.shape({
+      currentUser: PropTypes.instanceOf(Status)
+    }),
+    // automatic injection of data, including sane defaults whilst loading
+    currentUser: PropTypes.instanceOf(UserModel)
+  }
+  
+  render() {
+    const { status, currentUser } = this.props;
+    if (status.currentUser.isPending()) {
+      return &lt;Loading /&gt;;
+    }
+  
+    return &lt;p&gt;Username: { currentUser.name }&lt;/p&gt;
+  }
+}</code></pre>

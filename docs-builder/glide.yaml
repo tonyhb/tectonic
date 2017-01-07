@@ -1,0 +1,5 @@
+package: .
+import:
+- package: github.com/russross/blackfriday
+  version: ^1.4.0
+- package: github.com/shurcooL/sanitized_anchor_name

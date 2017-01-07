@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang='en'>
+<head>
+  <title>Tectonic - Setup Guide</title>
+  <!-- I understand that this could be made better, but I really wanna get the docs out. Plus HTTP2! :D -->
+<link href="https://fonts.googleapis.com/css?family=Droid+Sans|Droid+Serif" rel="stylesheet">
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/4.1.0/sanitize.min.css' />
+<link rel='stylesheet' href='/tectonic/styles.css' />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
+
+</head>
+<body>
+  <div class='wrapper'>
+    <div class='sidebar'>
+  <ol>
+    <a href='/tectonic/guide-setup.html'><li>Installation</li></a>
+    <li>
+      Queries
+      <ol>
+        <a href='/tectonic/basic-queries.html'><li>Basic GET queries</li></a>
+        <a href='/tectonic/dependent-queries.html'><li>Dependent data loading</li></a>
+      </ol>
+    </li>
+    <li>
+      API Documentation
+      <ol>
+        <a href='/tectonic/api-decorator.html'><li><code>@load</code> decorator API</li></a>
+        <a href='/tectonic/api-manager.html'><li>Manager API</li></a>
+        <a href='/tectonic/api-source-definitions.html'><li>Source definition API</li></a>
+      </ol>
+    </li>
+    <li>
+      Internals
+      <ol>
+        <a href='/tectonic/internals-cache.html'><li>Cache</li></a>
+        <a href='/tectonic/internals-decorator.html'><li>Decorator</li></a>
+        <a href='/tectonic/internals-driver.html'><li>Driver</li></a>
+        <a href='/tectonic/internals-manager.html'><li>Manager</li></a>
+        <a href='/tectonic/internals-model.html'><li>Model</li></a>
+        <a href='/tectonic/internals-propinspector.html'><li>PropInspector</li></a>
+        <a href='/tectonic/internals-query.html'><li>Query</li></a>
+        <a href='/tectonic/internals-reducer.html'><li>Reducer</li></a>
+        <a href='/tectonic/internals-resolver.html'><li>Resolver</li></a>
+        <a href='/tectonic/internals-source-definition.html'><li>Source Definition</li></a>
+    </li>
+  </ol>
+</div>
+
+    <div class='content'>
+      <div>
+        <h1>Installation</h1>
+
+<p>Welcome to Tectonic!  This guide will walk you through installing Tectonic in
+your redux app.  It shouldn&rsquo;t take more than 20 minutes for you to get started
+with making your first request.  Installation happens over a few steps:</p>
+
+<ol>
+<li>Write out your models and add some default values to them.</li>
+<li>Add the tectonic reducer to your store</li>
+<li>Set up the manager by specifying drivers and your redux store</li>
+<li>Specify your API endpoints as source definitions</li>
+<li>Add the manager to the root of your project</li>
+</ol>
+
+<p>Let&rsquo;s get started!</p>
+
+<hr />
+
+<h1>1. Define some models</h1>
+
+<p>One of the core aspects of tectonic are models.  Similar to models in
+frameworks such as rails, a model defines a particular resource in your app
+- such as a user.</p>
+
+<p>You can define a model by extending tectonic&rsquo;s base model class and adding
+the model&rsquo;s fields:</p>
+
+<pre><code>import { Model } from 'tectonic';
+
+export class User extends Model {
+
+  // 'modelName' is a required field and must be unique among all models
+  static modelName = 'user';
+
+  // 'fields' define the attributes that this model can hold, along with
+  // any default values for a new, empty model.  These default vaues are
+  // also passed to a component when data is pending.
+  static fields = {
+    id: undefined,
+    name: 'Anonymoose',
+    email: '',
+  }
+
+  getObfuscatedEmail() {
+    if (this.email.indexOf('@') &lt; 0) {
+      return '';
+    }
+    return `${this.email[0]}...${this.email.substr('@')}`
+  }
+}
+</code></pre>
+
+<p>Models are <strong>immutable by default</strong>; internally these models extend ImmutableJS
+records.</p>
+
+<p>You can also define functions for each model, as demonstrated above.  This
+helps co-locate all model related code without repetition, keeping your
+components free from data logic.</p>
+
+<p>For more information about the model API view API-MODEL.md.</p>
+
+<hr />
+
+<h1>2. Add the tectonic reducer to your store</h1>
+
+<p>Add the tectonic reducer using the <strong>tectonic</strong> key within combineReducers.
+This is important: the manager always expects it to be named tectonic.</p>
+
+<pre><code>// within store.js
+
+import {
+  applyMiddleware,
+  createStore,
+  combineReducers,
+} from 'redux';
+import { reducer as tectonicReducer } from 'tectonic';
+
+// tectonic *must* be added under the &quot;tectonic&quot; namespace
+const reducers = combineReducers({
+  tectonic: tectonicReducer,
+  ...
+});
+
+// create a store with your optional middleware
+const store = createStore(reducers);
+
+export default store;
+</code></pre>
+
+<p>Awesome stuff - the reducer is added! Now we can set up the manager.</p>
+
+<hr />
+
+<h1>3. Set up the manager</h1>
+
+<p>The MANAGER joins all tectonic components together, and specifies all of the options of Tectonic.  Let&rsquo;s add a manager to our project:</p>
+
+<pre><code>// manager.js
+
+import { Manager, Resolver } from 'tectonic';
+import TectonicSuperagent from 'tectonic-superagent'; // superagent driver
+// your store with the tectonic middleware added
+import store from './store.js';
+
+// create a new manager with all of the options provided
+const manager = new Manager({
+  // the resolver matches queries against your source definitions (API endpoints)
+  // and invokes them.
+  resolver: new Resolver(),
+
+  // drivers specifies all of the drivers for use when data loading.  each
+  // source definition must use one of these drivers.
+  drivers: {
+    // install the superagent driver with default options. For more options
+    // such as global request modifiers (eg. to add headers to every request)
+    // see the tectonic-superagent documentation.
+    fromSuperagent: new TectonicSuperagent(),
+  },
+
+  // give the manager access to your redux store so we can save data within
+  // the tectonic reducer
+  store: store,
+});
+
+export default manager;
+</code></pre>
+
+<p>That&rsquo;s literally it.  Generally the only thing you&rsquo;re going to customize here
+are the drivers.  Now that you&rsquo;ve got a manager instance we can specify some
+source definitions for loading data (eg. your API endpoints).</p>
+
+<p>For more information on the manager API head to MANAGER-API</p>
+
+<hr />
+
+<h1>4. Specify API endpoints</h1>
+
+<p>Now we need to define some sources for our data so that tectonic can make
+requests. These SOURCE DEFINITIONS are important in tectonic; each QUERY
+that you make to load or update data is matched against every SOURCE DEFINITION
+to find the correct API endpoint to hit.</p>
+
+<p>For example, when you ask to load a single user item with an ID of &ldquo;1&rdquo; we look
+through all of your sources for an API endpoint that will return a user item,
+and ensure that the API endpoint accepts &ldquo;id&rdquo; as a parameter.</p>
+
+<p>Before you begin make sure that you have some drivers defined in your manager.
+Now, let&rsquo;s get started:</p>
+
+<pre><code>// Import the models that you've defined within your project so that we
+// can associate sources with the models they refer to
+import UserModel from './models/user.js';
+import PostModel from './models/post.js';
+
+// Define a manager with some drivers
+const manager = new Manager({
+  // ...prior setup
+  drivers: {
+    fromSuperagent: new TectonicSuperagent(),
+    foo: new FooDriver(),
+  },
+});
+
+// Define the API endpoints for the project as a source.  Each source needs
+// to be associated with a driver; the drivers we set up above are installed
+// in `manager.drivers` to be used via the object key names.
+//
+// In the above setup we have `manager.drivers.fromSuperagent` as the
+// superagent drier and `manager.drivers.foo` as the foo driver.
+//
+// Let's define some API endpoints that use our superagent driver to make
+// AJAX requests.  Each object defines a single source, so each API endpoint
+// needs to be defined separately.
+manager.drivers.fromSuperagent([
+  // this API endpoint returns a list of users
+  {
+    meta: {
+      url: '/api/v1/users',
+      method: 'GET',
+    },
+    returns: UserModel.list(),
+  },
+  // this API endpoint returns a single user given the user ID as a
+  // parameter
+  {
+    // 'meta' holds driver-specific data
+    meta: {
+      url: '/api/v1/users/:id',
+      method: 'GET',
+    },
+    params: ['id'],
+    returns: UserModel.item(),
+  },
+  // this API endpoint creates a new user
+  {
+    // 'meta' holds driver-specific data
+    meta: {
+      url: '/api/v1/users',
+      method: 'POST',
+    },
+    // queryType dictates whether this creates, updates or deletes a model.
+    // The default is 'GET', which returns data from a source without side
+    // effects.
+    //
+    // If you mark this as 'CREATE', this source will only be considered for
+    // queries which create models; any other query will not use this endpoint.
+    // Valid options are 'GET', 'CREATE', 'UPDATE', and 'DELETE'.
+    queryType: 'CREATE',
+    returns: UserModel.item(),
+  },
+  // this API endpoint deletes a user
+  {
+    // 'meta' holds driver-specific data
+    meta: {
+      url: '/api/v1/users',
+      method: 'DELETE',
+    },
+    queryType: 'DELETE',
+    // The API returns no data so we leave 'returns' as undefined, but we
+    // still need to associate this source with the user model. We do this via
+    // the 'model' key.
+    model: UserModel,
+  },
+]);
+</code></pre>
+
+<p>The full API for source definitions is listed in API-MANAGER.md; be sure to
+check this out for more information on each option to use when defining a
+source.</p>
+
+<p>Also, for more information on how queries are matched to source definitioons
+see INTERNALS-RESOLVER.md.</p>
+
+<p>Now, let&rsquo;s get started on the last quick step before we can load data.</p>
+
+<hr />
+
+<h1>5. Add the manager to the root of your project</h1>
+
+<p>Finally, lets make the manager accessible to the <code>@load</code> decorator so that we
+can make queries.  To do that we need to add the manager to the root of your
+project:</p>
+
+<pre><code>// in your base JSX which is added via react's `render`:
+
+import { Loader } from 'tectonic';
+// your manager with all sources defined
+import manager from './manager.js';
+
+const App = () =&gt; (
+  { /* Just below Redux Provider component add Tectonic's loader */ }
+  &lt;Provider store={ store }&gt;
+    &lt;Loader manager={ manager }&gt;
+      { /* Your app, eg. redux router or your base component */ }
+    &lt;/Loader&gt;
+  &lt;/Provider&gt;
+);
+
+export default App;
+</code></pre>
+
+<p>The <code>Loader</code> component from tectonic adds <code>manager</code> to React&rsquo;s context.  This
+is how the @load decorator adds queries and fetches data/loading statuses from
+your store.</p>
+
+<p>That&rsquo;s it! You&rsquo;re ready to use tectonic to manage all of your API data. Let&rsquo;s
+make some queries!</p>
+
+      </div>
+    </div>
+  </div>
+  <script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>
+
