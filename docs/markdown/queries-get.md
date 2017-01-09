@@ -69,8 +69,9 @@ Pretty simple, eh?  The core part of loading data is `${model}.getItem` or
 	found a warning is thrown
      3. When a source definition is found we invoke the source's driver with
         the source and query information
-     4. The driver calls an onSuccess or onError function; this updates the
-        status of the query in Tectonic and is reflected in your component
+     4. The driver performs its logic and calls an onSuccess or onError
+        function; this updates the status of the query in Tectonic and is
+	reflected in your component
      5. On success caching information is passed from the driver's response,
         data is saved to the tectonic reducer and finally data is passed in to
 	your component.

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang='en'>
 <head>
-  <title>Tectonic - Decorator Internals</title>
+  <title>Tectonic - Making Queries with Side Effects</title>
   <!-- I understand that this could be made better, but I really wanna get the docs out. Plus HTTP2! :D -->
 <link href="https://fonts.googleapis.com/css?family=Droid+Sans|Droid+Serif" rel="stylesheet">
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/4.1.0/sanitize.min.css' />
@@ -54,11 +54,17 @@
 
     <div class='content'>
       <div>
-        <p>TODO:
- - Connecting to manager
- - Calling query function inside loader
- - Handling updates from tectonic queries
- - Batching updates</p>
+        <h1>Queries with side effects</h1>
+
+<p>Tectonic also allows you to create, update and delete records using your REST
+API.  It&rsquo;s a little more involved than using the decorator to load data, though
+it&rsquo;s still quick and easy.</p>
+
+<p>When you create, update and delete records using tectonic the internal state of
+the reducer is updated, so all components will re-render with new data as
+necessary without reloading any data.</p>
+
+<h2>Using <code>this.props.query</code> to create queries with side effects</h2>
 
       </div>
     </div>
