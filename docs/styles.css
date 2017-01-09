@@ -68,7 +68,7 @@ pre, code {
 	font-size: 14px;
 	line-height: 1.3;
 }
-h1, h2, h3 code {
+h1 code, h2 code, h3 code {
 	font-size: .9em
 }
 pre {
@@ -94,6 +94,9 @@ ul {
 }
 .content li {
 	margin: 0.25rem 0 .5rem;
+}
+br {
+	line-height: 2;
 }
 
 /** Syntax highlighting **/

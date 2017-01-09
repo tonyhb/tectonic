@@ -20,7 +20,7 @@
       <ol>
         <a href='/tectonic/queries-basic.html'><li>Basic GET queries</li></a>
         <a href='/tectonic/queries-dependent.html'><li>Dependent data loading</li></a>
-        <a href='/tectonic/queries-side-effects.html'><li>Queries with side effects*</li></a>
+        <a href='/tectonic/queries-side-effects.html'><li>Queries with side effects</li></a>
         <a href='/tectonic/queries-polling.html'><li>Polling*</li></a>
         <a href='/tectonic/queries-status.html'><li>Status injection*</li></a>
       </ol>
@@ -60,11 +60,189 @@
 API.  It&rsquo;s a little more involved than using the decorator to load data, though
 it&rsquo;s still quick and easy.</p>
 
-<p>When you create, update and delete records using tectonic the internal state of
-the reducer is updated, so all components will re-render with new data as
-necessary without reloading any data.</p>
+<p>Note that when you create, update and delete records using tectonic the
+internal state of the reducer is updated, so all components will re-render with
+new data as necessary without reloading any data.</p>
 
-<h2>Using <code>this.props.query</code> to create queries with side effects</h2>
+<h2>Using <code>this.props.query</code> to modify records</h2>
+
+<p>To resolve a create/update/delete query first decorate your component with the
+<code>@load</code> decorator. This will pass the <code>query</code> function down as a prop, as
+explained in <a href="/tectonic/api-decorator.html">the <code>@load</code> decorator API
+documentation</a></p>
+
+<p>The options passed into <code>this.props.query</code> are:</p>
+
+<pre><code class="language-javascript">{
+  // queryType represents which type of query this is.  It's used to match
+  // against your endpoints, which also have a queryType.
+  // This is **required**.
+  queryType: &lt;'CREATE' | 'UPDATE' | 'DELETE'&gt;,
+
+  // model is the base class of the model you're affecting, eg. UserModel.
+  // This must be the model class itself: **not** an instance of the class.
+  // This is **required**.
+  model: &lt;Model&gt;,
+
+  // modelId represents the ID of the model you're updating or deleting.
+  // This is **required** for UPDATE and DELETE queries, but not for creates.
+  modelId: &lt;?String | ?Int&gt;,
+
+  // params represents any query parameters needed for the source definition.
+  // This is optional and is only needed to match to certain sources (eg.
+  // an ID in the URL to delete a model).
+  params: &lt;?Object&gt;,
+
+  // body represents the JSON data you want to save for creates and updates.
+  // This is optional.
+  body: &lt;?Object&gt;,
+}
+</code></pre>
+
+<h3>Creating a model</h3>
+
+<p>Let&rsquo;s get started with a basic create query:</p>
+
+<pre><code class="language-js">// source definition:
+{
+  meta: {
+    url: '/api/v1/users',
+    method: 'POST',
+  },
+  queryType: 'UPDATE',
+  returns: UserModel.item(), // This endpoint returns the saved model after creation
+}
+
+// component:
+
+// load connects to the manager and passes down the `query` prop to save data
+@load()
+class CreateUserForm extends Component {
+  static propTypes = {
+    query: PropTypes.func.isRequired,
+  }
+
+  // Imagine that onCreateUser is called with an object containing all user
+  // data to be stored, as an object
+  onCreateUser(data) {
+    const opts = {
+      queryType: 'CREATE',
+      model: UserModel,
+      body: data,
+    };
+
+    this.props.query(opts, (err, result) =&gt; {
+      if (err !== null) {
+        // An error occured whilst creating the model
+        return;
+      }
+
+      // Success :D
+    });
+  }
+}
+</code></pre>
+
+<h3>Updating a model</h3>
+
+<pre><code class="language-js">// source definition:
+{
+  meta: {
+    url: '/api/v1/users/:id',
+    method: 'PUT',
+  },
+  queryType: 'UPDATE',
+  returns: UserModel.item(), // This returns the updated user after saving
+  params: ['id'], // We need the ID of the user in the URL
+}
+
+// component:
+@load()
+class UpdateUser extends Component {
+// ...
+  onUpdate(data) {
+    const opts = {
+      queryType: 'UPDATE',
+      model: UserModel,
+      modelId: data.id, // necessary for updates as explained below
+      body: data,
+      params: { id: data.id },
+    };
+
+    this.props.query(opts, (err, result) =&gt; {
+      // ...
+    });
+  }
+// ...
+}
+</code></pre>
+
+<h3>Deleting a model</h3>
+
+<pre><code class="language-js">// source definition:
+{
+  meta: {
+    url: '/api/v1/users/:id',
+    method: 'DELETE',
+  },
+  queryType: 'DELETE',
+  model: UserModel, // This endpoint returns no data but affects the UserModel
+  params: ['id'], // We need the ID of the user in the URL
+}
+
+// component:
+@load()
+class DeleteUser extends Component {
+// ...
+  onDelete(data) {
+    const opts = {
+      queryType: 'DELETE',
+      model: UserModel,
+      modelId: data.id, // necessary for deletes as explained below
+      params: {
+        id: data.id,
+      }
+    };
+
+    this.props.query(opts, (err, result) =&gt; {
+      // ...
+    });
+  }
+// ...
+}
+</code></pre>
+
+<h3>Why does <code>modelId</code> need to be specified for updates and deletes?</h3>
+
+<p>Tectonic&rsquo;s reducer stores all models keyed by their ID.  We need the ID within
+the query so that we can keep the internal state of the reducer up to date
+with the server&rsquo;s representation.</p>
+
+<p>For example, if you delete user ID 1 we need to remove that user from our
+reducer.</p>
+
+<p>This means that all of your components automatically update when each query
+is successful, without having to reload any data.</p>
+
+<h3>How do I add my model&rsquo;s defaults to a query?</h3>
+
+<p>Instantiate a new model with your form data, then call <code>.values()</code> on the model
+to return all model data as an object.  Instantiating an object assigns default
+values to the data passed in to the constructor, giving you defaults.</p>
+
+<p>For example:</p>
+
+<pre><code>onCreate(data) {
+  const opts = {
+    queryType: 'CREATE',
+    model: UserModel,
+    body: new UserModel(data).values(),
+  }
+  this.props.query(opts, (err, result) =&gt; {
+    // ...
+  });
+}
+</code></pre>
 
       </div>
     </div>
