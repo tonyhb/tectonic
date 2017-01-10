@@ -30,7 +30,7 @@
       <ol>
         <a href='/tectonic/api-decorator.html'><li><code>@load</code> decorator API</li></a>
         <a href='/tectonic/api-manager.html'><li>Manager API</li></a>
-        <a href='/tectonic/api-model.html'><li>Model API*</li></a>
+        <a href='/tectonic/api-model.html'><li>Model API</li></a>
         <a href='/tectonic/api-source-definitions.html'><li>Source definition API</li></a>
         <a href='/tectonic/api-status.html'><li>Status API*</li></a>
       </ol>
@@ -54,7 +54,108 @@
 
     <div class='content'>
       <div>
-        
+        <h1>Model API</h1>
+
+<p>Models are a core part of tectonic, and define all of the attributes for your
+resources.</p>
+
+<p>In order to define a model you must extend Tectonic&rsquo;s base class. There are
+three main class variables you need to define:</p>
+
+<pre><code class="language-js">import { Model } from 'tectonic';
+
+class UserModel extends Model {
+  // 'modelName' is a required field and must be unique among all models
+  static modelName = 'user';
+
+  // 'idField' is the attribute which holds the model ID; this defaults to 'id'
+  // if left undefined.  This must be set if the ID is in another field.
+  static idField = 'id';
+
+  // 'fields' define the attributes that this model can hold, along with
+  // any default values for a new, empty model.  These default vaues are
+  // also passed to a component when data is pending.
+  static fields = {
+    id: undefined,
+    name: 'Anonymoose',
+    email: '',
+  }
+}
+</code></pre>
+
+<p>Models can be nested:</p>
+
+<pre><code class="language-js">class PostModel extends Model {
+  static modelName = 'post';
+
+  static fields = {
+    id: undefined,
+    slug: '',
+    body: '',
+    // ensure the 'author' object is converted into a UserModel
+    author: new UserModel(),
+  }
+}
+</code></pre>
+
+<h2>Data manipulation</h2>
+
+<p>Often you&rsquo;ll need to manipulate a model&rsquo;s data to show correctly within a
+component.  You can define custom methods on your class to manipulate data
+so that you keep your components decoupled from data logic:</p>
+
+<pre><code class="language-js">class User extends Model {
+  static modelName = 'user';
+
+  static fields = {
+    id: undefined,
+    email: '',
+    avatar: '',
+  }
+
+  getAvatar() {
+    if (this.avatar === '') {
+      return 'https://placehold.it/500x500';
+    }
+    return this.avatar
+  }
+}
+</code></pre>
+
+<p>Now we can use <code>this.props.user.getAvatar()</code> to show a placeholder or their
+avatar.</p>
+
+<h2>Filtering data</h2>
+
+<p>Models can also define a filter function.  All data passed to a model during
+construction will be filtered via this function before being set:</p>
+
+<pre><code class="language-js">class User extends Model {
+  // this needs to be a static function so that it's set on the class
+  // as a prototypical method, not the instance.
+  static filter(data) {
+    // The data returned from this function will be used to set the model's
+    // fields.
+    return {
+      ...data,
+      fullName: `${data.firstName} ${data.lastName}`,
+    };
+  }
+}
+</code></pre>
+
+<p>Note that often using instance methods as explained above in the <code>data
+manipulation</code> section is often a better idea.</p>
+
+<h2>Gotchas</h2>
+
+<p>Models can&rsquo;t have a <code>size</code> attribute due to conflicting field names with
+ImmutableJS.  If you have a <code>size</code> attribute from your API you should rename
+this within your frontend model and use filtering to rename the field before
+data is set.</p>
+
+<p>We know this kinda sucks. Sorry.</p>
+
       </div>
     </div>
   </div>
