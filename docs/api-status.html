@@ -32,7 +32,7 @@
         <a href='/tectonic/api-manager.html'><li>Manager API</li></a>
         <a href='/tectonic/api-model.html'><li>Model API</li></a>
         <a href='/tectonic/api-source-definitions.html'><li>Source definition API</li></a>
-        <a href='/tectonic/api-status.html'><li>Status API*</li></a>
+        <a href='/tectonic/api-status.html'><li>Status API</li></a>
       </ol>
     </li>
     <li>
@@ -54,7 +54,35 @@
 
     <div class='content'>
       <div>
-        
+        <h1>Status API</h1>
+
+<p>Status classes are automatically injected for every query you make within the
+<code>@load</code> decorator.</p>
+
+<p>They&rsquo;re a basic class with only a few attributes, letting you know whether each
+query is pending, successful or failed.</p>
+
+<p>The basic definition is this:</p>
+
+<pre><code class="language-js">class Status {
+  const status = &lt;'PENDING' | 'SUCCESS' | 'ERROR'&gt;'
+
+  // code stores the HTTP status code for the request
+  const code;
+
+  // error represents the error as returned from the driver
+  const error;
+
+  isPending() =&gt; this.status === 'PENDING';
+  isSuccess() =&gt; this.status === 'SUCCESS';
+  isError() =&gt; this.status === 'ERROR';
+}
+</code></pre>
+
+<p>Normally you&rsquo;d use <code>this.props.status.myQuery.isPending()</code> to show a loading
+state, and <code>isError</code> to detect when things go wrong. Not so complex to deal
+with.</p>
+
       </div>
     </div>
   </div>
