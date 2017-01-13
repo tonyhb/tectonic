@@ -6,9 +6,10 @@ docbuilder:
 	golang:1.7.4-alpine \
 	go install docs
 
-docs:
-	rm -f docs/*.html
+docs: clean
 	docker run --rm -v $(shell pwd -P):/data alpine:3.4 /data/docs-builder/bin/docs
 
+clean:
+	rm -f docs/*.html
 
 .PHONY: docs

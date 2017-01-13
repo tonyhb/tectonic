@@ -1,5 +1,38 @@
 # Model API
 
+## Built in functionality
+
+### Instance-level methods
+
+These methods are called on concrete instances of a model:
+
+- `inst.values()`: Returns the model data as a plain JS object. This
+preserves any ImmutableJS values you may have set inside a model.
+- `inst.toJS()`: Deeply coverts the model data to plain JS objects. This
+does not preserve any ImmutableJS values you may have set.
+- `inst.unsetId()`: Unsets the `idField` of the model instance
+
+### Class-level methods
+
+These methods are called on the classes themselves, not on instances:
+
+- `Model.blank()`: returns a new instance of the model with default values
+specified in `fields`
+- `Model.fieldNames()`: returns all field names as an array
+- `Model.submodelFieldDNames()`: A class-level method which returns all field
+names of nested classes
+- `Model.item()`: returns a new `Provider` asserting
+that the API response returns a single model
+- `Model.list()`: Returns a new `Provider` asserting that the API response
+returns a list of models
+- `Model.getItem(params<Object>)`: returns a new `Query` requsting a single
+item to be loaded
+- `Model.getList(params<Object>)`: returns a new `Query` requsting a list of
+items to be loaded
+
+
+## Defining props
+
 Models are a core part of tectonic, and define all of the attributes for your
 resources.
 
@@ -45,7 +78,7 @@ class PostModel extends Model {
 ```
 
 
-## Data manipulation
+### Data manipulation
 
 Often you'll need to manipulate a model's data to show correctly within a
 component.  You can define custom methods on your class to manipulate data
@@ -74,7 +107,7 @@ Now we can use `this.props.user.getAvatar()` to show a placeholder or their
 avatar.
 
 
-## Filtering data
+### Filtering data
 
 Models can also define a filter function.  All data passed to a model during
 construction will be filtered via this function before being set:
@@ -97,7 +130,7 @@ class User extends Model {
 Note that often using instance methods as explained above in the `data
 manipulation` section is often a better idea.
 
-## Gotchas
+### Gotchas
 
 Models can't have a `size` attribute due to conflicting field names with
 ImmutableJS.  If you have a `size` attribute from your API you should rename

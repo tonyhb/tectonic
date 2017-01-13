@@ -5,7 +5,7 @@
   <!-- I understand that this could be made better, but I really wanna get the docs out. Plus HTTP2! :D -->
 <link href="https://fonts.googleapis.com/css?family=Droid+Sans|Droid+Serif" rel="stylesheet">
 <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/4.1.0/sanitize.min.css' />
-<link rel='stylesheet' href='/tectonic/styles.css' />
+<link rel='stylesheet' href='styles.css' />
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js"></script>
 
@@ -56,6 +56,42 @@
       <div>
         <h1>Model API</h1>
 
+<h2>Built in functionality</h2>
+
+<h3>Instance-level methods</h3>
+
+<p>These methods are called on concrete instances of a model:</p>
+
+<ul>
+<li><code>inst.values()</code>: Returns the model data as a plain JS object. This
+preserves any ImmutableJS values you may have set inside a model.</li>
+<li><code>inst.toJS()</code>: Deeply coverts the model data to plain JS objects. This
+does not preserve any ImmutableJS values you may have set.</li>
+<li><code>inst.unsetId()</code>: Unsets the <code>idField</code> of the model instance</li>
+</ul>
+
+<h3>Class-level methods</h3>
+
+<p>These methods are called on the classes themselves, not on instances:</p>
+
+<ul>
+<li><code>Model.blank()</code>: returns a new instance of the model with default values
+specified in <code>fields</code></li>
+<li><code>Model.fieldNames()</code>: returns all field names as an array</li>
+<li><code>Model.submodelFieldDNames()</code>: A class-level method which returns all field
+names of nested classes</li>
+<li><code>Model.item()</code>: returns a new <code>Provider</code> asserting
+that the API response returns a single model</li>
+<li><code>Model.list()</code>: Returns a new <code>Provider</code> asserting that the API response
+returns a list of models</li>
+<li><code>Model.getItem(params&lt;Object&gt;)</code>: returns a new <code>Query</code> requsting a single
+item to be loaded</li>
+<li><code>Model.getList(params&lt;Object&gt;)</code>: returns a new <code>Query</code> requsting a list of
+items to be loaded</li>
+</ul>
+
+<h2>Defining props</h2>
+
 <p>Models are a core part of tectonic, and define all of the attributes for your
 resources.</p>
 
@@ -98,7 +134,7 @@ class UserModel extends Model {
 }
 </code></pre>
 
-<h2>Data manipulation</h2>
+<h3>Data manipulation</h3>
 
 <p>Often you&rsquo;ll need to manipulate a model&rsquo;s data to show correctly within a
 component.  You can define custom methods on your class to manipulate data
@@ -125,7 +161,7 @@ so that you keep your components decoupled from data logic:</p>
 <p>Now we can use <code>this.props.user.getAvatar()</code> to show a placeholder or their
 avatar.</p>
 
-<h2>Filtering data</h2>
+<h3>Filtering data</h3>
 
 <p>Models can also define a filter function.  All data passed to a model during
 construction will be filtered via this function before being set:</p>
@@ -147,7 +183,7 @@ construction will be filtered via this function before being set:</p>
 <p>Note that often using instance methods as explained above in the <code>data
 manipulation</code> section is often a better idea.</p>
 
-<h2>Gotchas</h2>
+<h3>Gotchas</h3>
 
 <p>Models can&rsquo;t have a <code>size</code> attribute due to conflicting field names with
 ImmutableJS.  If you have a <code>size</code> attribute from your API you should rename
