@@ -15,11 +15,7 @@ describe('Defining source drivers', () => {
       resolver: () => ({}),
       store: createStore()
     });
-    assert.isFunction(m.test);
-  });
-
-  xit('delegates to Sources.processDefinitions', () => {
-    // This ensures we use validation baked into Sources
+    assert.isFunction(m.drivers.test);
   });
 
 });

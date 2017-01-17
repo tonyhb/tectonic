@@ -52,6 +52,7 @@ export default class Manager {
   store: Object
   cache: Object
   resolver: Object
+  drivers: Object
   sources: Sources
 
   constructor({ store, drivers, resolver }: ManagerOpts = {}) {
@@ -71,6 +72,7 @@ export default class Manager {
     this.resolver.store = store;
     // And add the cache to the resolver for querying and adding data
     this.resolver.cache = this.cache;
+    this.drivers = {};
 
     // Make each driver callable via its key bound to our current context. This
     // allows us to add definitions for each driver by calling
@@ -79,7 +81,7 @@ export default class Manager {
       const driverFunc = drivers[driver];
       // When calling the driver name run processDefinitions to add the
       // definitions to the Source class.
-      (this: Object)[driver] = defs =>
+      (this: Object).drivers[driver] = defs =>
         this.sources.processDefinitions(driverFunc, defs, this.resolver);
     });
   }

@@ -12,4 +12,8 @@ docs: clean
 clean:
 	rm -f docs/*.html
 
+test:
+	docker run --rm -ti -v $(shell pwd -P)/packages/tectonic:/workspace kkarczmarczyk/node-yarn:7.2-slim sh -c 'yarn install && yarn test'
+
+
 .PHONY: docs

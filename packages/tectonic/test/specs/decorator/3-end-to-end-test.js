@@ -25,7 +25,7 @@ describe('@load: e2e end-to-end test', () => {
 
     const manager = createNewManager();
     // Define sources for loading data.
-    manager.fromMock([
+    manager.drivers.fromMock([
       {
         id: 'userSource',
         meta: {
@@ -98,7 +98,7 @@ describe('@load: e2e end-to-end test', () => {
 
     const manager = createNewManager();
     // Define sources for loading data.
-    manager.fromMock([
+    manager.drivers.fromMock([
       {
         meta: {
           // The mock driver is set up to return whatever is in meta.returns
@@ -166,7 +166,7 @@ describe('@load: e2e end-to-end test', () => {
 
     const manager = createNewManager();
     // Define sources for loading data.
-    manager.fromMock([
+    manager.drivers.fromMock([
       {
         meta: {
           returns: (success) => {
