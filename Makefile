@@ -14,6 +14,7 @@ clean:
 
 test:
 	docker run --rm -ti -v $(shell pwd -P)/packages/tectonic:/workspace kkarczmarczyk/node-yarn:7.2-slim sh -c 'yarn install && yarn test'
+	docker run --rm -ti -v $(shell pwd -P)/packages/tectonic:/workspace tonyhb/flow:0.37.4 flow
 
 
-.PHONY: docs
+.PHONY: docs test
