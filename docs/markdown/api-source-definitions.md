@@ -31,6 +31,7 @@ const manager = new Manager({
 
 // Define your sources
 manager.drivers.fromSuperagent([
+  // Jump below this definition for concise examples.
   {
     // 'meta' is driver-specific implementation data. The below `meta` object
     // is for the superagent driver only.
@@ -151,6 +152,13 @@ manager.drivers.fromSuperagent([
     //
     // This may be omitted; the default is 'GET'.
     queryType: 'GET'
+  },
+  // bare minimum GET query
+  {
+    meta: {
+      url: '/api/v1/users',
+    },
+    returns: UserModel.list(),
   },
   // this API endpoint creates a new user
   {
