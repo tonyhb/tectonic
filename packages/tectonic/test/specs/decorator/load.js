@@ -25,7 +25,7 @@ describe('@load decorators .load prop', () => {
     };
 
     const manager = createNewManager();
-    manager.fromMock([
+    manager.drivers.fromMock([
       {
         id: 'userSource',
         meta: {

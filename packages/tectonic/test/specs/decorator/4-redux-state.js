@@ -21,7 +21,7 @@ describe('@load: query func using redux state', () => {
   it('should allow the query func inside @load to use state to create queries', (done) => {
     const manager = createNewManager();
     // Define sources for loading data.
-    manager.fromMock([
+    manager.drivers.fromMock([
       {
         id: 'userSource',
         meta: {

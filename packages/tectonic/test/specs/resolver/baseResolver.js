@@ -29,7 +29,7 @@ describe('BaseResolver', () => {
 
     const resolveAllManager = () => {
       const m = createNewManager();
-      m.fromMock([
+      m.drivers.fromMock([
         {
           params: 'id',
           returns: User.item(),
@@ -191,7 +191,7 @@ describe('BaseResolver', () => {
 
     it('doesnt use a CREATE query which returns an Item for a GET query', () => {
       const m = createNewManager();
-      m.fromMock([{
+      m.drivers.fromMock([{
         queryType: CREATE,
         returns: User.item(),
         params: ['id'],
@@ -210,7 +210,7 @@ describe('BaseResolver', () => {
 
     it('doesnt use GET for a CREATE query', () => {
       const m = createNewManager();
-      m.fromMock([{
+      m.drivers.fromMock([{
         queryType: GET,
         returns: User.item(),
         meta: {
@@ -235,7 +235,7 @@ describe('BaseResolver', () => {
 
     it('calls a CREATE query successfully', () => {
       const m = createNewManager();
-      m.fromMock([{
+      m.drivers.fromMock([{
         queryType: CREATE,
         returns: User.item(),
         meta: {
@@ -261,7 +261,7 @@ describe('BaseResolver', () => {
 
     it('calls an UPDATE query (http PUT/PATCH depending on driver) with params', () => {
       const m = createNewManager();
-      m.fromMock([
+      m.drivers.fromMock([
         // Add two definitions so we can ensure it uses the correct one.
         {
           id: 'fail',
@@ -307,7 +307,7 @@ describe('BaseResolver', () => {
 
   describe('callbacks', () => {
     const m = createNewManager();
-    m.fromMock([
+    m.drivers.fromMock([
       {
         returns: User.item(),
         params: 'id',
