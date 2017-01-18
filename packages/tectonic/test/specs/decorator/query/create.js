@@ -4,12 +4,12 @@ import { assert } from 'chai';
 import sinon from 'sinon';
 
 import React, { Component } from 'react';
-import load from '../../../src/decorator';
-import { CREATE } from '../../../src/consts';
+import load from '../../../../src/decorator';
+import { CREATE } from '../../../../src/consts';
 
-import { renderAndFind } from '../../utils';
-import { createNewManager } from '../../manager';
-import { User, Post } from '../../models';
+import { renderAndFind } from '../../../utils';
+import { createNewManager } from '../../../manager';
+import { User, Post } from '../../../models';
 
 // This spec tests creating a model from within a component.
 //
@@ -23,29 +23,16 @@ import { User, Post } from '../../models';
 // 2. Adds a custom callback to the query which will be called **with the result
 //    of the API call**.
 //    This lets you chain creates together using async.js
-//
-// Ideal API:
-//
-// ```
-//   @load()
-//   class Some extends Component {
-//     static propTypes = {
-//       createModel: func
-//     }
-//
-//     onSubmit(data) {
-//       this.props.createModel(new User(data), (err, result) => {
-//       });
-//     }
-//
-//     ...
-//   }
-describe('creating a resource from within a component', () => {
+describe('props.createModel', () => {
+
   class Basic extends Component {
     // This can be called from our test utils. By allowing a custom
     // model and user we can change this in each test.
     create(model, callback) {
-      this.props.createModel(model, callback);
+      this.props.createModel({
+        body: model.values(),
+        model, // model.constructor?
+      }, callback);
     }
     render = () => <p>Hi</p>;
   }
@@ -68,19 +55,11 @@ describe('creating a resource from within a component', () => {
     });
   });
 
-  describe('cache', () => {
-    it('should store models in the cache if return data is defined', () => {
-      // so that we can load models via ID without another query if necessary
-    });
-
-    it('shouldnt store data if the return value is undefined', () => {
-    });
-  });
-
   describe('callback', () => {
 
-    it('callback called with no err and a result after successfully creating', () => {
+    it('callback called with no err and a result after successfully creating', (done) => {
       const item = renderAndFind(<Wrapped />, Basic);
+
       let calledWith;
       // Add a callback which copies the callback args into calledWith
       item.create(
@@ -92,11 +71,13 @@ describe('creating a resource from within a component', () => {
 
       // Resolving happens after 5ms
       window.setTimeout(() => {
+        console.log(calledWith);
         assert.isArray(calledWith);
+        done();
       }, 10);
     });
 
-    it('callback called with err and no result after failure', () => {
+    it('callback called with err and no result after failure', (done) => {
       const item = renderAndFind(<Wrapped />, Basic);
       let calledWith;
       // There should NOT be a source defined for creating a Post model in our
@@ -109,11 +90,11 @@ describe('creating a resource from within a component', () => {
       );
 
       // Resolving happens after 5ms
-      // TODO: Spy on callback
       window.setTimeout(() => {
         assert.isArray(calledWith);
         const [err, result] = calledWith;
         assert.isDefined(err);
+        done();
       }, 10);
     });
   });

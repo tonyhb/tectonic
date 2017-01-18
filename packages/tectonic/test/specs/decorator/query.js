@@ -5,12 +5,6 @@ import decorator from '../../../src/decorator';
 import { User, Post } from '../../models';
 import { createNewManager } from '../../manager';
 
-describe('@load decorator _createQuery', () => {
-
-  xit('assigns modelId', () => {
-  });
-
-  xit('correctly assigns modelType', () => {
-  });
+describe('@load decorator query', () => {
 
 });

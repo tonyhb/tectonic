@@ -7,7 +7,7 @@
     "flow": "flow; test $? -eq 0 -o $? -eq 2",
     "lint": "$(npm bin)/eslint ./src",
     "prepublish": "$(npm bin)/babel -d transpiled src",
-    "test": "$(npm bin)/mocha --compilers js:babel-register --recursive --require ./test/_setup.js ./test/specs/**/*.js"
+    "test": "$(npm bin)/mocha --compilers js:babel-register --recursive --require ./test/_setup.js ./test/specs"
   },
   "repository": {
     "type": "git",
