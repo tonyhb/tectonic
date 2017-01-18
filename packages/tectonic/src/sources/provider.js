@@ -36,9 +36,12 @@ export default class Provider {
 
     if (fields === '*') {
       this.fields = fields;
-      return;
+    } else {
+      this.setFieldSubsets(fields, model);
     }
+  }
 
+  setFieldSubsets(fields: Array<string> | string, model: Class<Model>) {
     // If this only returns a single field we should wrap it in an array.
     if (typeof fields === 'string') {
       fields = [fields];

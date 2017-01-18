@@ -101,6 +101,47 @@ describe('resolver utils', () => {
       });
       assert.isFalse(utils.doesSourceSatisfyQueryParams(s, q));
     });
+
+    it('returns false when the source has defaults but the query is still missing required fields', () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(),
+        meta: {},
+        params: {
+          id: undefined,
+          foo: 'bar',
+        },
+        optionalParams: ['limit']
+      });
+
+      const q = new Query({
+        model: User,
+        fields: RETURNS_ALL_FIELDS,
+        returnType: RETURNS_ITEM,
+        params: { foo: 'baz' } // missing 'id' without a default
+      });
+      assert.isFalse(utils.doesSourceSatisfyQueryParams(s, q));
+    });
+
+    it('returns true when the source has defaults which the query is missing', () => {
+      const s = new SourceDefinition({
+        id: 1,
+        returns: User.item(),
+        meta: {},
+        params: {
+          id: undefined,
+          foo: 'bar',
+        },
+        optionalParams: ['limit']
+      });
+      const q = new Query({
+        model: User,
+        fields: RETURNS_ALL_FIELDS,
+        returnType: RETURNS_ITEM,
+        params: { id: 1 }
+      });
+      assert.isTrue(utils.doesSourceSatisfyQueryParams(s, q));
+    });
   });
 
   describe('doesSourceSatisfyAllQueryFields', () => {

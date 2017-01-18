@@ -266,7 +266,7 @@ export default class Cache {
 
   /**
    * getQueryData inspects the given state for the current model for the
-   * necessary data and returns it if so.
+   * necessary data and returns it if all requirements are met.
    *
    * @param Query  Query, which must have a filled .returnedIds
    * @param Map    Tectonic's reducer state (store.getState().tectonic)
@@ -288,6 +288,8 @@ export default class Cache {
 
     // No IDs were returned when we queried for this item
     if (returnedIds.size === 0) {
+      // ensure we return a consistent default; RETURNS_ITEM will always use
+      // a blank model but we need to return a list for RETURNS_LIST.
       const returns = (query.returnType === RETURNS_LIST) ? [] : undefined;
       return [returns, true];
     }

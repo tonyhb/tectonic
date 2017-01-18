@@ -1,7 +1,11 @@
 // @flow
 
 import Query from '../query';
-import SourceDefinition from '../sources/definition';
+import SourceDefinition, {
+  assignDefaultParams
+} from '../sources/definition';
+
+import type { ParamsType } from '../consts';
 
 // TODO:
 // - `doesSourceSatisfySomeQueryFields` for partial matching
@@ -24,7 +28,8 @@ export function hash(str: any): number {
  * If a query doesn't provide all required parameters for a source then the
  * source can't satisfy said query.
  *
- * NOTE: This only tests satisfiability of required params.
+ * NOTE: This only tests satisfiability of required params, and **mixes in**
+ *       default parameters if specified.
  *
  * TODO: Should we check that the source **also** allows for all params passed
  * into the query?
@@ -34,14 +39,22 @@ export function hash(str: any): number {
  * @return bool
  */
 export function doesSourceSatisfyQueryParams(source: SourceDefinition, query: Query) {
-  const queryKeys = Object.keys(query.params);
+  // Assign default parameters to a copy - keeping the original query unmodified
+  const queryParams = assignDefaultParams(source, query.params);
+  const queryKeys = queryParams;
+  const params = source.paramNames();
 
-  if (source.params.length === 0 && queryKeys.length === 0) {
+  if (params.length === 0 && queryKeys.length === 0) {
     return true;
   }
 
+  // short circuit without testing
+  if (queryParams.length < params.length) {
+    return false;
+  }
+
   // Iterate through all source keys to see if they're defined in the query.
-  return source.params.every(sp => query.params[sp] !== undefined);
+  return params.every(sp => queryParams[sp] !== undefined);
 }
 
 export function doesSourceSatisfyQueryModel(source: SourceDefinition, query: Query) {

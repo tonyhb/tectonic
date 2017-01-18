@@ -8,15 +8,18 @@ import {
 
 import type {
   QueryType,
+  ParamsType,
 } from '../consts';
+
 import type Model from '../model';
+import type Query from '../query';
 
 export type SourceDefinitionOpts = {
   id: string;
   returns: Provider | { [key: string]: Provider } | ?string;
   meta: Object;
-  params: ?Array<string>;
-  optionalParams: ?Array<string>;
+  params: ParamsType | ?Array<string> | string;
+  optionalParams: ?Array<string> | string;
   driverFunc: Function;
 
   // model may be explicitly set for non-GET queries; otherwise, for GET queries
@@ -39,15 +42,17 @@ export default class SourceDefinition {
   queryType: QueryType
 
   /**
-   * Array of **required** parameters for the source.
+   * Object of **required** parameters for the source (where values are defaults).
    * These can be query parameters, postdata or parameters for URL replacement.
    */
-  params: Array<string>
+  params: ParamsType
+  _paramNames: Array<string>
 
   /**
-   * Array of optional parameters for the source
+   * Object of optional parameters for the source (where values are defaults)
    */
-  optionalParams: Array<string>
+  optionalParams: ParamsType
+  _optionalParamNames: Array<string>
 
   /**
    * Create a new source definition to be used as a source for an API call.
@@ -91,22 +96,58 @@ export default class SourceDefinition {
     this.id = id;
     this.providers = new ProviderGroup(returns);
     this.meta = meta;
-    this.params = params || [];
-    this.optionalParams = optionalParams || [];
+    this.params = this.constructor.normalizeParams(params);
+    this.optionalParams = this.constructor.normalizeParams(optionalParams);
     this.driverFunc = driverFunc;
     // Which CRUD action this refers to
     this.queryType = queryType;
     this.setModelProperty(model);
 
-    if (typeof this.params === 'string') {
-      this.params = [this.params];
-    }
-    if (typeof this.optionalParams === 'string') {
-      this.optionalParams = [this.optionalParams];
-    }
-
     // ensure that after setting properties the definition is valid
     this.validate();
+  }
+
+  static normalizeParams(input: ParamsType | ?Array<string> | string): ParamsType {
+    if (input === undefined || input === null) {
+      return {};
+    }
+
+    if (Array.isArray(input)) {
+      const result: ParamsType = {};
+      input.forEach((val) => { result[val] = undefined; });
+      return result;
+    }
+
+    if (typeof input === 'string') {
+      return { [input]: undefined };
+    }
+
+    return input;
+  }
+
+  // paramNames returns the keys of `this.params`, ie. required parameter
+  // names. Param names are often checked during resolution, therefore this
+  // memoization should shave off some CPU cycles in lieu of some memory.
+  paramNames(): Array<string> {
+    if (this._paramNames !== undefined) {
+      return this._paramNames;
+    }
+    this._paramNames = Object.keys(this.params);
+    return this._paramNames;
+  }
+
+  optionalParamNames(): Array<string> {
+    if (this._optionalParamNames !== undefined) {
+      return this._optionalParamNames;
+    }
+    this._optionalParamNames = Object.keys(this.optionalParams);
+    return this._optionalParamNames;
+  }
+
+  // addDefaultParams adds missing params and optionalParams to a query
+  // given the defaults provided in the source definition.
+  addDefaultParams(q: Query) {
+    q.params = assignDefaultParams(this, q.params);
   }
 
   /**
@@ -170,3 +211,23 @@ export default class SourceDefinition {
     }
   }
 }
+
+// assignDefaultParams returns a copy of queryParams with defaults assigned
+// from the given source definition's params and optionalParams.
+export function assignDefaultParams(source: SourceDefinition, queryParams: ParamsType): ParamsType {
+  const copy = { ...queryParams };
+
+  source.paramNames().forEach((p) => {
+    if (source.params[p] !== undefined && copy[p] === undefined) {
+      copy[p] = source.params[p];
+    }
+  });
+  source.optionalParamNames().forEach((p) => {
+    if (source.optionalParams[p] !== undefined && copy[p] === undefined) {
+      copy[p] = source.optionalParams[p];
+    }
+  });
+
+  return { ...copy };
+}
+
