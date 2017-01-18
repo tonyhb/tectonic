@@ -10,6 +10,10 @@ new data as necessary without reloading any data.
 
 ## Using `this.props.query` to modify records
 
+```javascript
+this.props.query(args<Object>, callback<Function>)
+```
+
 To resolve a create/update/delete query first decorate your component with the
 `@load` decorator. This will pass the `query` function down as a prop, as
 explained in [the `@load` decorator API

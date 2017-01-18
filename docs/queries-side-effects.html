@@ -65,6 +65,9 @@ new data as necessary without reloading any data.</p>
 
 <h2>Using <code>this.props.query</code> to modify records</h2>
 
+<pre><code class="language-javascript">this.props.query(args&lt;Object&gt;, callback&lt;Function&gt;)
+</code></pre>
+
 <p>To resolve a create/update/delete query first decorate your component with the
 <code>@load</code> decorator. This will pass the <code>query</code> function down as a prop, as
 explained in <a href="/tectonic/api-decorator.html">the <code>@load</code> decorator API
