@@ -344,7 +344,6 @@ export default class BaseResolver {
 
     // Call the callback if it exists with an error
     if (typeof query.callback === 'function') {
-      // TODO improve error
       query.callback('There is no source definition which resolves the query', null);
     }
 

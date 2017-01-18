@@ -14,7 +14,8 @@ import {
   UPDATE,
   DELETE,
 } from '../consts';
-import Model from '../model';
+
+import type { QueryOpts } from '../query/index';
 
 const debug = d('tectonic:decorator');
 
@@ -152,118 +153,45 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
         manager.resolve();
       }
 
-      /**
-       * createModel is a function passed to the wrapped component. This
-       * function takes an instance of a model and an optional callback, creates
-       * a CREATE query and adds it to the resolver.
-       *
-       * Examples:
-       *
-       *   No API params or callback:
-       *
-       *   onSubmit(data) {
-       *     this.props.createModel(new User(data));
-       *   }
-       *
-       *   No API params, with callback:
-       *
-       *   onSubmit(data) {
-       *     this.props.createModel(new User(data), (err, result) => {});
-       *   }
-       *
-       *   API params, no callback:
-       *
-       *   onSubmit(data) {
-       *     this.props.createModel({
-       *       model: new Post(data)
-       *       params: { userID: 1 }
-       *     });
-       *   }
-       *
-       *   API params and callback:
-       *
-       *   onSubmit(data) {
-       *     this.props.createModel(
-       *       {
-       *         model: new Post(data)
-       *         params: { userID: 1 }
-       *       },
-       *       (err, result) => {}
-       *     );
-       *   }
-       *
-       * @param Object containing model instance with data to save and any api
-       * params
-       * @param function async-style callback with params (err, response)
-       */
       createModel = (opts, callback) => {
-        this._createQuery(CREATE, opts, callback);
+        this.query({ ...opts, queryType: CREATE }, callback);
       }
 
       updateModel = (opts, callback) => {
-        this._createQuery(UPDATE, opts, callback);
+        this.query({ ...opts, queryType: UPDATE }, callback);
       }
 
-      // deleteModel creates a DELETE query for a model instance.
-      // It can be used in the following ways:
-      //
-      // Note that opts.modelId may be specified to
       deleteModel = (opts, callback) => {
-        this._createQuery(DELETE, opts, callback);
-        /*
-         * TODO api cleanup later, see API.md
-        if (typeof opts === 'function' && callback === undefined) {
-          // deleteModel was called like so:
-          // this.props.deleteModel(this.props.user, callback)
-          callback = opts;
-          opts = {};
-        }
-
-        if (typeof model.values === 'function') {
-          opts
-        }
-        */
+        this.query({ ...opts, queryType: DELETE }, callback);
       }
 
       getModel = (opts, callback) => {
-        this._createQuery(GET, opts, callback);
+        this.query({ ...opts, queryType: GET }, callback);
       }
 
-      _createQuery(type, input: Model | Object = {}, callback) {
-        let opts: Object = {};
+      query = (opts: QueryOpts, callback) => {
+        const { queryType, model } = opts;
 
-        if (input instanceof Model) {
-          opts = { model: input };
-        } else if (typeof input === 'object') {
-          opts = input;
+        if (model === undefined) {
+          throw new Error('The \'model\' key must be defined when making a query');
         }
 
-        // If we pass a model class as opts.model,
-        if (typeof opts.model.values !== 'function') {
-          // Quick hack to make things work - below expects an instance of the
-          // model
-          const Constr = opts.model;
-          opts.model = new Constr();
+        if ([GET, CREATE, UPDATE, DELETE].indexOf(queryType) === -1) {
+          throw new Error(`queryType must be one of ${CREATE}, ${UPDATE}, ${DELETE}`);
         }
 
-        if (opts.modelId === undefined) {
-          // TODO can we get this from params if not defined here?
-          opts.modelId = opts.model[opts.model.constructor.idField]; // TODO: test
+        if ([UPDATE, DELETE].indexOf(queryType) >= 0 && opts.modelId === undefined) {
+          throw new Error(`The 'modelId' key must be set for ${UPDATE} or ${DELETE} queries`);
         }
 
-        const { model, params, modelId } = opts;
+        if (queryType === CREATE && opts.body === undefined) {
+          throw new Error(`The 'body' key must be set for ${CREATE} queries`);
+        }
 
         // Create a new query for the given type (CREATE, UPDATE etc)
         // Resolver utils only check that the returnType matches when querying
         // for a list; this needs no returnType field.
-        const query = new Query({
-          modelId,
-          params,
-          callback,
-          model: model.constructor,
-          queryType: type,
-          body: model.values && model.values(),
-        });
+        const query = new Query({ ...opts, callback });
 
         const {
           context: { manager },
@@ -281,8 +209,6 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
        * this.props.load({
        *   propName: User.getItem({ id: 1 })
        * });
-       *
-       * This will re-inject properties from the
        */
       load = (queries) => {
         if (typeof queries !== 'object') {
@@ -319,6 +245,7 @@ this.props.load({
           createModel: this.createModel,
           updateModel: this.updateModel,
           deleteModel: this.deleteModel,
+          query: this.query,
           load: this.load,
         };
 
