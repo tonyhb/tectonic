@@ -2,6 +2,8 @@
 
 import { assert } from 'chai';
 import SourceDefinition from '../../../src/sources/definition.js';
+import Query from '../../../src/query';
+import Model from '../../../src/model';
 import { User, Post } from '../../models';
 import { GET, UPDATE, CREATE, DELETE, RETURNS_NONE } from '../../../src/consts';
 
@@ -22,6 +24,59 @@ describe('SourceDefinition', () => {
         queryType: DELETE
       });
       assert.equal(sd.providers.returnsNone, true);
+    });
+  });
+
+  describe('normalizeParams', () => {
+    it('normalizes an array of params to an object of undefined default values', () => {
+      const input = ['a', 'b'];
+      const expected = {a: undefined, b: undefined};
+      assert.deepEqual(SourceDefinition.normalizeParams(input), expected);
+    });
+
+    it('converts a string', () => {
+      const input = 'a';
+      const expected = {a: undefined};
+      assert.deepEqual(SourceDefinition.normalizeParams(input), expected);
+    });
+  });
+
+  describe('addDefaultParams', () => {
+    it('adds required params to a query', () => {
+      // minimum required constructor opts
+      const params = {
+        foo: 'ruffleburg',
+      };
+
+      const q = new Query({ model: User, queryType: 'GET' });
+      const sd = new SourceDefinition({
+        meta: {},
+        returns: User.item(),
+        params,
+      });
+
+      assert.deepEqual(q.params, {});
+      sd.addDefaultParams(q);
+      console.log(params, "QUERY NEXT", q.params);
+      assert.deepEqual(q.params, params);
+    });
+
+    it('adds optional params to a query', () => {
+      // minimum required constructor opts
+      const params = {
+        foo: 'ruffleburg',
+      };
+
+      const q = new Query({ model: User, queryType: 'GET' });
+      const sd = new SourceDefinition({
+        meta: {},
+        returns: User.item(),
+        optionalParams: params,
+      });
+
+      assert.deepEqual(q.params, {});
+      sd.addDefaultParams(q);
+      assert.deepEqual(q.params, params);
     });
   });
 
@@ -85,22 +140,22 @@ describe('SourceDefinition', () => {
   });
 
   describe('param normalization', () => {
-    it('turns a single param into an array', () => {
+    it('turns params into an object', () => {
       const def = new SourceDefinition({
-        params: 'id',
+        params: ['id'],
         returns: User.item(),
         meta: {}
       });
-      assert.deepEqual(def.params, ['id']);
+      assert.deepEqual(def.params, {'id': undefined});
     });
 
-    it('turns a single optionalParam into an array', () => {
+    it('turns optionalParams into an object', () => {
       const def = new SourceDefinition({
-        optionalParams: 'id',
+        optionalParams: ['id'],
         returns: User.item(),
         meta: {}
       });
-      assert.deepEqual(def.optionalParams, ['id']);
+      assert.deepEqual(def.optionalParams, {'id': undefined});
     });
   });
 

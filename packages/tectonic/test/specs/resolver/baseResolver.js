@@ -53,6 +53,22 @@ describe('BaseResolver', () => {
           params: 'userId',
           meta: {},
           returns: Post.list()
+        },
+        // Set up an endpoint that has default optional parameters
+        {
+          params: ['withDefault'],
+          optionalParams: {
+            'foo': 'bar',
+          },
+          returns: User.item(),
+          meta: {
+            returns: (success) => {
+              success(
+                { id: 1, name: 'foo', email: 'withdefault@foo.com' },
+                { headers: { 'cache-control': 'max-age=3600' } }
+              );
+            },
+          }
         }
       ]);
       return m;
@@ -129,6 +145,7 @@ describe('BaseResolver', () => {
 
           const expirySpy = sinon.spy(m.resolver.cache, 'hasQueryExpired');
           const queryDataSpy = sinon.spy(m.resolver.cache, 'getQueryData');
+
           m.addQuery(q);
           m.resolve();
           assert.isTrue(expirySpy.called);
@@ -136,6 +153,68 @@ describe('BaseResolver', () => {
 
           done();
         }, 75);
+      });
+
+      it('uses cache with default params foodd', () => {
+        const m = resolveAllManager();
+        // create a query which will be supplemented
+        const query = User.getItem({ withDefault: true });
+        const copy = User.getItem({ withDefault: true });
+        m.addQuery(query);
+
+        // The queries should start out with the same toString hash as
+        // they have the same params right now - defaults haven't been added.
+        assert.equal(query.toString(), copy.toString());
+
+        // Set up a spy to ensure that the query status that's saved uses the
+        // hash with default parameters.
+        const queryStatusSpy = sinon.spy(m.store, 'dispatch');
+        // And set up a spy to ensure that the query passed to cache.storeQuery
+        // has all default parameters
+        const storeQuerySpy = sinon.spy(m.resolver.cache, 'storeQuery');
+        m.resolve();
+
+        // Note that after resolving the query should have changed - adding
+        // default parameters modifies by reference so that the query within
+        // the decorator is also updated.
+        assert.isTrue(query.toString() !== copy.toString());
+        assert.deepEqual(query.params, { withDefault: true, foo: 'bar' });
+        assert.isTrue(query.toString().indexOf('"foo":"bar"') > 0);
+
+        // Ensure that the query status stored via the reducer was the query
+        // with defaults.
+        assert.isTrue(queryStatusSpy.called);
+        assert.equal(Object.keys(queryStatusSpy.firstCall.args[0].payload).length, 1);
+        assert.equal(Object.keys(queryStatusSpy.firstCall.args[0].payload)[0], query.toString());
+
+        // Ensure that the data store query call uses the updated query.
+        assert.isTrue(storeQuerySpy.called);
+        assert.equal(storeQuerySpy.firstCall.args[0], query);
+
+        // Ensure that our reducer state is correect.
+        const state = m.resolver.store.getState().tectonic;
+        const ids = state.getIn(['queriesToIds', query.toString()], new Set());
+        const expiry = state.getIn(['queriesToExpiry', query.toString()]);
+        assert.equal(ids.size, 1);
+        assert.isTrue(ids.has('1'));
+        assert.isDefined(expiry);
+
+        // And that the original query isn't saved
+        assert.isFalse(state.getIn(['queriesToIds', copy.toString()], new Set()).has('1'));
+        assert.isUndefined(state.getIn(['queriesToExpiry', copy.toString()]));
+
+        // Then ensure that requerying for this uses the cached data.
+        m.addQuery(User.getItem({ withDefault: true }));
+        const skipFromCacheSpy = sinon.spy(m.resolver, 'skipFromCache');
+        m.resolve();
+
+        // The skip call should be called twice: one for the orignial query
+        // without default params and once with.
+        assert.isTrue(skipFromCacheSpy.calledTwice);
+        assert.equal(skipFromCacheSpy.firstCall.returnValue, false);
+        // the second time it should return true to use the cached version
+        assert.equal(skipFromCacheSpy.secondCall.returnValue, true);
+
       });
 
     });

@@ -31,7 +31,7 @@ const manager = new Manager({
 
 // Define your sources
 manager.drivers.fromSuperagent([
-  // Jump below this definition for concise examples.
+  // Jump below this first definition for concise examples.
   {
     // 'meta' is driver-specific implementation data. The below `meta` object
     // is for the superagent driver only.
@@ -61,8 +61,6 @@ manager.drivers.fromSuperagent([
     // 'params' specifies **required parameters** for this source.  If
     // undefined this source has no required parameters.
     //
-    // This **must** always be an array of strings.
-    //
     // When a source definition has required params **only queries with these
     // params will be considered**.
     //
@@ -80,10 +78,22 @@ manager.drivers.fromSuperagent([
     //  })
     //
     // For more information on creating queries see API-DECORATOR.md
+    //
+    // If defined this can be:
+    //
+    // - An array of strings
+    // - An object where keys represent names and values represent defaults
+    //
+    // See below for examples.
     params: ['id'],
 
     // 'optionalParams' specifies optional params for a source.  These do not
     // need to be specified in a query to use this source.
+    //
+    // If defined this can be:
+    //
+    // - An array of strings
+    // - An object where keys represent names and values represent defaults
     optionalParams: ['foo'],
 
     // 'returns' specifies what data this source definition returns. Some API
@@ -153,6 +163,9 @@ manager.drivers.fromSuperagent([
     // This may be omitted; the default is 'GET'.
     queryType: 'GET'
   },
+
+  // Concise examples
+
   // bare minimum GET query
   {
     meta: {
@@ -160,6 +173,18 @@ manager.drivers.fromSuperagent([
     },
     returns: UserModel.list(),
   },
+
+  // default values in params
+  {
+    meta: {
+      url: '/api/v1/users/:id/:operation',
+    },
+    params: {
+      id: undefined, // no default ID; must be supplied.
+      operation: 'posts', // defaults to 'posts' but overridden if supplied
+    },
+  }
+
   // this API endpoint creates a new user
   {
     // 'meta' holds driver-specific data
@@ -170,6 +195,7 @@ manager.drivers.fromSuperagent([
     queryType: 'CREATE',
     returns: UserModel.item(),
   },
+
   // this API endpoint deletes a user
   {
     // 'meta' holds driver-specific data

@@ -53,16 +53,31 @@ export default class BaseResolver {
   ];
 
   /**
-   * List of queries to resolve
+   * List of queries to resolve. These queries have not yet been resolved
+   * therefore cannot have the default values added (as there's no source
+   * definition to fill in defaults).
+   *
+   * Therefore, these hashes are for initial component deuplication only
+   * and should not be relied on for later use.
    */
   queries: { [key: QueryHash]: Query } = {}
 
+  /**
+   * queriesInFlight is used to store all currently pending queries by hash
+   * with default parameters added.
+   *
+   * We can then check this object to see if a duplicate query is currently
+   * pending; if so we can add the duplicate to the pending query's dupe lists
+   * so that components are automaticaly deduplicated.
+   */
   queriesInFlight: { [key: QueryHash]: Query } = {}
 
   /**
    * statusMap holds a list of query hashes to their statuses during resolution.
    * This allows us to manipulate the status of queries in resolveAll,
    * resolveItem and unresolvable before dispatching.
+   *
+   * Note that these hashes must be queries with all default values added.
    *
    */
   statusMap: { [key: QueryHash]: StatusOpts } = {}
@@ -181,69 +196,54 @@ export default class BaseResolver {
         return;
       }
 
-      // Only check query data if the query has data that is NOT stale; ie we
-      // have cached data
-      if (!this.cache.hasQueryExpired(q, state)) {
-        // Check if the query is in the cache. getQueryData returns a tuple; if
-        // the second parameter of the tuple is true we already have data for this
-        // query and can skip it. However, if this returns FALSE we MUST
-        // process the query again unless it's in-flight.
-        const ok = this.cache.getQueryData(q, state)[1];
-
-        // We have data for this query; this query is resolved and is successful
-        if (ok) {
-          debug('query has cached data; success', q.toString(), q);
-          this.statusMap[hash] = {
-            status: 'SUCCESS',
-          };
-          return;
-        }
-      } else {
-        debug('query has stale data', q.toString(), q);
-      }
-
-      // check if the query status was previously set to pending
-      const status = this.cache.getQueryStatus(q, state);
-      if (status.isPending()) {
-        debug('query already pending and in flight; skipping', q.toString(), q);
-        // update the query's internal status to pending, but no need to update
-        // the query status as it's already pending
-        q.updateStatus('PENDING');
-        // If we're here and the query is PENDING this must mean that the
-        // internal status of the query didn't get set. Perhaps this was added
-        // by a loaded component after the previous in-flight query was
-        // resolved?
-        // In any case, to ensure that the original query which caused the
-        // request cascades down into this one we need to mark this query as
-        // a duplicate.
-        // Otherwise, this query's internal status will still be set to PENDING
-        // (as the parent query doesn't update it) which is inconsistent,
-        // causing data not to be passed down in the manager.
-        const parent = this.queriesInFlight[q.toString()];
-        if (parent === undefined) {
-          warn('There is no parent definition found for in-flight query: ', q.toString());
-        } else {
-          debug('query previously resolved and in-flight; marking dupe', q.toString(), q);
-          parent.duplicates.push(q);
-        }
+      let status = this.cache.getQueryStatus(q, state);
+      if (this.skipFromCache(q, hash, status, state)) {
         return;
       }
 
       // Attempt to resolve a single query from the map of source definitions.
       const sd = this.resolveItem(q, sourceMap, status);
-      if (sd !== undefined && sd !== null) {
-        // Add this query to the reducer's global queryInFlight list for
-        // future dupe linking during the PENDING stage
-        this.queriesInFlight[q.toString()] = q;
-        // Push this to the list which will be processed via drivers
-        resolvedQueries.push(q);
-        q.sourceDefinition = sd;
-        q.updateStatus('PENDING');
-        this.statusMap[hash] = {
-          status: 'PENDING',
-        };
-        debug('resolved query', q.toString(), q);
+      if (sd === undefined || sd === null) {
+        // no source definition found for this query so it's unresolvable.
+        return;
       }
+
+      // Supplement the query with new all of the default parameters for the
+      // source definiton's params and optionalParmas. Use this in place of our
+      // query if it's different.
+      //
+      // This ensures that we're sending and caching the correct query. Note that
+      // we'll need to retest cached data with the new supplemented query if it's
+      // different as the query's toString() will produce a new string - and
+      // that's used as the cache key.
+      sd.addDefaultParams(q);
+      const newHash = q.toString();
+
+      if (hash !== newHash) {
+        // Recheck status and cache information for the new query
+        status = this.cache.getQueryStatus(q, state);
+        if (this.skipFromCache(q, newHash, status, state)) {
+          debug('query with defaults is pending or cached; skipping', q.toString(), q);
+          return;
+        }
+      }
+
+      // Add this query to the reducer's global queryInFlight list for
+      // future dupe linking during the PENDING stage
+      //
+      // Note that we can't use "hash" here - the query's toString value
+      // (hash) may have changed due to adding default parameters.
+      this.queriesInFlight[q.toString()] = q;
+
+      // Push this to the list which will be processed via drivers
+      resolvedQueries.push(q);
+      q.sourceDefinition = sd;
+      q.updateStatus('PENDING');
+      this.statusMap[q.toString()] = {
+        status: 'PENDING',
+      };
+
+      debug('resolved query', q.toString(), q);
     });
 
     if (Object.keys(this.statusMap).length > 0) {
@@ -264,6 +264,61 @@ export default class BaseResolver {
         sd.driverFunc(sd, query, success, fail);
       }
     });
+  }
+
+  // skipFromCache is used during resolution to determine whether we can
+  // short-circuit and stop resolving a given query if:
+  //   - the query has valid, unexpired data in the cache
+  //   - a duplicate query is pending
+  //
+  // This returns a boolean indicating whether we can short circuit
+  skipFromCache(query: Query, hash: QueryHash, status: Status, state: Map<*, *>): boolean {
+    if (!this.cache.hasQueryExpired(query, state)) {
+      // Check if the query is in the cache. getQueryData returns a tuple; if
+      // the second parameter of the tuple is true we already have data for this
+      // query and can skip it. However, if this returns FALSE we MUST
+      // process the query again unless it's in-flight.
+      const ok = this.cache.getQueryData(query, state)[1];
+
+      // We have data for this query; this query is resolved and is successful
+      if (ok) {
+        debug('query has cached data; success', query.toString(), query);
+        this.statusMap[hash] = { status: 'SUCCESS' };
+        return true;
+      }
+    }
+
+    // check if the query status was previously set to pending
+    // XXX (tonyhb): there may be a teeny chance of a hidden race condition
+    // using the cache here vs this.queriesInFlight. Plz check. Note that
+    // this has _not_ been encountered in the wild; this is speculation.
+    if (status.isPending()) {
+      debug('query already pending and in flight; skipping', query.toString(), query);
+      // update the query's internal status to pending, but no need to update
+      // the query status as it's already pending
+      query.updateStatus('PENDING');
+
+      // If we're here and the query is PENDING this must mean that the
+      // internal status of the query didn't get set. Perhaps this was added
+      // by a loaded component after the previous in-flight query was
+      // resolved?
+      // In any case, to ensure that the original query which caused the
+      // request cascades down into this one we need to mark this query as
+      // a duplicate.
+      // Otherwise, this query's internal status will still be set to PENDING
+      // (as the parent query doesn't update it) which is inconsistent,
+      // causing data not to be passed down in the manager.
+      const parent = this.queriesInFlight[query.toString()];
+      if (parent === undefined) {
+        warn('There is no parent definition found for in-flight query: ', query.toString());
+      } else {
+        debug('query previously resolved and in-flight; marking dupe', query.toString(), query);
+        parent.duplicates.push(query);
+      }
+      return true;
+    }
+
+    return false;
   }
 
   /**

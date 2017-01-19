@@ -96,6 +96,7 @@ export default class Query {
   queryType: QueryType
   returnType: ?ReturnType
   body: any
+  // params contains both required and optional params
   params: ParamsType = {}
   // TODO: ReturnsNoFields, for deletes. This shouldn't be "undefined"
   fields: Array<string> | ReturnsAllFields
