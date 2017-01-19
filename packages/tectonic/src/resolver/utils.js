@@ -2,10 +2,8 @@
 
 import Query from '../query';
 import SourceDefinition, {
-  assignDefaultParams
+  assignDefaultParams,
 } from '../sources/definition';
-
-import type { ParamsType } from '../consts';
 
 // TODO:
 // - `doesSourceSatisfySomeQueryFields` for partial matching

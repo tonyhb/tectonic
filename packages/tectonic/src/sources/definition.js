@@ -147,6 +147,7 @@ export default class SourceDefinition {
   // addDefaultParams adds missing params and optionalParams to a query
   // given the defaults provided in the source definition.
   addDefaultParams(q: Query) {
+    // eslint-disable-next-line
     q.params = assignDefaultParams(this, q.params);
   }
 
