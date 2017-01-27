@@ -49,6 +49,8 @@ export type ManagerOpts = {
  */
 export default class Manager {
 
+  version: '1.3.1'
+
   store: Object
   cache: Object
   resolver: Object
