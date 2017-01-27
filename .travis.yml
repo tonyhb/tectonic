@@ -1,0 +1,11 @@
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker pull tonyhb/flow:0.37.4
+  - docker pull kkarczmarczyk/node-yarn:7.2-slim
+
+script:
+  - make ci
