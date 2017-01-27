@@ -16,6 +16,8 @@ import {
 } from '../consts';
 import Model from '../model';
 
+import type { QueryOpts } from '../query/index';
+
 const debug = d('tectonic:decorator');
 
 /**
