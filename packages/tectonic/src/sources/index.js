@@ -3,6 +3,9 @@
 import SourceDefinition from './definition';
 
 /**
+ * Sources is a parent class that holds all source definiitons in a map keyed
+ * by definition ID.
+ *
  * {
  *   meta: {},
  *   fields: [],

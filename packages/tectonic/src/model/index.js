@@ -161,10 +161,16 @@ export default class Model {
   }
 
   static item(fields = RETURNS_ALL_FIELDS): Provider {
+    if (this.modelName === undefined) {
+      throw new Error('models must have a static modelName attribute defined');
+    }
     return new Provider(this, fields, RETURNS_ITEM);
   }
 
   static list(fields = RETURNS_ALL_FIELDS): Provider {
+    if (this.modelName === undefined) {
+      throw new Error('models must have a static modelName attribute defined');
+    }
     return new Provider(this, fields, RETURNS_LIST);
   }
 
