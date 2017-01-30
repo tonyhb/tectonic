@@ -4,6 +4,7 @@ import { assert } from 'chai';
 import Model from '../../../src/model';
 import { User, Post } from '../../models';
 import React, { Component } from 'react';
+import Provider from '../../../src/sources/provider';
 import {
   GET,
   RETURNS_ITEM,
@@ -99,6 +100,35 @@ describe('Model', () => {
    * of that model) API endpoints return
    */ 
   describe('returns methods', () => {
+    describe('getItem', () => {
+      it('throws an error without a modelName attribute', () => {
+        class Foo extends Model{}
+        assert.throws(
+          () => Foo.item(),
+          'models must have a static modelName attribute defined',
+        );
+      });
+
+      it('returns a provider with type RETURNS_ITEM', () => {
+        const expected = new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM);
+        assert.deepEqual(expected, User.item());
+      });
+    });
+
+    describe('getList', () => {
+      it('throws an error without a modelName attribute', () => {
+        class Foo extends Model{}
+        assert.throws(
+          () => Foo.list(),
+          'models must have a static modelName attribute defined',
+        );
+      });
+
+      it('returns a provider with type RETURNS_LIST', () => {
+        const expected = new Provider(User, RETURNS_ALL_FIELDS, RETURNS_LIST);
+        assert.deepEqual(expected, User.list());
+      });
+    });
   });
 
   it('has an instanceOf class prop', () => {
