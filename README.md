@@ -250,8 +250,6 @@ class YourForm extends Component {
 
 💥💥💥! This is automatically gonna populate the cache, too.
 
-```
-
 <h3 align='center'>Can I see documentation?</h3>
 
 <a href="https://tonyhb.github.io/tectonic/">Sure thing, partner. Head here.</a>
