@@ -4,8 +4,9 @@ import { assert } from 'chai';
 import React, { Component } from 'react';
 import load from '../../../src/decorator';
 import TestUtils from 'react-addons-test-utils';
-
-import { renderAndFind } from '../../utils';
+import {
+  renderAndFind,
+} from '../../utils';
 
 describe('@load: basic component rendering', () => {
 
@@ -42,6 +43,16 @@ describe('@load: basic component rendering', () => {
     assert.throws(() => {
       const item = renderAndFind(<WrappedChild />, Child);
     }, '@load decorator function must return an object');
+  });
+
+  it('throws an error with no context.manager defined', () => {
+    class Child extends Component {
+      render = () => <p>Child</p>;
+    }
+    const WrappedChild = load()(Child);
+    assert.throws(
+      () => TestUtils.renderIntoDocument(<WrappedChild />),
+    );
   });
 
 });
