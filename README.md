@@ -2,7 +2,7 @@
 
 -----
 
-<p align='center'>Declarative data loading for REST APIs</p>
+<p align='center'>Declarative data loading for REST APIs: https://tonyhb.github.io/tectonic/</p>
 
 -----
 
@@ -145,7 +145,7 @@ const manager = new Manager({
 // Step 2: Define some API endpoints as sources.
 // Note that each driver becomes a function on `manager` - this
 // is how we know which driver to use when requesting data.
-manager.fromSuperagent([
+manager.drivers.fromSuperagent([
   // Each driver takes an array of API endpoints
   {
     // LMK what the endpoint returns. In this case it's a single
@@ -218,41 +218,30 @@ export default App;
 
 Hell yeah baby!
 
-The `@load` decorator also adds a few functions to your components:
-- `createModel` (to create models)
-- `updateModel` (to update models)
-- `deleteModel` (i won't go on)
-- `getModel`
-
-They all have very similar APIs:
+The `@load` decorator also adds a query function to your components:
 
 ```
 @load() // just gimme these functions please!
 class YourForm extends Component {
   static propTypes = {
-    createModel: PropTypes.func,
+    query: PropTypes.func,
   }
 
   // imagine onSubmit is called with an object containing model
   // data...
   onSubmit(data) {
-    const user = new User(data);
-
     // Each function takes two arguments: an object of options and a
-    // second callback (if you actually want. I prefer callbacks to
-    // promises.
-    const status = this.props.createModel({
-      model: user,
-    }, ::this.afterSubmit);
-    
-    // But guess what! You get a status for the query too. And you
-    // can use that status like a promise. Fancy, huh?
-    status.then(() => {}, () => {});
+    // second callback for tracking the status of the request 
+    this.props.query({
+      model: User,
+      body: data,
+      queryType: 'CREATE', // tells us to use a source definition to CREATE a model
+    }, this.afterSubmit);
   }
   
-  afterSubmit(err, result) {
+  afterSubmit = (err, result) => {
     if (err !== null) {
-      // poo
+      // poo 💩
       return;
     }
   }
@@ -261,24 +250,8 @@ class YourForm extends Component {
 
 💥💥💥! This is automatically gonna populate the cache, too.
 
-Here's the full options you pass to CRUDdy methods:
-
-```
-{
-  // model is either the model instance you're creating or the model
-  // class you're deleting.
-  model: new User({}) || User,
-
-  // modelId is the ID of the model you're updating or deleting. If this
-  // isn't defined we take it from the model instance in `model`
-  modelId: <...>,
-
-  // params is an object of source parameters for the API request
-  params: {
-  }
-}
 ```
 
-<h3 align='center'>Can I see a full example?</h3>
+<h3 align='center'>Can I see documentation?</h3>
 
-<a href="https://github.com/tonyhb/tectonic/tree/master/packages/tectonic/example/basic">Sure thing, partner. Head here.</a>
+<a href="https://tonyhb.github.io/tectonic/">Sure thing, partner. Head here.</a>
