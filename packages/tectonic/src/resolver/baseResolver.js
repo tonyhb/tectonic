@@ -355,6 +355,10 @@ export default class BaseResolver {
         };
       }
 
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('ignoring query as it has undefined parameters', query);
+      }
+
       debug('ignoring query as it has undefined parameters', query);
       return null;
     }
