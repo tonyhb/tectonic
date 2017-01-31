@@ -1,8 +1,7 @@
 <h1 align='center'>Tectonic</h1>
 
------
-
 <p align='center'>Declarative data loading for REST APIs: https://tonyhb.github.io/tectonic/</p>
+<p align='center'><a href='https://travis-ci.org/tonyhb/tectonic'><img src='https://travis-ci.org/tonyhb/tectonic.svg?branch=master' /></a></p>
 
 -----
 
