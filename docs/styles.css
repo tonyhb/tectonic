@@ -19,12 +19,28 @@
 .intro, .demo {
 	width: 50%;
 }
+.intro {
+	text-align: center;
+}
+.intro h1 {
+	font-size: 3.5rem;
+	letter-spacing: -2px;
+	font-style: italic;
+	margin: 8rem 0 0 0;
+}
+.intro .version {
+	color: #777;
+	font-size: 1rem;
+	font-weight: 400;
+	font-style: normal;
+}
 
 /** Main docs **/
 .wrapper {
 	display: flex;
 	min-height: 100%;
 }
+
 .sidebar {
 	min-height: 100%;
 	display: block;
@@ -42,6 +58,12 @@
 .sidebar ul {
 	list-style: none;
 }
+.sidebarHeader {
+	padding: 0 0 15px 40px;
+	color: #999;
+	border-bottom: 1px solid #eee;
+}
+
 .content {
 	margin: 0 3rem;
 	padding: 0 0 2rem 0;
