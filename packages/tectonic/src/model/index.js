@@ -220,6 +220,13 @@ export default class Model {
     if (typeof data === 'object') {
       // Set data normally, such as new User({ id: 1 });
 
+      // Apply per-model filtering before setting data. This lets us rename
+      // fields per-model, for example if the API response always includes
+      // '.size' which is disallowed using immutable records.
+      if (typeof this.constructor.filter === 'function') {
+        data = this.constructor.filter(data);
+      }
+
       // create new submodels if necessary
       this.constructor.submodelFieldNames().forEach((field) => {
         // TODO: a better way of determining whether something is a model
@@ -229,13 +236,6 @@ export default class Model {
           data[field] = new this.constructor.fields[field].constructor(data[field]);
         }
       });
-
-      // Apply per-model filtering before setting data. This lets us rename
-      // fields per-model, for example if the API response always includes
-      // '.size' which is disallowed using immutable records.
-      if (typeof this.constructor.filter === 'function') {
-        data = this.constructor.filter(data);
-      }
 
       this.record = new ModelRecord(data);
     } else {
