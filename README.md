@@ -47,7 +47,7 @@ class User extends Model {
 }
 ```
 
-Then you define your REST API as soures. It's quick and easy, but let's skip it
+Then you define your REST API as sources. It's quick and easy, but let's skip it
 to get to the juicy part. Which is declaratively asking for data!
 
 Check it out (I'll tell you what's going on after):
