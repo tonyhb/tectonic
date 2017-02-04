@@ -123,6 +123,50 @@ describe('Model instance data', () => {
 
       assert.equal(item.a.sayHi(), 'hi');
     });
+
+    it('filters data prior to setting sub-models', () => {
+      class B extends Model {
+        static modelName = 'b';
+        static fields = {
+          id: '',
+          a: new A(),
+          baz: '',
+        };
+
+        // the data field 'newA' should be renamed to A prior to setting
+        // sub-models
+        static filter(data) {
+          const copy = { ...data };
+          copy.a = copy.newA;
+          delete copy['newA'];
+          return copy;
+        }
+      }
+
+      const item = new B({
+        id: 'b',
+        baz: 'lol',
+        newA: {
+          id: 'a',
+          foo: 'test',
+        },
+      });
+
+      assert.deepEqual(
+        item.values(),
+        {
+          id: 'b',
+          baz: 'lol',
+          a: {
+            id: 'a',
+            foo: 'test',
+          },
+        }
+      );
+
+      assert.equal(item.a.sayHi(), 'hi');
+    });
+
   });
 
 });
