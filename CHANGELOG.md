@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.2] - 2016-02-07
+### Fixed
+- Removed PropType helpers from models to comply with React 15 [#60]
+- Queries with empty responses have their status updated [#58]
+
+## [2.0.1] - 2016-02-04
+### Fixed
+- Apply model filtering before instantiating sub-models [#55]
+
+## [2.0.0] - 2016-01-30
+### Added
+- Added .query prop, standardized the way we make non-GET queries in
+components [#42]
+- Drivers can now have default parameters [#40]
+
+### Changed
+- Throw an error when providing source definitions for nameless models [#32]
+- Driver functions are now added to `manager.drivers` vs `manager` [#39]
+- Made the ingoring query log a warning for better dev [#28]
+
+### Fixed
+- Saving query responses should remove deleted IDs from blacklist [#37]
+
+
 ## [1.2.1] - 2016-10-21
 ### Added
 - Allow @load() to connect to state via @load((props, state) => {})
