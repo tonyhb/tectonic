@@ -130,12 +130,4 @@ describe('Model', () => {
       });
     });
   });
-
-  it('has an instanceOf class prop', () => {
-    assert.isDefined(User.instanceOf)
-    assert.equal(User.instanceOf(User), React.PropTypes.instanceOf(User)(User))
-    assert.equal(User.instanceOf(true), React.PropTypes.instanceOf(User)(true))
-    assert.equal(Post.instanceOf(User), React.PropTypes.instanceOf(Post)(User))
-  });
-
 });
