@@ -1,6 +1,5 @@
 // @flow
 
-import React from 'react';
 import { Record } from 'immutable';
 
 import Provider from '../sources/provider';
@@ -64,8 +63,6 @@ export default class Model {
   static fields: Object;
 
   static idField = 'id';
-
-  static instanceOf = React.PropTypes.instanceOf(this);
 
   static submodelFields: Array<string>;
 

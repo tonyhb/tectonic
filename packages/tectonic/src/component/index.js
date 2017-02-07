@@ -1,6 +1,6 @@
 // @flow
 
-import { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
 import Manager from '../manager';
 
 /**
@@ -13,12 +13,12 @@ import Manager from '../manager';
 export default class Loader extends Component {
 
   static propTypes = {
-    children: PropTypes.node.isRequired,
-    manager: PropTypes.instanceOf(Manager).isRequired,
+    children: React.PropTypes.node.isRequired,
+    manager: React.PropTypes.instanceOf(Manager).isRequired,
   }
 
   static childContextTypes = {
-    manager: PropTypes.instanceOf(Manager),
+    manager: React.PropTypes.instanceOf(Manager),
   }
 
   getChildContext() {
