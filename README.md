@@ -219,7 +219,7 @@ Hell yeah baby!
 
 The `@load` decorator also adds a query function to your components:
 
-```
+```js
 @load() // just gimme these functions please!
 class YourForm extends Component {
   static propTypes = {
