@@ -71,7 +71,7 @@ class UserInfo extends Component {
     status: shape({
       user: instanceOf(Status), // Status is a predefined Tectonic class :)
       posts: instanceOf(Status),
-    }
+    })
   }
 
   render() {
