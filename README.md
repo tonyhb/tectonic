@@ -58,10 +58,10 @@ import load, { Status } from 'tectonic';
 import { User, Post } from './models.js'; // your models
 const { instanceOf, arrayOf, shape, string } = PropTypes;
 
-@load((props) => {
+@load((props) => ({
   user: User.getItem({ id: props.params.userId }),
   posts: Post.getList({ email: props.user.email })
-})
+}))
 class UserInfo extends Component {
   static propTypes = {
     // btw, these are the same keys we passed to '@load'
