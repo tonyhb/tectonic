@@ -1,0 +1,40 @@
+.overlay {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, .75);
+  text-align: center;
+  font-size: .85rem;
+
+  p {
+    padding: 8px 0 5px;
+  }
+
+  button {
+    border: 1px solid #f66;
+    border-radius: 2px;
+    background: #f66;
+    padding: 3px 20px;
+    transition: .2s all;
+
+    &:hover {
+      background: #e55151;
+    }
+  }
+
+  .cancel {
+    margin-right: 10px;
+    border: 1px solid #bcbec0;
+    background: transparent;
+    color: #bcbec0;
+
+    &:hover {
+      background: transparent;
+      border-color: #fff;
+      color: #fff;
+    }
+  }
+}

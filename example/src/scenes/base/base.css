@@ -1,0 +1,106 @@
+/* stylelint-disable */
+@import 'sanitize.css/sanitize.css';
+/* stylelint-enable */
+
+:root,
+input,
+button,
+textarea {
+  font: 16px/1.5 'Proxima Nova', 'Open Sans', 'Droid Sans', 'Helvetica Neue', Helvetica, arial, sans-serif;
+  color: #211f1e;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+.header {
+  :global(.dashboard) {
+    display: block;
+    height: 100%;
+    width: 195px;
+    background: inline('logo.svg') no-repeat 0 center;
+    background-size: 195px 20px;
+    margin: 0 1rem;
+    text-indent: -99999rem;
+    opacity: .5;
+    transition: all .25s;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  background: #211f1e;
+  height: 60px;
+  position: relative;
+  z-index: 2;
+}
+
+h1 {
+  margin: .5rem 0;
+}
+
+:global {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  a {
+    color: #3581d3;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  label {
+    display: block;
+    color: #888;
+    font-size: .85rem;
+    line-height: 1.7;
+
+    span {
+      opacity: .75;
+    }
+  }
+
+  label + label {
+    margin: 1rem 0 0;
+  }
+
+  input {
+    display: block;
+    border: 1px solid #e3e3e3;
+    border-radius: 3px;
+    padding: .35rem;
+  }
+
+  hr {
+    border: 0;
+    outline: 0;
+    border-bottom: 1px solid #e3e3e3;
+    margin: 2rem 0;
+  }
+
+  button[type='submit'] {
+    border: 1px solid #43c580;
+    border-radius: 3px;
+    padding: .5rem 2rem .4rem;
+    color: #2dc46e;
+  }
+
+  button[type='cancel'],
+  button[type='delete'] {
+    border: 1px solid #f66;
+    border-radius: 3px;
+    padding: .5rem 2rem .4rem;
+    color: #f33;
+  }
+}
+

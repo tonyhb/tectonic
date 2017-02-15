@@ -1,0 +1,21 @@
+.header {
+  background: #e9ece5;
+  padding-top: 1px;
+  display: flex;
+  height: 85px;
+}
+
+.left {
+  flex: 1 100%;
+  padding: 0 0 5px 1rem;
+
+  h1 {
+    margin: 15px 0 0;
+    line-height: 1;
+  }
+
+  a {
+    font-size: .75rem;
+  }
+}
+

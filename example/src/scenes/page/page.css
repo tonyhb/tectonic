@@ -1,0 +1,8 @@
+.wrapper {
+  display: flex;
+}
+
+.page {
+  flex: 1 auto;
+  max-width: calc(100% - 300px);
+}

@@ -1,0 +1,47 @@
+.pageHeader {
+  background: #e9ece5;
+  padding-top: 1px;
+  display: flex;
+}
+
+.pageInfo {
+  flex: 1 100%;
+  padding: 0 0 5px 1rem;
+
+  h1 {
+    margin: 15px 0 0;
+    line-height: 1;
+  }
+
+  a {
+    font-size: .75rem;
+  }
+}
+
+.actions {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  border-left: 1px solid #dddbd9;
+
+  > a,
+  span::before {
+    cursor: pointer;
+    display: block;
+    line-height: 5.4rem;
+    border-right: 1px solid #dddbd9;
+    text-decoration: none;
+    color: #000;
+  }
+
+  span::before {
+    content: '›';
+    width: 25px;
+    text-align: center;
+    height: 100%;
+  }
+
+  > a {
+    padding: 0 2rem;
+  }
+}

@@ -1,0 +1,25 @@
+.wrapper {
+  padding: 0 1rem;
+
+  button + button {
+    float: right;
+  }
+}
+
+.form {
+  display: flex;
+}
+
+.inputs {
+  flex: 1;
+  padding: 0 1rem;
+
+  input {
+    width: 100%;
+  }
+}
+
+.threshold {
+  padding: 0 0 0 1rem;
+  flex: 1;
+}

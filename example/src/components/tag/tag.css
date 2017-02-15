@@ -1,0 +1,25 @@
+.tag {
+  font-size: .75rem;
+  display: inline-block;
+  padding: .2rem .3rem;
+  margin: 0 .2rem 0 0;
+  border-radius: 2px;
+  line-height: 1;
+  box-shadow: 0 0 2px rgba(255, 255, 255, .1);
+}
+
+.deletable {
+  padding-right: 1rem;
+  position: relative;
+
+  &::after {
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 0;
+    content: '';
+    height: 100%;
+    width: 17px;
+    background: inline('tag-cross.svg') no-repeat center;
+  }
+}

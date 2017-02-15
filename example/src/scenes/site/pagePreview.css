@@ -1,0 +1,25 @@
+.preview {
+  display: flex;
+  width: 250px;
+  height: 320px;
+}
+
+.image {
+  display: flex;
+  width: 250px;
+  height: 300px;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 0 4px rgba(0, 0, 0, .15);
+
+  img {
+    max-width: 250px;
+    max-height: 300px;
+  }
+}
+
+.text {
+  margin: .5rem 0;
+  text-decoration: none;
+  color: #444;
+}

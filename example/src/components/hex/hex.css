@@ -1,0 +1,46 @@
+.hex {
+  display: inline-block;
+  position: relative;
+  margin: 0 1em 0 0;
+  font-size: .9em;
+
+  span {
+    color: #fff;
+    position: absolute;
+    left: 0;
+    margin: .25em 0 0;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+.icon {
+  display: inline-block;
+  position: relative;
+  width: 1em;
+  height: 1.732em;
+  border-radius: .1em/.05em;
+  background: #000;
+  transition: opacity .5s;
+  cursor: pointer;
+  transform: rotate(30deg);
+}
+
+.icon::before,
+.icon::after {
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  border-radius: inherit;
+  background: inherit;
+  content: '';
+}
+
+.icon::before {
+  transform: rotate(60deg);
+}
+
+.icon::after {
+  transform: rotate(-60deg);
+}
+

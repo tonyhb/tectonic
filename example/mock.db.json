@@ -1,0 +1,84 @@
+{
+  "sites": [
+    {
+      "id": "1",
+      "domain": "googleDOTcom",
+      "urls": [
+        "www.googleDOTcom"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "id": "1",
+      "name": "Google",
+      "url": "https://www.google.com/",
+      "site": {
+        "id": "1",
+        "domain": "googleDOTcom",
+        "urls": [
+          "www.googleDOTcom"
+        ]
+      },
+      "lastScan": {
+        "id": "uuid1",
+        "pageId": "1",
+        "name": "Some Scan",
+        "tags": [
+          "homepage"
+        ],
+        "htmlHash": "html",
+        "imageHash": "img",
+        "createdAt": "2017-02-15T02:30:27.905Z",
+        "type": {
+          "format": "desktop",
+          "width": 1280
+        }
+      }
+    }
+  ],
+  "scans": [
+    {
+      "id": "uuid1",
+      "pageId": "1",
+      "name": "Some Scan",
+      "type": {
+        "format": "desktop",
+        "width": 1280
+      },
+      "tags": [
+        "homepage"
+      ],
+      "isValid": true,
+      "htmlHash": "html",
+      "htmlSize": 0,
+      "imageHash": "img",
+      "imageSize": 0,
+      "imageMime": "",
+      "imageDifference": 0,
+      "createdAt": "2017-02-15T02:30:27.905Z",
+      "updatedAt": "1970-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "uuid2",
+      "pageId": "1",
+      "name": "Anther Scan",
+      "type": {
+        "format": "desktop",
+        "width": 1280
+      },
+      "tags": [
+        "product page"
+      ],
+      "isValid": true,
+      "htmlHash": "html",
+      "htmlSize": 0,
+      "imageHash": "img",
+      "imageSize": 0,
+      "imageMime": "",
+      "imageDifference": 0,
+      "createdAt": "2017-02-15T01:30:27.905Z",
+      "updatedAt": "1970-01-01T00:00:00.000Z"
+    }
+  ]
+}

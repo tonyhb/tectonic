@@ -1,0 +1,26 @@
+.wrapper,
+.tagName,
+.addTag {
+  display: inline-block;
+}
+
+.addTag {
+  font-size: .75rem;
+  padding: .2rem .3rem;
+  margin: 0 .2rem 0 0;
+  border-radius: 2px;
+  background: #43c580;
+  color: #fff;
+  line-height: 1;
+}
+
+.wrapper {
+  position: relative;
+}
+
+.tagName {
+  border: 1px solid #ddd;
+  top: 0;
+  left: 0;
+  font-size: .8rem;
+}

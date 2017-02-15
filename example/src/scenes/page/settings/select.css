@@ -1,0 +1,49 @@
+.select {
+  display: block;
+  position: relative;
+  width: 100%;
+  padding: .5rem 0 .75rem 6rem;
+  text-align: left;
+
+  &:focus {
+    outline: none;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  span {
+    color: #888;
+    font-size: .95rem;
+  }
+
+  &::before {
+    position: absolute;
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #dde0d9;
+    border-radius: 20px;
+    left: 0;
+    top: 50%;
+    margin-top: -10px;
+  }
+
+  &.selected::before {
+    border: 5px solid #43c580;
+  }
+}
+
+.all {
+  background: inline('threshold-all.svg') no-repeat 45px center;
+}
+
+.small {
+  background: inline('threshold-small.svg') no-repeat 45px center;
+}
+
+.large {
+  background: inline('threshold-large.svg') no-repeat 45px center;
+}

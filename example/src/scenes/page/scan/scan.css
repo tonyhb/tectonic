@@ -1,0 +1,50 @@
+.wrapper {
+  padding: 1rem;
+}
+
+.header {
+  display: flex;
+}
+
+.title {
+  line-height: 1.2;
+  flex: 1;
+
+  h2 {
+    font-weight: normal;
+    margin: 0;
+  }
+}
+
+.date,
+.zoom {
+  font-size: .75rem;
+  color: #888;
+}
+
+.zoom {
+  margin: 1rem 0 0;
+}
+
+.date {
+  margin: 0 0 .5rem;
+}
+
+.actions {}
+
+.scan {
+  display: flex;
+  margin: 25px 0;
+  justify-content: center;
+
+  > div {
+    display: inline-block;
+    width: auto;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 0 8px rgba(0, 0, 0, .1);
+  }
+}

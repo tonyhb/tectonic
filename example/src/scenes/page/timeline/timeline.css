@@ -1,0 +1,83 @@
+.timeline {
+  text-align: center;
+  background: #f7f6ed;
+  height: 100%;
+  position: fixed;
+  right: 0;
+  overflow: scroll;
+  top: 0;
+  padding-top: 60px;
+
+  &,
+  .container {
+    width: 300px;
+  }
+
+  h2 {
+    margin: 0;
+    color: #221f1e;
+  }
+}
+
+.container {
+  background: #f7f6ed;
+  padding: 1.5rem .75rem;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.backToTop {
+  margin: -60px 0 0;
+  height: 60px;
+  text-align: center;
+  display: block;
+  font-size: .8rem;
+  text-transform: uppercase;
+}
+
+.updates {
+  color: #808080;
+  margin: 0 0 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: .875rem;
+}
+
+.nextScan {
+  background: #e2e6ea;
+  border: 1px dashed #71abda;
+  padding: .75rem;
+  color: #5ca1da;
+  line-height: 1.2;
+
+  span {
+    font-size: .8rem;
+  }
+
+  p {
+    font-weight: 600;
+    margin: 0;
+  }
+}
+
+.scans {
+  margin: 2rem 0 0;
+  position: relative;
+
+  &::after {
+    content: ' ';
+    display: block;
+    position: absolute;
+    z-index: 0;
+    top: .2rem;
+    width: 2px;
+    left: 50%;
+    margin-left: -1px;
+    height: 100%;
+    background: #d9d7d4;
+  }
+}

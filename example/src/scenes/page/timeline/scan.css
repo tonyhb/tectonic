@@ -1,0 +1,146 @@
+.scan {
+  display: block;
+  position: relative;
+  z-index: 1;
+  margin: 1rem 0;
+  padding: .75rem;
+  background: #fff;
+  text-align: left;
+  text-decoration: none;
+  color: #000;
+  box-shadow: 0 0 4px rgba(0, 0, 0, .05);
+  transition: all .25s;
+
+  &.selected {
+    opacity: 1;
+    background: #43c580;
+    color: #fff;
+  }
+
+  &:hover {
+    opacity: 1;
+    box-shadow: 0 0 4px rgba(0, 0, 0, .2);
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.date {
+  font-size: .8rem;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: none;
+}
+
+.trash,
+.invalidate,
+.revalidate {
+  display: block;
+  height: 25px;
+  width: 30px;
+  text-indent: -9999rem;
+  opacity: .35;
+  transition: .15s all;
+  margin: 4px 0;
+  outline: 0;
+  cursor: pointer;
+
+  &:hover {
+    opacity: .8;
+  }
+
+  &::before {
+    color: #fff;
+  }
+}
+
+.trash {
+  position: relative;
+  background: inline('trash.svg') no-repeat center;
+
+  &::before {
+    content: 'Permanently trash';
+    position: absolute;
+    text-indent: 0;
+    background: #333;
+    display: none;
+    text-align: center;
+    width: 120px;
+    top: 0;
+    left: -120px;
+    font-size: .8rem;
+    padding: 4px 0;
+  }
+}
+
+.invalidate,
+.revalidate {
+  position: relative;
+  background: inline('invalidate.svg') no-repeat center;
+  padding-right: 3px;
+
+  &::before {
+    content: 'Invalidate';
+    position: absolute;
+    text-indent: 0;
+    background: #333;
+    display: none;
+    text-align: center;
+    width: 120px;
+    top: 0;
+    left: -120px;
+    font-size: .8rem;
+    padding: 3px 0;
+  }
+}
+
+.invalidate:hover::before,
+.revalidate:hover::before,
+.trash:hover::before {
+  display: block;
+}
+
+.revalidate {
+  background: inline('revalidate.svg') no-repeat center;
+
+  &::before {
+    content: 'Revalidate';
+    top: 1px;
+  }
+}
+
+.selected .actions {
+  display: block;
+}
+
+.invalid {
+  position: relative;
+  margin: 1rem 0;
+  background: #f7f6ed;
+  border: 2px dashed #d9d7d4;
+  z-index: 2;
+  text-align: left;
+  padding: 0 0 0 .75rem;
+
+  .actions {
+    display: block;
+    top: -3px;
+  }
+
+  p {
+    margin: .3rem 0;
+    color: #bcbec0;
+    font-size: .8rem;
+  }
+}
+
