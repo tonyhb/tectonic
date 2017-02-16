@@ -26,7 +26,7 @@
     "redux"
   ],
   "author": "Tony Holdstock-Brown",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/tonyhb/tectonic-superagent/issues"
   },

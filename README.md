@@ -252,3 +252,5 @@ class YourForm extends Component {
 <h3 align='center'>Can I see documentation?</h3>
 
 <a href="https://tonyhb.github.io/tectonic/">Sure thing, partner. Head here.</a>
+
+License: MIT.

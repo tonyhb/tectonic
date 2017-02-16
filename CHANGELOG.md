@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## TBD
+- Change from GPL to MIT license.  Go nuts.
+
 ## [2.0.2] - 2016-02-07
 ### Fixed
 - Removed PropType helpers from models to comply with React 15 [#60]
