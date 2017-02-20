@@ -13,13 +13,13 @@ clean:
 	rm -f docs/*.html
 
 test:
-	docker run --rm -ti -v $(shell pwd -P)/packages/tectonic:/workspace kkarczmarczyk/node-yarn:7.2-slim sh -c 'yarn install && yarn test'
+	docker run --rm -ti -v $(shell pwd -P)/packages/tectonic:/workspace tonyhb/node-yarn:7.2-slim sh -c 'yarn install && yarn test'
 
 flow:
 	docker run --rm -ti -v $(shell pwd -P)/packages/tectonic:/workspace tonyhb/flow:0.37.4 flow
 
 lint:
-	docker run --rm -ti -v $(shell pwd -P)/packages/tectonic:/workspace kkarczmarczyk/node-yarn:7.2-slim sh -c 'yarn install && yarn lint'
+	docker run --rm -ti -v $(shell pwd -P)/packages/tectonic:/workspace tonyhb/node-yarn:7.2-slim sh -c 'yarn install && yarn lint'
 
 ci: lint flow test
 
