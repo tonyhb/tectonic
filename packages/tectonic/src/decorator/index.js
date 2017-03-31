@@ -33,7 +33,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
   return (WrappedComponent: Class<React$Component<*, *, *>>) => {
     class TectonicComponent extends Component {
       static WrappedComponent = WrappedComponent
-    
+
       static propTypes = {
         // State is all redux state
         state: React.PropTypes.instanceOf(Map),
