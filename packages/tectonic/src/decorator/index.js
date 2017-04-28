@@ -120,7 +120,11 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
           // query statuses for successful queries and not re-query them even if
           // the cache is now invalid
           Object.keys(newQueries).forEach((q) => {
-            this.queries[q].params = newQueries[q].params;
+            if (this.queries[q]) {
+              this.queries[q].params = newQueries[q].params;
+            } else {
+              this.queries[q] = newQueries[q];
+            }
           });
 
           debug('computed new queries for component', this.queries);
