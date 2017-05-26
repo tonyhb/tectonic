@@ -16,7 +16,9 @@ export default class TectonicSuperagent {
         meta: { url, transform, method, headers, request }
       } = sourceDef;
 
-      url = inst.parseUrlParams({ url, query });
+      url = inst.parseUrlParams({ url, query }, opts);
+      url = inst.removeUnspecifiedParams(url, opts)
+      console.log(url)
       // Normalize method type
       method = method ? method.toUpperCase() : 'GET';
 
@@ -78,4 +80,30 @@ export default class TectonicSuperagent {
     return url;
   }
 
+  /**
+   * Removes unspecified params. It can remove them all (unsafe), or remove if
+   * it's the last param.
+   * @param {string} url
+   * @param {string} type
+   */
+  removeUnspecifiedParams (url, { removeParams }) {
+    const unspec = '/undefined'
+    const isLast = (url, unspec) => {
+      return url.length - url.indexOf(unspec) - unspec.length === 0
+    }
+
+    switch (removeParams) {
+      case 'unsafe':
+        return url.replace(unspec, '')
+      case 'safe':
+        const index = url.indexOf(unspec)
+        if (index === -1) return url
+        else if (!isLast(url, unspec)) throw new Error('Unspecified param')
+        else return url.replace(unspec, '')
+      case undefined:
+        return url
+      default:
+        throw new Error('Invalid removeParams option')
+    }
+  }
 }
