@@ -36,7 +36,7 @@ We can also:
   - If the query parameter matches an ID pre-empt the API call and look in the
 	cache
 
-## Default parametrs
+## Default parameters
 
 **Challenge**: Queries with and without default parameters should use caching
 equally.
