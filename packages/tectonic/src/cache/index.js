@@ -141,6 +141,14 @@ export default class Cache {
           throw new Error('Error attempting to parse model data with no key', sourceDef, apiResponse);
         }
 
+        // Calculate the expiry from the source definition and model, if applicable.
+        // Use the lowest TTL.
+        const sec = [provider.model.cacheFor, sourceDef.cacheFor].sort().shift();
+        if (sec !== undefined && sec !== null) {
+          expires = new Date();
+          expires.setSeconds(sec);
+        }
+
         if (sourceDef.isPolymorphic()) {
           // Fail as described in the scenario above; this polymorphic API
           // response needs an object

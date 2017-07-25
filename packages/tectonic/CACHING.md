@@ -37,3 +37,31 @@ In short:
 1. The decorator resolves queries into a tree of dependencies when the component
    is created
 2. When a query is resolved and is successful we attempt to resolve its children
+
+### Custom caching
+
+From tectonic 2.1 it's possible to set custom cache information for your models
+and sources.  This allows you to minimize network requests and ensure that
+queries will be resolved from the cache.
+
+Custom cache information can be set on a source definition or model.  If the
+cache sees that one of these is set, the cache TTL will be modified
+accordingly.  If both are set the lowest value will be used.
+
+The cache property is always an integer representing the number of seconds to
+cache.
+
+#### Model caching
+
+Setting the `static cacheFor` property in a model ensures that all models of
+this type will be cached for the given number of seconds across all source
+definitions.
+
+Note that if a source definition specifies a lower cacheFor TTL, the lower
+value from the source definition will be used.
+
+#### Source definition caching
+
+Source definition caching allows you to specificy custom cache durations for
+each API endpoint.  This gives you custom granularity on a per-url basis for
+how long we should cache your data.

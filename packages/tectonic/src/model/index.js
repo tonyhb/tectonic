@@ -66,6 +66,14 @@ export default class Model {
 
   static submodelFields: Array<string>;
 
+  /**
+   * cacheFor represents the number of seconds this model should be cached for.
+   *
+   * If defined, this is used as explained in [CACHING.md] - Custom Caching -
+   * to configure custom cache times within our state.
+   */
+  static cacheFor = undefined;
+
   record: Record<*>;
 
 

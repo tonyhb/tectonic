@@ -26,6 +26,9 @@ export type SourceDefinitionOpts = {
   // this is typically resolved from the Returns parameter
   model: ?Class<Model>;
   queryType: QueryType;
+
+  // cacheFor may be set, defining the TTL for the response in seconds
+  cacheFor: ?number;
 };
 
 /**
@@ -40,6 +43,8 @@ export default class SourceDefinition {
   model: Array<Class<Model>>
   driverFunc: Function
   queryType: QueryType
+
+  cacheFor: ?number
 
   /**
    * Object of **required** parameters for the source (where values are defaults).
@@ -81,6 +86,7 @@ export default class SourceDefinition {
     driverFunc,
     model,
     queryType = GET,
+    cacheFor,
   }: SourceDefinitionOpts = {}) {
     if (id === undefined) {
       id = Math.floor(Math.random() * (1 << 30)).toString(16);
@@ -102,6 +108,7 @@ export default class SourceDefinition {
     // Which CRUD action this refers to
     this.queryType = queryType;
     this.setModelProperty(model);
+    this.cacheFor = cacheFor;
 
     // ensure that after setting properties the definition is valid
     this.validate();

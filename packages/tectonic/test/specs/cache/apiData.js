@@ -113,6 +113,7 @@ describe('parsing cache data', () => {
   });
 
   describe('parseApiData', () => {
+
     it('parses a polymorphic returns correctly', () => {
       const sd = new SourceDefinition({
         returns: {
@@ -163,6 +164,141 @@ describe('parsing cache data', () => {
         expected
       );
     });
+
+    it('sets expiry from sourceDef.cacheFor', () => {
+      const sd = new SourceDefinition({
+        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+        meta: {},
+        cacheFor: 600,
+      });
+      const apiResponse = {
+        id: 1,
+        name: 'foo',
+        email: 'foo@bar.com'
+      };
+      const expires = new Date();
+      expires.setSeconds(600);
+
+      const expected = {
+        user: {
+          1: {
+            data: apiResponse,
+            cache: { expires }
+          }
+        }
+      };
+      const actual = cache.parseApiData(User.getItem(), sd, apiResponse, expires);
+
+      assert.closeTo(
+        expected.user[1].cache.expires.getTime(),
+        actual.user[1].cache.expires.getTime(),
+        100,
+        "Times are within 100ms as expected",
+      );
+      expected.user[1].cache.expires = actual.user[1].cache.expires;
+      assert.deepEqual(expected, actual);
+    });
+
+    it('sets expiry from Model.cacheFor', () => {
+      User.cacheFor = 900;
+      const sd = new SourceDefinition({
+        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+        meta: {},
+      });
+      const apiResponse = {
+        id: 1,
+        name: 'foo',
+        email: 'foo@bar.com'
+      };
+      const expires = new Date();
+      expires.setSeconds(900);
+      const expected = {
+        user: {
+          1: {
+            data: apiResponse,
+            cache: { expires }
+          }
+        }
+      };
+      const actual = cache.parseApiData(User.getItem(), sd, apiResponse, expires);
+      assert.closeTo(
+        expected.user[1].cache.expires.getTime(),
+        actual.user[1].cache.expires.getTime(),
+        100,
+        "Times are within 100ms as expected",
+      );
+      expected.user[1].cache.expires = actual.user[1].cache.expires;
+      assert.deepEqual(expected, actual);
+      User.cacheFor = undefined;
+    });
+
+    it('uses the lowest expiry from sourceDef.cacheFor and model.cacheFor', () => {
+      const sd = new SourceDefinition({
+        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+        meta: {},
+        cacheFor: 600,
+      });
+      User.cacheFor = 900;
+      const apiResponse = {
+        id: 1,
+        name: 'foo',
+        email: 'foo@bar.com'
+      };
+      const expires = new Date();
+      expires.setSeconds(600);
+      const expected = {
+        user: {
+          1: {
+            data: apiResponse,
+            cache: { expires }
+          }
+        }
+      };
+      const actual = cache.parseApiData(User.getItem(), sd, apiResponse, expires);
+      assert.closeTo(
+        expected.user[1].cache.expires.getTime(),
+        actual.user[1].cache.expires.getTime(),
+        100,
+        "Times are within 100ms as expected",
+      );
+      expected.user[1].cache.expires = actual.user[1].cache.expires;
+      assert.deepEqual(expected, actual);
+      User.cacheFor = undefined;
+    });
+
+    it('sets expiry from Model.cacheFor', () => {
+      User.cacheFor = 900;
+      const sd = new SourceDefinition({
+        returns: new Provider(User, RETURNS_ALL_FIELDS, RETURNS_ITEM),
+        meta: {},
+      });
+      const apiResponse = {
+        id: 1,
+        name: 'foo',
+        email: 'foo@bar.com'
+      };
+      const expires = new Date();
+      expires.setSeconds(900);
+      const expected = {
+        user: {
+          1: {
+            data: apiResponse,
+            cache: { expires }
+          }
+        }
+      };
+      const actual = cache.parseApiData(User.getItem(), sd, apiResponse, expires);
+      assert.closeTo(
+        expected.user[1].cache.expires.getTime(),
+        actual.user[1].cache.expires.getTime(),
+        100,
+        "Times are within 100ms as expected",
+      );
+      expected.user[1].cache.expires = actual.user[1].cache.expires;
+      assert.deepEqual(expected, actual);
+      User.cacheFor = undefined;
+    });
+
   });
 
   describe('sets Query.returnedIds', () => {
