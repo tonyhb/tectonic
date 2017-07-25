@@ -5,9 +5,9 @@
   "main": "transpiled/index.js",
   "scripts": {
     "flow": "flow; test $? -eq 0 -o $? -eq 2",
-    "lint": "$(npm bin)/eslint ./src",
-    "prepublish": "$(npm bin)/babel -d transpiled src",
-    "test": "$(npm bin)/mocha --compilers js:babel-register --recursive --require ./test/_setup.js ./test/specs"
+    "lint": "eslint ./src",
+    "prepublish": "babel -d transpiled src",
+    "test": "mocha --compilers js:babel-register --recursive --require ./test/_setup.js ./test/specs"
   },
   "repository": {
     "type": "git",
@@ -34,7 +34,6 @@
     "babel-eslint": "^7.0.0",
     "babel-plugin-syntax-decorators": "^6.13.0",
     "babel-plugin-syntax-flow": "^6.13.0",
-    "babel-plugin-transform-decorators": "^6.13.0",
     "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "babel-plugin-transform-flow-strip-types": "^6.14.0",
     "babel-preset-es2015": "^6.5.0",
