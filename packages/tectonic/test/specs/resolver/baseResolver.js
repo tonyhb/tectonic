@@ -44,9 +44,15 @@ describe('BaseResolver', () => {
             }
           }
         },
+        // This source will fail to resolve
         {
           params: ['start', 'limit'],
           returns: User.list(),
+          meta: {}
+        },
+        {
+          params: ['fail'],
+          returns: User.item(),
           meta: {}
         },
         {
@@ -155,7 +161,7 @@ describe('BaseResolver', () => {
         }, 75);
       });
 
-      it('uses cache with default params foodd', () => {
+      it('uses cache with default params', () => {
         const m = resolveAllManager();
         // create a query which will be supplemented
         const query = User.getItem({ withDefault: true });
@@ -253,6 +259,19 @@ describe('BaseResolver', () => {
           m.store.getState().tectonic.getIn(['status', q.hash()]),
           { status: 'ERROR', error: 'There is no source definition which resolves the query' }
         );
+        assert.equal(q.status, 'ERROR');
+      });
+
+      it('sets failed queries to ERROR', () => {
+        const m = resolveAllManager();
+        const q = User.getList({ start: 1, limit: 10 });
+        m.addQuery(q);
+        m.resolve();
+        assert.deepEqual(
+          m.store.getState().tectonic.getIn(['status', q.hash()]),
+          { status: 'ERROR', error: 'either pass success/fail state in query params or provide meta.returns', code: undefined }
+        );
+        assert.equal(q.status, 'ERROR');
       });
 
       it('sets queries with undefined params to UNDEFINED_PARAMS', () => {

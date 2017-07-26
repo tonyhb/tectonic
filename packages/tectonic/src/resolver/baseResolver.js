@@ -442,6 +442,7 @@ export default class BaseResolver {
     // TODO: Also update all dependencies of this query as failed
     warn(`Query failed on ${query.toString()} using sourceDefinition ${sourceDef.toString()}: ${data.toString()}`);
 
+    query.updateStatus('ERROR');
     this.store.dispatch({
       type: UPDATE_QUERY_STATUSES,
       payload: {
