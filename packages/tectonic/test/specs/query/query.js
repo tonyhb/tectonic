@@ -163,4 +163,16 @@ describe('query', () => {
 
   });
 
+  describe('.filter', () => {
+    it('pushes to the end of the filters property', () => {
+      const query = User.getItem();
+      assert.equal(query.filters.length, 0);
+      query.filter(User.getName);
+      assert.equal(query.filters.length, 1);
+      assert.equal(query.filters[0], User.getName);
+      query.filter((name) => name.toUpperCase());
+      assert.equal(query.filters.length, 2);
+    });
+  });
+
 });

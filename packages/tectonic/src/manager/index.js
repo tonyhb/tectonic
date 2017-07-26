@@ -171,6 +171,9 @@ export default class Manager {
         data = new Model(data);
       }
 
+      // Apply any filters to this data set in the query
+      data = query.filters.reduce((result, func) => func(result), data);
+
       props[prop] = data;
     });
 

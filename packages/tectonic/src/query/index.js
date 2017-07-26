@@ -87,7 +87,7 @@ export default class Query {
    * Note that a duplicated query still respects the cache; it should only be
    * forced to run through the resolver individually.
    *
-   * By default this deduplicates the query.
+   * By default this is set to false and deduplicates the query.
    */
   _force: boolean = false
 
@@ -104,6 +104,8 @@ export default class Query {
 
   children: Array<Query>
   callback: ?Function
+
+  filters: Array<() => any>
 
   /**
    * @param Model  model class
@@ -139,6 +141,7 @@ export default class Query {
     this.body = body;
     this.callback = callback;
     this.children = [];
+    this.filters = [];
 
     // To create query trees we need to iterate through each param and see if
     // the value is a function; if it is we assume this was created via
@@ -226,6 +229,15 @@ export default class Query {
    */
   force() {
     this._force = true;
+  }
+
+  filter(func: () => any | Array<() => any>): Query {
+    if (Array.isArray(func)) {
+      this.filters = this.filters.concat(func);
+    } else {
+      this.filters.push(func);
+    }
+    return this;
   }
 
 }
