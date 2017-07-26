@@ -259,7 +259,7 @@ describe('BaseResolver', () => {
           m.store.getState().tectonic.getIn(['status', q.hash()]),
           { status: 'ERROR', error: 'There is no source definition which resolves the query' }
         );
-        assert.equal(q.status, 'ERROR');
+        assert.equal(q.status.status, 'ERROR');
       });
 
       it('sets failed queries to ERROR', () => {
@@ -271,7 +271,7 @@ describe('BaseResolver', () => {
           m.store.getState().tectonic.getIn(['status', q.hash()]),
           { status: 'ERROR', error: 'either pass success/fail state in query params or provide meta.returns', code: undefined }
         );
-        assert.equal(q.status, 'ERROR');
+        assert.equal(q.status.status, 'ERROR');
       });
 
       it('sets queries with undefined params to UNDEFINED_PARAMS', () => {
