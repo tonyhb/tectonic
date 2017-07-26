@@ -255,6 +255,9 @@ this.props.load({
           load: this.load,
         };
 
+        // remove tectonic state passed to this container
+        delete props.state;
+
         return <WrappedComponent { ...props } />;
       }
     }
