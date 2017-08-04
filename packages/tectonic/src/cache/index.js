@@ -57,6 +57,14 @@ export default class Cache {
    * @param Date - date at which this data should expire
    */
   storeQuery(query: Query, sourceDef: SourceDefinition, apiResponse: Object | Array<Object>, expires: Date = new Date()) {
+    // Get the lowest cacheFor value from the source definition and its models
+    // such that we can set the query expiry date correctly.
+    const cacheFor = sourceDef.getCacheFor();
+    if (cacheFor !== undefined && cacheFor !== null) {
+      expires = new Date();
+      expires.setSeconds(cacheFor);
+    }
+
     if (query.queryType === DELETE) {
       // Add the ID of this model to the delete blacklist
       if (query.modelId === undefined || query.modelId === null) {

@@ -179,6 +179,17 @@ export default class SourceDefinition {
   }
 
   /**
+   * getCacheFor returns the lowest cacheFor value from the source definition
+   * and all of the models it returns.
+   *
+   */
+  getCacheFor(): number {
+    const ttl = [this.cacheFor];
+    this.model.forEach(m => ttl.push(m.cacheFor));
+    return ttl.sort().shift();
+  }
+
+  /**
    * Returns true if this source definition fetches more than one model at
    * a time
    */
