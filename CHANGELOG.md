@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.1] - 2017-08-04
+### Fixed
+- Set query cache property based on lowest cacheFor TTL in source definitioon or
+models.
+
 ## [2.1] - 2017-08-04
 ### Added
 - Allow routes and models to define their own cache TTL
