@@ -2,6 +2,7 @@
 
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import deepEqual from 'deep-equal';
 import { Map } from 'immutable';
 import d from 'debug';
 
@@ -120,7 +121,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
           // query statuses for successful queries and not re-query them even if
           // the cache is now invalid
           Object.keys(newQueries).forEach((q) => {
-            if (this.queries[q]) {
+            if (this.queries[q] && deepEqual(this.queries[q].params, newQueries[q].params)) {
               this.queries[q].params = newQueries[q].params;
             } else {
               this.queries[q] = newQueries[q];
