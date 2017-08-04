@@ -4,7 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## TBD
+## [2.1] - 2017-08-04
+### Added
+- Allow routes and models to define their own cache TTL
+### Fixed
+- No longer pass tectonic state down to wrapped components
+### Changed
 - Change from GPL to MIT license.  Go nuts.
 
 ## [2.0.2] - 2016-02-07
