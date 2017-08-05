@@ -1,6 +1,6 @@
 // @flow
 
-import { Map } from 'immutable';
+import { Map, fromJS } from 'immutable';
 
 export const UPDATE_QUERY_STATUSES = '@@tectonic/update-query-statuses';
 export const UPDATE_DATA = '@@tectonic/update-data';
@@ -63,7 +63,9 @@ const reducer = (state: Object = defaultState, action: ActionObject) => {
     const { query, data, expires } = action.payload;
 
     return state.withMutations((s) => {
-      s.mergeDeep({ data });
+      Object.keys(data).forEach(key => {
+        s.mergeIn(['data', key], fromJS(data[key]));
+      })
       s.setIn(['queriesToIds', query.toString()], query.returnedIds);
       s.setIn(['queriesToExpiry', query.toString()], expires);
       s.setIn(['status', query.toString()], { status: 'SUCCESS' });
