@@ -199,7 +199,7 @@ export default class Model {
     });
   }
 
-  constructor(data: Object) {
+  constructor(data: Object = {}) {
     const { modelName } = this.constructor;
     let ModelRecord: Class<Record<*>> = modelRecords[modelName];
 
@@ -222,30 +222,26 @@ export default class Model {
       throw new Error('Must supply an ID field for this model');
     }
 
-    if (typeof data === 'object') {
-      // Set data normally, such as new User({ id: 1 });
-
-      // Apply per-model filtering before setting data. This lets us rename
-      // fields per-model, for example if the API response always includes
-      // '.size' which is disallowed using immutable records.
-      if (typeof this.constructor.filter === 'function') {
-        data = this.constructor.filter(data);
-      }
-
-      // create new submodels if necessary
-      this.constructor.submodelFieldNames().forEach((field) => {
-        // TODO: a better way of determining whether something is a model
-        // other than values; instanceof this.constructor doesn't work as they
-        // may be different models
-        if (data[field] !== undefined && data[field].values === undefined) {
-          data[field] = new this.constructor.fields[field].constructor(data[field]);
-        }
-      });
-
-      this.record = new ModelRecord(data);
-    } else {
-      this.record = new ModelRecord();
+    // Set data normally, such as new User({ id: 1 });
+    // Apply per-model filtering before setting data. This lets us rename
+    // fields per-model, for example if the API response always includes
+    // '.size' which is disallowed using immutable records.
+    if (typeof this.constructor.filter === 'function') {
+      data = this.constructor.filter(data);
     }
+
+    // create new submodels if necessary
+    this.constructor.submodelFieldNames().forEach((fieldName) => {
+      const item = data[fieldName];
+      if (item instanceof Model === false) {
+        // When defining a model each field is an instance of a model; we need
+        // to create a new instance by accessing constructor.
+        data[fieldName] = new this.constructor.fields[fieldName].constructor(item);
+      }
+    });
+
+    // Set the internal immutable record which holds our data.
+    this.record = new ModelRecord(data);
 
     // This creates getters for each field in the model, allowing us to read
     // data from the model record directly
