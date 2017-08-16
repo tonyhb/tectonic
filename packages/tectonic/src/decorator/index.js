@@ -120,15 +120,18 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
           // Assign the props newQueries to this.queries; this is gonna retain
           // query statuses for successful queries and not re-query them even if
           // the cache is now invalid
+          let haveNewQueries = false
           Object.keys(newQueries).forEach((q) => {
-            if (!this.queries[q].is(newQueries[q])) {
+            if (!this.queries[q] || !this.queries[q].is(newQueries[q])) {
+              haveNewQueries = true
               this.queries[q] = newQueries[q];
             }
           });
 
           debug('computed new queries for component', this.queries);
 
-          this.addAndResolveQueries();
+          if (haveNewQueries)
+            this.addAndResolveQueries();
         }
       }
 
