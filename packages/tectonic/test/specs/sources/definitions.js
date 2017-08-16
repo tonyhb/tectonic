@@ -57,7 +57,6 @@ describe('SourceDefinition', () => {
 
       assert.deepEqual(q.params, {});
       sd.addDefaultParams(q);
-      console.log(params, "QUERY NEXT", q.params);
       assert.deepEqual(q.params, params);
     });
 

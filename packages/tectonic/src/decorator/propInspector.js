@@ -2,7 +2,7 @@
 
 import deepEqual from 'deep-equal';
 
-import type Query from '../query';
+import Query from '../query';
 import type Manager from '../manager';
 
 type ConstructorOpts = {
@@ -17,6 +17,29 @@ type QueryTree = {
 type Accessor = {
   [key: string]: Function
 }
+
+/**
+ * queriesToHash iterates through an object potentially containing Query
+ * instances as values and converts them to their unique hash.
+ *
+ * All other values are untouched.
+ */
+const queriesToHash = (obj: ?Object) => {
+  if (obj === undefined || obj === null) {
+    return null;
+  }
+
+  const o = obj; // fixes flow inferences as arguments are not consts.
+  const ret = {};
+  Object.keys(o).forEach((v) => {
+    ret[v] = o[v];
+    if (o[v] instanceof Query) {
+      ret[v] = o[v].toString();
+    }
+  });
+
+  return ret;
+};
 
 /**
  * PropInspector is used to detect relationships between queries within a single
@@ -49,14 +72,14 @@ export default class PropInspector {
     // This gives us a map of prop names to queries.
     // We can use this to determine if queries generate props which other
     // queries depend on.
-    let queryMap = queryFunc(props, reduxState);
+    const queryMap = queryFunc(props, reduxState);
 
     // !! Note: slightly complex issue. At this point we may be rendering
     // a componet with dependent data queries to be loaded with props and
     // state.
     //
-    // IF we've already queried for the parent query we'll already pass
-    // the props into the component during render() (via
+    // IF we've already resolved and have data for the parent query we'll
+    // pass the props into the component during render() (via
     // manager.props(this.queries)).
     //
     // This means that resolving **won't change our props** for the
@@ -69,11 +92,16 @@ export default class PropInspector {
     // To work around this we compute queries using the props from manager
     // up until this.queries doesn't change.
     if (manager !== null && manager !== undefined) {
-      let computedProps = manager.props(queryMap);
+      let currentProps = manager.props(queryMap);
+      let previousProps = {};
 
-      while (deepEqual(queryMap, queryFunc({ ...props, computedProps }, reduxState)) === false) {
-        queryMap = queryFunc({ ...props, computedProps }, reduxState);
-        computedProps = manager.props(queryMap);
+      // With filtering, people can pass anonymous functions into query.filters.
+      // This breaks deepEqual.  To account for this, we iterate through
+      // previous/currentProps and convert any instance of a Query into its
+      // unique hash.
+      while (deepEqual(queriesToHash(previousProps), queriesToHash(currentProps)) === false) {
+        previousProps = currentProps;
+        currentProps = queryFunc({ ...props, previousProps }, reduxState);
       }
     }
 
@@ -169,3 +197,4 @@ export default class PropInspector {
   }
 
 }
+

@@ -10,6 +10,15 @@ export class User extends Model {
     name: '',
     email: ''
   }
+
+  static getName(user) {
+    return user.name;
+  }
+
+  maskEmail() {
+    const pos = this.email.indexOf('@');
+    return this.email[0] + this.email.substr(pos);
+  }
 };
 
 export class Post extends Model {

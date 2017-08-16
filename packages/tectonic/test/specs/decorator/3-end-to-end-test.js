@@ -208,4 +208,69 @@ describe('@load: e2e end-to-end test', () => {
       done();
     }, 50);
   });
+
+  it('applies query filters correctly', () => {
+    const data = {
+      user: {
+        id: 1,
+        name: 'works',
+        email: 'some@example.com'
+      },
+      posts: [{
+        id: 1,
+        title: 'some post'
+      }],
+    };
+    const manager = createNewManager();
+    // Define sources for loading data.
+    manager.drivers.fromMock([
+      {
+        meta: {
+          returns: (success) => success(data.user),
+        },
+        returns: User.item(),
+      },
+      {
+        meta: {
+          returns: (success, queryParams) => {
+            assert.deepEqual(queryParams, {name: 'WORKS'});
+            return data.posts;
+          }
+        },
+        params: ['name'],
+        returns: Post.list(),
+      }
+    ]);
+
+    class Base extends Component {
+      static propTypes = {
+        status: PropTypes.object,
+        posts: PropTypes.array
+      }
+
+      render() {
+        return <p>stuff</p>;
+      }
+    }
+
+    // Ensure chaining filters works
+    const WrappedWithUppercaseName = load(props => ({
+      userName: User
+        .getItem()
+        .filter([User.getName, (name) => name.toUpperCase()]),
+    }))(Base);
+    let item = renderAndFind(<WrappedWithUppercaseName />, Base, manager);
+    assert.equal(item.props.userName, 'WORKS');
+
+
+    // Ensure dependency chains work
+    const WrappedWithFilteredDependencies = load(props => ({
+      userName: User
+        .getItem()
+        .filter([User.getName, (name) => name.toUpperCase()]),
+      posts: Post.getList({ name: props.userName }),
+    }))(Base);
+    item = renderAndFind(<WrappedWithFilteredDependencies />, Base, manager);
+    assert.equal(item.props.userName, 'WORKS');
+  });
 });
