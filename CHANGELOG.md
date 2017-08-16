@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) 
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.1.2] - 2017-08-16
+### Fixed
+- #87 - When params change we now make new requests. Thanks @aindeev
+- #88 - Fixed infinite loop error when adding cache-control header. 
+Thanks @aindeev again!
+- Fixed an issue in which submodule field values were sometimes instantiated
+incorrectly
+
 ## [2.1.1] - 2017-08-04
 ### Fixed
 - Set query cache property based on lowest cacheFor TTL in source definitioon or
