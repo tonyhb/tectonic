@@ -183,7 +183,7 @@ export default class SourceDefinition {
    * and all of the models it returns.
    *
    */
-  getCacheFor(): number {
+  getCacheFor(): ?number {
     const ttl = [this.cacheFor];
     this.model.forEach(m => ttl.push(m.cacheFor));
     return ttl.sort().shift();
