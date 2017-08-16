@@ -83,7 +83,7 @@ export default class Cache {
       return;
     }
 
-    let data;
+    let data = {};
     if (apiResponse) {
       data = this.parseApiData(query, sourceDef, apiResponse, expires);
     }

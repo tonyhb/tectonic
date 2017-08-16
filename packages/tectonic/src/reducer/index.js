@@ -63,9 +63,9 @@ const reducer = (state: Object = defaultState, action: ActionObject) => {
     const { query, data, expires } = action.payload;
 
     return state.withMutations((s) => {
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         s.mergeIn(['data', key], fromJS(data[key]));
-      })
+      });
       s.setIn(['queriesToIds', query.toString()], query.returnedIds);
       s.setIn(['queriesToExpiry', query.toString()], expires);
       s.setIn(['status', query.toString()], { status: 'SUCCESS' });
