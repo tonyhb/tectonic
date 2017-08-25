@@ -104,7 +104,7 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
       componentWillReceiveProps(next) {
         // Prevent some unnecessary work computing queries if the props didn't change
         if (deepEqual(next, this.props)) {
-          return
+          return;
         }
 
         if (typeof loadQueries === 'function' && next !== undefined) {
