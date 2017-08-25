@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Map } from 'immutable';
 import d from 'debug';
+import deepEqual from 'deep-equal';
 
 import Manager from '../manager';
 import Query from '../query';
@@ -101,6 +102,11 @@ export default function load(loadQueries: { [key: string]: Query } | Function = 
        *
        */
       componentWillReceiveProps(next) {
+        // Prevent some unnecessary work computing queries if the props didn't change
+        if (deepEqual(next, this.props)) {
+          return;
+        }
+
         if (typeof loadQueries === 'function' && next !== undefined) {
           const { ...others } = next;
           delete others.state;
