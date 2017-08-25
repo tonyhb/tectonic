@@ -8,7 +8,8 @@ import { UPDATE_QUERY_STATUSES } from '../reducer';
 import type {
   QueryHash,
 } from '../consts';
-import type Status, { StatusOpts } from '../status/status';
+import Status from '../status/status';
+import type { StatusOpts } from '../status/status';
 import type Query from '../query';
 import type SourceDefinition from '../sources/definition';
 
@@ -23,6 +24,8 @@ const warn = (...args) => {
     console.warn(...args);
   }
 };
+
+const errUnresolvableText = 'There is no source definition which resolves the query';
 
 /**
  * BaseResolver is a simple resolver which batches new queries from the
@@ -238,7 +241,7 @@ export default class BaseResolver {
       // Push this to the list which will be processed via drivers
       resolvedQueries.push(q);
       q.sourceDefinition = sd;
-      q.updateStatus('PENDING');
+      q.updateStatus(new Status({ status: 'PENDING' }));
       this.statusMap[q.toString()] = {
         status: 'PENDING',
       };
@@ -296,7 +299,7 @@ export default class BaseResolver {
       debug('query already pending and in flight; skipping', query.toString(), query);
       // update the query's internal status to pending, but no need to update
       // the query status as it's already pending
-      query.updateStatus('PENDING');
+      query.updateStatus(new Status({ status: 'PENDING' }));
 
       // If we're here and the query is PENDING this must mean that the
       // internal status of the query didn't get set. Perhaps this was added
@@ -403,16 +406,16 @@ export default class BaseResolver {
 
     // Call the callback if it exists with an error
     if (typeof query.callback === 'function') {
-      query.callback('There is no source definition which resolves the query', null);
+      query.callback(errUnresolvableText, null);
     }
 
     this.statusMap[query.hash()] = {
       status: 'ERROR',
-      error: 'There is no source definition which resolves the query',
+      error: errUnresolvableText,
     };
 
-    query.updateStatus('ERROR');
-    warn('There is no source definition which resolves the query', query.toString());
+    query.updateStatus(new Status({ status: 'ERROR', error: errUnresolvableText }));
+    warn(errUnresolvableText, query.toString());
   }
 
   success(query: Query, sourceDef: SourceDefinition, data: Object | Array<Object>, meta: Object = {}) {
@@ -428,7 +431,7 @@ export default class BaseResolver {
     // by default this will return now, meaning this query will never be cached
     const expires = this.parseCacheHeaders(meta.headers);
 
-    query.updateStatus('SUCCESS');
+    query.updateStatus(new Status({ status: 'SUCCESS' }));
     this.cache.storeQuery(query, sourceDef, data, expires);
 
     if (typeof query.callback === 'function') {
@@ -442,14 +445,12 @@ export default class BaseResolver {
     // TODO: Also update all dependencies of this query as failed
     warn(`Query failed on ${query.toString()} using sourceDefinition ${sourceDef.toString()}: ${data.toString()}`);
 
+    const statusOpts = { status: 'ERROR', error: data, code: meta.status };
+    query.updateStatus(new Status(statusOpts));
     this.store.dispatch({
       type: UPDATE_QUERY_STATUSES,
       payload: {
-        [query.hash()]: {
-          status: 'ERROR',
-          code: meta.status,
-          error: data,
-        },
+        [query.hash()]: statusOpts,
       },
     });
 

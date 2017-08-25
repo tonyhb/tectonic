@@ -254,7 +254,7 @@ this.props.load({
 
         const props = {
           ...this.props,
-          ...manager.props(queries, undefined, true),
+          ...manager.props(queries),
           getModel: this.getModel,
           createModel: this.createModel,
           updateModel: this.updateModel,

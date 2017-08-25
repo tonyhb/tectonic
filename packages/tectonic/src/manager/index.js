@@ -136,10 +136,14 @@ export default class Manager {
       const Model = query.model;
       let status = cache.getQueryStatus(query, state);
 
-      // respectCache is only taken into account if the status is undefined or
-      // pending; if the status is SUCCESS or ERROR within the query it has
-      // already been resolved.
-      const respectCache = query.status !== 'SUCCESS' && !status.isError();
+      // respectCacheExpiration is only taken into account if the status is
+      // undefined or pending; if the status is SUCCESS or ERROR within the
+      // query it has already been resolved and should skip the cache
+      // expiration check and serve up the data this query generated.
+      let respectCacheExpiration = false;
+      if (query.status === undefined || query.status.isPending()) {
+        respectCacheExpiration = true;
+      }
 
       // We only respect the cache if the query status is pending or undefined.
       // You might expect us to respec the cache if the status is SUCCESS: we
@@ -147,7 +151,7 @@ export default class Manager {
       // just been resolved, so we can ignore the cache.
       // SUCCESS is not set internally on query instances based on cache hits
       // TODO: tidy into cache hit property?
-      if (this.cache.hasQueryExpired(query, state) && respectCache) {
+      if (this.cache.hasQueryExpired(query, state) && respectCacheExpiration) {
         status = new Status({ status: 'PENDING' });
       }
 

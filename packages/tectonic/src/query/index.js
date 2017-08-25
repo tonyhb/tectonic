@@ -10,12 +10,12 @@ import {
 import type {
   Id,
   QueryType,
-  StatusType,
   ReturnType,
   ReturnsAllFields,
   ParamsType,
   QueryHash,
 } from '../consts';
+import type Status from '../status/status';
 
 export type QueryOpts = {
   model: Class<Model> | Model;
@@ -60,7 +60,7 @@ export default class Query {
    *   that we can guarantee that a query instance with status of SUCCESS is
    *   fresh and can ignore the cache
    */
-  status: ?StatusType;
+  status: ?Status;
 
   /**
    * Duplicates stores references to other query instances which are duplicates
@@ -215,7 +215,7 @@ export default class Query {
     return this.toString();
   }
 
-  updateStatus(to: StatusType) {
+  updateStatus(to: Status) {
     this.status = to;
     this.duplicates.forEach((dupe) => { dupe.status = to; });
   }
