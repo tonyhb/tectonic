@@ -16,6 +16,11 @@ export default class TectonicSuperagent {
         meta: { url, transform, method, headers, request }
       } = sourceDef;
 
+      // Allow for late generation of the URL string
+      if (typeof url === 'function') {
+        url = url(query.params);
+      }
+      
       url = inst.parseUrlParams({ url, query });
       // Normalize method type
       method = method ? method.toUpperCase() : 'GET';
