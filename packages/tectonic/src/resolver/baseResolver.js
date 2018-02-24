@@ -278,12 +278,15 @@ export default class BaseResolver {
       // the second parameter of the tuple is true we already have data for this
       // query and can skip it. However, if this returns FALSE we MUST
       // process the query again unless it's in-flight.
-      const ok = this.cache.getQueryData(query, state)[1];
+      const [ data, ok ] = this.cache.getQueryData(query, state);
 
       // We have data for this query; this query is resolved and is successful
       if (ok) {
         debug('query has cached data; success', query.toString(), query);
         this.statusMap[hash] = { status: 'SUCCESS' };
+        if (typeof query.callback === 'function') {
+          query.callback( null, data );
+        }
         return true;
       }
     }
